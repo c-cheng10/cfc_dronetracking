@@ -1,0 +1,19 @@
+# datasets and recordings are large: never commit them
+data/
+*.hdf5
+*.h5
+*.raw
+*.zip
+
+# training outputs
+runs/
+checkpoints/
+*.pt
+*.pth
+
+# python
+__pycache__/
+*.pyc
+.venv/
+lnn-env/
+.ipynb_checkpoints/

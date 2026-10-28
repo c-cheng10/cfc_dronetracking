@@ -1,0 +1,6 @@
+torch
+numpy
+h5py
+matplotlib
+tqdm
+ncps==1.0.1   # reference CfC only; known bug: don't pass timespans with batch size > 1
