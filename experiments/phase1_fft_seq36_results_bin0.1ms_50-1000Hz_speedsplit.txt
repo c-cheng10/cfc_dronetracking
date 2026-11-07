@@ -1,0 +1,29 @@
+speed split: bins 100 us, band 50-1000 Hz, windows 0.5s hop 0.25s
+
+=== ID 1 DJI Mini 3 ===  (262 usable windows)
+speed px/s percentiles 10/25/50/75/90: 60 / 108 / 187 / 353 / 592
+speed box-widths/s percentiles 10/25/50/75/90: 0.87 / 1.24 / 1.97 / 2.95 / 4.15
+box width px median 99
+rank corr(speed px/s, events per window)        = +0.80
+rank corr(speed px/s, events per px^2 per s)    = +0.75
+rank corr(speed px/s, prominence)               = +0.18
+background: 735 windows, prominence median 2.94
+group                                     n peak med         IQR  +-10% prom med    AUC   ev/win
+slow tercile (< 135 px/s)                88      231   200-376      30%     4.75  0.882     6175
+fast (>= 135 px/s)                      174      229   210-264      49%     5.16  0.926    25686
+slow absolute (< 1 box-widths/s)         41      226   206-284      44%     5.41  0.911     4997
+fast absolute (>= 1 box-widths/s)       221      230   208-272      43%     4.86  0.911    19293
+
+=== ID 2 DarwinFPV cineape20 ===  (361 usable windows)
+speed px/s percentiles 10/25/50/75/90: 87 / 134 / 216 / 321 / 490
+speed box-widths/s percentiles 10/25/50/75/90: 2.21 / 3.10 / 4.51 / 5.56 / 6.63
+box width px median 47
+rank corr(speed px/s, events per window)        = +0.78
+rank corr(speed px/s, events per px^2 per s)    = +0.74
+rank corr(speed px/s, prominence)               = +0.33
+background: 1002 windows, prominence median 2.79
+group                                     n peak med         IQR  +-10% prom med    AUC   ev/win
+slow tercile (< 154 px/s)               121      532   308-732      12%     3.02  0.753     1201
+fast (>= 154 px/s)                      240      558   314-800      10%     3.20  0.831     4615
+slow absolute (< 1 box-widths/s)          3      496   467-640      33%     2.59  0.359      891   <-- fewer than 20 windows: too few to conclude
+fast absolute (>= 1 box-widths/s)       358      554   308-788      10%     3.12  0.809     3270

@@ -17,3 +17,6 @@ __pycache__/
 .venv/
 lnn-env/
 .ipynb_checkpoints/
+
+# locally built third-party code (ECF HDF5 plugin)
+third_party/
