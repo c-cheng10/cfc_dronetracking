@@ -38,5 +38,5 @@ Target: **IDEaS Counter-UAS (Urban) Sandbox 2027**. Applications close **1 Dec 2
 
 ## Data
 
-- **FRED** (Florence RGB-Event Drone dataset, arXiv 2506.05163): 7+ h, 5 drone types. One zip per sequence: raw events in `.hdf5`, boxes in `coordinates.txt`. Code: `github.com/miccunifi/FRED`. Put it in `data/FRED/`.
+- **FRED** (Florence RGB-Event Drone dataset, arXiv 2506.05163): 7+ h, 5 drone types. One zip per sequence: raw events in `.hdf5`, boxes in `coordinates.txt`. Code: `github.com/miccunifi/FRED`. Put it in `data/FRED/`. Raw events (`Event/events.hdf5`, dataset `CD/events`, fields x, y, p, t in µs) use Prophesee's ECF compression (HDF5 filter 36559), so plain h5py can't read them. The codec is at `github.com/prophesee-ai/hdf5_ecf` (Apache 2.0). The bundled PNG event frames are about 30 fps, far too slow for rotor flicker.
 - **SkyEV** (ETH, 2026): held-out generalization test.
