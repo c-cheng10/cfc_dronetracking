@@ -1,0 +1,226 @@
+Phase 1 multi-sequence evaluation: FFT rotor detector vs count-only baseline
+Locked settings: 0.5 ms bins, 50-1000 Hz, 0.5 s windows, 0.25 s step. Written by src/phase1_multiseq.py.
+tune        : train/91, train/67, train/96, train/225, train/218
+heldout     : train/92, train/58, train/95, train/224, train/199
+challenging : test/111, train/108, test/21, train/78, test/178, train/177, train/99, train/100, train/35
+development : train/36
+
+FROZEN THRESHOLDS (phase1_threshold.json): FFT prominence > 5.2981, event_count > 4578
+Rule: lowest threshold with false-alarm rate <= 2% on active background windows pooled over the tune sequences (decision: score > threshold). 5523 active tune windows.
+Why: fixes the false-alarm budget on the hardest negatives, and does not depend on the
+number of background boxes per drone (precision and F1 do). One global count threshold
+is crude because event counts scale with box size and distance; that is the baseline's problem.
+
+Notes on the columns:
+  AUC = P[drone window scores higher than background window], threshold-free.
+  prec/recall/FA use the frozen thresholds. Precision depends on our ratio of background to
+  drone windows (up to 3 shifted + 3 active boxes per drone), so compare it between rows, not
+  to the outside world. FA/min = false alarms per minute of background box-time
+  (each window adds 0.25 s; per single background box).
+
+=== HELDOUT (frozen threshold, never tuned on) ===
+drone type            bg      scorer  n_pos  n_neg    AUC   prec recall  FA/win  FA/min
+Betafpv air75         shifted FFT       381   1125  0.974  0.927  0.100   0.003    0.64
+Betafpv air75         shifted count     381   1125  0.994  1.000  0.231   0.000    0.00
+Betafpv air75         active  FFT       381   1107  0.764  0.826  0.100   0.007    1.73
+Betafpv air75         active  count     381   1107  0.705  0.427  0.231   0.107   25.58
+DJI Mini 2            shifted FFT       451   1353  0.996  1.000  0.929   0.000    0.00
+DJI Mini 2            shifted count     451   1353  0.999  0.984  0.976   0.005    1.24
+DJI Mini 2            active  FFT       451   1311  0.981  0.948  0.929   0.018    4.21
+DJI Mini 2            active  count     451   1311  0.982  0.849  0.976   0.059   14.28
+DJI Mini 3            shifted FFT       427   1271  0.989  0.957  0.677   0.010    2.45
+DJI Mini 3            shifted count     427   1271  1.000  1.000  0.635   0.000    0.00
+DJI Mini 3            active  FFT       427   1224  0.948  0.835  0.677   0.047   11.18
+DJI Mini 3            active  count     427   1224  0.978  0.968  0.635   0.007    1.76
+DJI Tello EDU         shifted FFT       465   1395  0.997  0.987  0.809   0.004    0.86
+DJI Tello EDU         shifted count     465   1395  1.000  0.996  0.972   0.001    0.34
+DJI Tello EDU         active  FFT       465   1332  0.963  0.858  0.809   0.047   11.17
+DJI Tello EDU         active  count     465   1332  0.987  0.890  0.972   0.042   10.09
+DarwinFPV cineape20   shifted FFT       407   1146  0.980  0.846  0.054   0.003    0.84
+DarwinFPV cineape20   shifted count     407   1146  0.998  1.000  0.260   0.000    0.00
+DarwinFPV cineape20   active  FFT       407   1173  0.750  0.379  0.054   0.031    7.37
+DarwinFPV cineape20   active  count     407   1173  0.969  0.972  0.260   0.003    0.61
+ALL TYPES             shifted FFT      2131   6290  0.965  0.979  0.537   0.004    0.95
+ALL TYPES             shifted count    2131   6290  0.992  0.993  0.637   0.001    0.34
+ALL TYPES             active  FFT      2131   6147  0.886  0.860  0.537   0.030    7.26
+ALL TYPES             active  count    2131   6147  0.932  0.837  0.637   0.043   10.31
+
+=== CHALLENGING (frozen threshold, never tuned on) ===
+drone type            bg      scorer  n_pos  n_neg    AUC   prec recall  FA/win  FA/min
+Betafpv air75         shifted FFT       854   2480  0.966  0.542  0.015   0.004    1.06
+Betafpv air75         shifted count     854   2480  0.998  1.000  0.201   0.000    0.00
+Betafpv air75         active  FFT       854   2457  0.684  0.115  0.015   0.041    9.77
+Betafpv air75         active  count     854   2457  0.777  0.677  0.201   0.033    8.01
+DJI Mini 3            shifted FFT      1108   3219  0.690  0.359  0.054   0.033    7.98
+DJI Mini 3            shifted count    1108   3219  0.971  1.000  0.361   0.000    0.00
+DJI Mini 3            active  FFT      1108   3177  0.296  0.037  0.054   0.493  118.22
+DJI Mini 3            active  count    1108   3177  0.738  0.797  0.361   0.032    7.71
+DJI Tello EDU         shifted FFT       679   2003  0.520  1.000  0.006   0.000    0.00
+DJI Tello EDU         shifted count     679   2003  0.979  0.968  0.619   0.007    1.68
+DJI Tello EDU         active  FFT       679   2016  0.501  0.160  0.006   0.010    2.50
+DJI Tello EDU         active  count     679   2016  0.955  0.968  0.619   0.007    1.67
+DarwinFPV cineape20   shifted FFT       940   2681  0.887  0.943  0.141   0.003    0.72
+DarwinFPV cineape20   shifted count     940   2681  0.991  1.000  0.368   0.000    0.00
+DarwinFPV cineape20   active  FFT       940   2556  0.668  0.417  0.141   0.073   17.46
+DarwinFPV cineape20   active  count     940   2556  0.794  0.785  0.368   0.037    8.92
+ALL TYPES             shifted FFT      3581  10383  0.795  0.625  0.059   0.012    2.91
+ALL TYPES             shifted count    3581  10383  0.966  0.990  0.374   0.001    0.32
+ALL TYPES             active  FFT      3581  10206  0.527  0.101  0.059   0.183   44.02
+ALL TYPES             active  count    3581  10206  0.797  0.820  0.374   0.029    6.89
+
+=== DEVELOPMENT train/36 (detector designed on it earlier; not a test) ===
+drone type            bg      scorer  n_pos  n_neg    AUC   prec recall  FA/win  FA/min
+DJI Mini 3            shifted FFT       262    735  0.910  0.937  0.454   0.011    2.61
+DJI Mini 3            shifted count     262    735  0.983  1.000  0.897   0.000    0.00
+DJI Mini 3            active  FFT       262    657  0.736  0.504  0.454   0.178   42.74
+DJI Mini 3            active  count     262    657  0.949  0.890  0.897   0.044   10.59
+DarwinFPV cineape20   shifted FFT       361   1002  0.780  0.750  0.033   0.004    0.96
+DarwinFPV cineape20   shifted count     361   1002  0.999  1.000  0.360   0.000    0.00
+DarwinFPV cineape20   active  FFT       361    600  0.504  0.101  0.033   0.178   42.80
+DarwinFPV cineape20   active  count     361    600  0.874  1.000  0.360   0.000    0.00
+ALL TYPES             shifted FFT       623   1737  0.811  0.916  0.210   0.007    1.66
+ALL TYPES             shifted count     623   1737  0.993  1.000  0.586   0.000    0.00
+ALL TYPES             active  FFT       623   1257  0.592  0.369  0.210   0.178   42.77
+ALL TYPES             active  count     623   1257  0.894  0.926  0.586   0.023    5.54
+
+=== TUNE (threshold chosen here; in-sample, for reference only) ===
+drone type            bg      scorer  n_pos  n_neg    AUC   prec recall  FA/win  FA/min
+Betafpv air75         shifted FFT       373   1091  0.974  0.783  0.048   0.005    1.10
+Betafpv air75         shifted count     373   1091  0.998  1.000  0.161   0.000    0.00
+Betafpv air75         active  FFT       373   1107  0.757  1.000  0.048   0.000    0.00
+Betafpv air75         active  count     373   1107  0.767  0.612  0.161   0.034    8.24
+DJI Mini 2            shifted FFT       251    753  0.997  1.000  0.829   0.000    0.00
+DJI Mini 2            shifted count     251    753  1.000  1.000  0.972   0.000    0.00
+DJI Mini 2            active  FFT       251    729  0.972  0.929  0.829   0.022    5.27
+DJI Mini 2            active  count     251    729  0.985  0.942  0.972   0.021    4.94
+DJI Mini 3            shifted FFT       419   1242  0.977  0.905  0.706   0.025    5.99
+DJI Mini 3            shifted count     419   1242  0.993  1.000  0.656   0.000    0.00
+DJI Mini 3            active  FFT       419   1200  0.920  0.813  0.706   0.057   13.60
+DJI Mini 3            active  count     419   1200  0.961  0.896  0.656   0.027    6.40
+DJI Tello EDU         shifted FFT       482   1446  0.966  0.995  0.413   0.001    0.17
+DJI Tello EDU         shifted count     482   1446  1.000  1.000  0.593   0.000    0.00
+DJI Tello EDU         active  FFT       482   1374  0.855  0.971  0.413   0.004    1.05
+DJI Tello EDU         active  count     482   1374  0.941  0.941  0.593   0.013    3.14
+DarwinFPV cineape20   shifted FFT       387   1129  0.979  0.842  0.041   0.003    0.64
+DarwinFPV cineape20   shifted count     387   1129  0.998  1.000  0.031   0.000    0.00
+DarwinFPV cineape20   active  FFT       387   1113  0.720  0.444  0.041   0.018    4.31
+DarwinFPV cineape20   active  count     387   1113  0.703  0.632  0.031   0.006    1.51
+ALL TYPES             shifted FFT      1912   5661  0.960  0.949  0.385   0.007    1.70
+ALL TYPES             shifted count    1912   5661  0.997  1.000  0.459   0.000    0.00
+ALL TYPES             active  FFT      1912   5523  0.833  0.870  0.385   0.020    4.78
+ALL TYPES             active  count    1912   5523  0.855  0.889  0.459   0.020    4.78
+
+=== ACTIVE BACKGROUNDS: event counts vs the drone box (per sequence, per track) ===
+cnt = median events per 0.5 s window. act/drone = active median / drone median.
+sequence   track drone type             n_drone drone cnt active cnt shift cnt act/drone AUCfft sh AUCfft act AUCcnt act
+train/91   1     DJI Mini 3                 419      8075        187         1     0.023     0.977      0.920      0.961
+train/67   1     DarwinFPV cineape20        387       640        293         0     0.458     0.979      0.720      0.703
+train/96   1     Betafpv air75              373      2215        803         0     0.363     0.974      0.757      0.767
+train/225  1     DJI Tello EDU              482      5813        429        10     0.074     0.966      0.855      0.941
+train/218  1     DJI Mini 2                 251     38006       1546        37     0.041     0.997      0.972      0.985
+train/92   1     DJI Mini 3                 427      8075        200         1     0.025     0.989      0.948      0.978
+train/58   1     DarwinFPV cineape20        407      3235        168         1     0.052     0.980      0.750      0.969
+train/95   1     Betafpv air75              381      2630       1357         0     0.516     0.974      0.764      0.705
+train/224  1     DJI Tello EDU              465     21617        414         9     0.019     0.997      0.963      0.987
+train/199  1     DJI Mini 2                 451     23133       1639       381     0.071     0.996      0.981      0.982
+test/111   1     DJI Mini 3                 373      1681       1781        42     1.059     0.620      0.056      0.530
+train/108  1     DJI Mini 3                 384      1940        832        51     0.429     0.671      0.302      0.723
+test/21    1     DarwinFPV cineape20        159       526         68         2     0.128     0.992      0.715      0.857
+train/78   1     DarwinFPV cineape20        400      2044       1275         3     0.624     0.940      0.671      0.658
+test/178   1     DJI Tello EDU              386      6936       1007       592     0.145     0.520      0.506      0.950
+train/177  1     DJI Tello EDU              293      6782       1037       526     0.153     0.519      0.495      0.964
+train/99   1     Betafpv air75              420      2086        684         2     0.328     0.958      0.677      0.784
+train/100  1     Betafpv air75              434      2104        713         0     0.339     0.974      0.692      0.771
+train/35   1     DarwinFPV cineape20        381     10790        475        48     0.044     0.840      0.619      0.956
+train/35   2     DJI Mini 3                 351      5677        384        32     0.068     0.784      0.565      0.875
+train/36   1     DJI Mini 3                 262     15244        418        51     0.027     0.910      0.736      0.949
+train/36   2     DarwinFPV cineape20        361      3230        421        20     0.130     0.780      0.504      0.874
+
+=== BOX WIDTH (all sequences incl. tune and development, full resolution) ===
+Negatives in a width bin are the backgrounds of drones in that bin (same box size).
+width px  drone type             n_pos n_act rec FFT rec cnt AUCfft sh AUCfft act AUCcnt act
+0-20      Betafpv air75              4     0   0.000   0.000     0.917        nan        nan
+0-20      DJI Mini 3                10     0   0.200   0.200     0.727        nan        nan
+0-20      DarwinFPV cineape20       17     0   0.000   0.059     0.959        nan        nan
+0-20      ALL TYPES                 31     0   0.065   0.097     0.880        nan        nan
+20-30     Betafpv air75            282    57   0.018   0.000     0.966      0.887      0.842
+20-30     DJI Mini 2                50     0   0.640   0.660     0.971        nan        nan
+20-30     DJI Mini 3                58    57   0.328   0.017     0.964      0.893      0.895
+20-30     DJI Tello EDU            175   285   0.446   0.520     0.968      0.820      0.967
+20-30     DarwinFPV cineape20      275   345   0.018   0.015     0.970      0.694      0.879
+20-30     ALL TYPES                840   744   0.165   0.154     0.948      0.754      0.900
+30-45     Betafpv air75           1003  4122   0.030   0.110     0.969      0.711      0.747
+30-45     DJI Mini 2               257   930   0.852   0.996     0.997      0.975      0.985
+30-45     DJI Mini 3               410   876   0.244   0.151     0.918      0.733      0.843
+30-45     DJI Tello EDU            464  1476   0.427   0.659     0.941      0.815      0.951
+30-45     DarwinFPV cineape20      961  3228   0.037   0.081     0.954      0.707      0.829
+30-45     ALL TYPES               3095 10632   0.188   0.262     0.939      0.744      0.824
+45-70     Betafpv air75            302   492   0.089   0.646     0.982      0.815      0.952
+45-70     DJI Mini 2               352   939   0.949   1.000     0.999      0.999      1.000
+45-70     DJI Mini 3               917  3084   0.314   0.479     0.859      0.568      0.893
+45-70     DJI Tello EDU            632  2031   0.275   0.706     0.792      0.694      0.986
+45-70     DarwinFPV cineape20      541  1098   0.068   0.433     0.889      0.608      0.836
+45-70     ALL TYPES               2744  7644   0.313   0.607     0.870      0.674      0.909
+70-100    Betafpv air75             17     0   0.412   0.882     0.960        nan        nan
+70-100    DJI Mini 2                13    57   1.000   1.000     1.000      1.000      1.000
+70-100    DJI Mini 3               510  1689   0.376   0.745     0.863      0.568      0.943
+70-100    DJI Tello EDU            280   723   0.454   0.861     0.810      0.759      0.972
+70-100    DarwinFPV cineape20      164   339   0.256   0.866     0.838      0.657      0.974
+70-100    ALL TYPES                984  2808   0.387   0.804     0.849      0.639      0.955
+100-150   DJI Mini 2                23    57   0.957   1.000     1.000      1.000      1.000
+100-150   DJI Mini 3               226   486   0.469   0.938     0.867      0.633      0.945
+100-150   DJI Tello EDU             58   207   0.017   0.983     0.544      0.547      0.981
+100-150   DarwinFPV cineape20      106   390   0.472   0.981     0.874      0.700      0.989
+100-150   ALL TYPES                413  1140   0.433   0.959     0.836      0.674      0.969
+>150      DJI Mini 2                 7    57   1.000   1.000     1.000      0.752      0.907
+>150      DJI Mini 3                85    66   0.671   1.000     0.948      0.900      0.970
+>150      DJI Tello EDU             17     0   0.059   1.000     0.680        nan        nan
+>150      DarwinFPV cineape20       31    42   0.419   1.000     0.883      0.866      1.000
+>150      ALL TYPES                140   165   0.557   1.000     0.908      0.793      0.897
+
+=== SIMULATED SMALLER SENSOR (heldout + challenging pooled, frozen threshold) ===
+x, y and boxes integer-divided by 2 / 4; events on the same coarse pixel kept separate.
+drone type             sensor n_pos rec FFT FA act AUCfft sh AUCfft act AUCcnt act
+Betafpv air75            1280  1235   0.041  0.030     0.969      0.707      0.749
+Betafpv air75             640  1235   0.038  0.030     0.968      0.704      0.749
+Betafpv air75             320  1235   0.038  0.032     0.966      0.700      0.750
+DJI Mini 2               1280   451   0.929  0.018     0.996      0.981      0.982
+DJI Mini 2                640   451   0.925  0.018     0.996      0.981      0.982
+DJI Mini 2                320   451   0.931  0.018     0.996      0.982      0.982
+DJI Mini 3               1280  1535   0.227  0.369     0.820      0.494      0.824
+DJI Mini 3                640  1535   0.227  0.366     0.820      0.492      0.824
+DJI Mini 3                320  1535   0.227  0.367     0.820      0.493      0.825
+DJI Tello EDU            1280  1144   0.332  0.025     0.797      0.704      0.973
+DJI Tello EDU             640  1144   0.335  0.025     0.797      0.700      0.973
+DJI Tello EDU             320  1144   0.334  0.024     0.796      0.702      0.973
+DarwinFPV cineape20      1280  1347   0.115  0.060     0.919      0.696      0.853
+DarwinFPV cineape20       640  1347   0.115  0.060     0.914      0.691      0.853
+DarwinFPV cineape20       320  1347   0.114  0.061     0.914      0.691      0.852
+ALL TYPES                1280  5712   0.237  0.126     0.872      0.663      0.852
+ALL TYPES                 640  5712   0.237  0.125     0.870      0.660      0.852
+ALL TYPES                 320  5712   0.237  0.126     0.870      0.660      0.851
+
+=== NOTES (written by hand after the November 6, 2026 run; re-running the script drops this block) ===
+1. The FFT does NOT beat count-only on active backgrounds overall. AUC, FFT vs count:
+   heldout 0.886 vs 0.932, challenging 0.527 vs 0.797. Per type it wins only for Betafpv air75
+   on heldout (0.764 vs 0.705); Mini 2 ties (0.981 vs 0.982).
+2. Count matching mostly failed: in 18 of 22 tracks the active boxes have under half the drone's
+   median events (act/drone 0.02-0.46); the scene has nothing as busy as a nearby drone. Where it
+   came closer (train/95 0.52, train/78 0.62, train/67 0.46) the FFT edges out count
+   (0.764/0.705, 0.671/0.658, 0.720/0.703). In the one matched sequence (test/111, 1.06) the
+   FFT collapses (0.056) because of item 3.
+3. Most active-box false alarms peak at exactly 100, 200 or 300 Hz: light flicker at harmonics of
+   50 Hz mains (test/111: 705 of 1098 active windows peak at 200 Hz; train/108 and train/36 the
+   same). The prominence score cannot tell a rotor from a flickering light. Not fixed here; an
+   obvious next step is to reject peaks within a few Hz of 100*k Hz (tune it on the tune set only;
+   the Mini 3's blade-pass near 200-230 Hz sits close to the 200 Hz line).
+4. DJI Tello EDU in test/178 and train/177: FFT AUC ~0.52 even against shifted boxes, i.e. no
+   rotor signal at all there; count still works (0.95).
+5. Downsampling by 2 and 4 changes nothing (all AUCs within 0.005). Expected: the score sums every
+   event in the box, and integer-dividing coordinates only moves box edges by under one coarse
+   pixel. This simulation cannot answer "does a smaller sensor lose the rotor"; that needs a model
+   of per-pixel event generation (contrast threshold, refractory merging), not coordinate binning.
+6. Width: FFT recall at the frozen threshold rises with box width (0.07 below 20 px [n=31],
+   0.17 at 20-30, 0.19 at 30-45, 0.31 at 45-70, 0.39 at 70-100, 0.43 at 100-150, 0.56 above 150).
+   There is no sharp width where the peak vanishes; drone type matters more than width
+   (Mini 2 recall 0.64 at 20-30 px, Betafpv 0.02-0.09 at every width it appears).

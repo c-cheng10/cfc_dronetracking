@@ -1,0 +1,20 @@
+{
+  "fft_threshold": 5.2981,
+  "count_threshold": 4578.0,
+  "rule": "lowest threshold with false-alarm rate <= 2% on active background windows pooled over the tune sequences (decision: score > threshold)",
+  "tuned_on": [
+    "train/91",
+    "train/67",
+    "train/96",
+    "train/225",
+    "train/218"
+  ],
+  "n_active_tune_windows": 5523,
+  "settings": {
+    "bin_ms": 0.5,
+    "f_lo_hz": 50.0,
+    "f_hi_hz": 1000.0,
+    "window_s": 0.5,
+    "step_s": 0.25
+  }
+}

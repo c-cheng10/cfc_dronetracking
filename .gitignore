@@ -20,3 +20,6 @@ __pycache__/
 .venv/
 lnn-env/
 .ipynb_checkpoints/
+
+# no-op downsampling outputs (see docs/FINDINGS.md); regenerate with --downsample
+experiments/csv/*_ds*.csv

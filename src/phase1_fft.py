@@ -6,31 +6,100 @@ blade-pass frequency. If we count events in short time bins and take a Fourier
 transform (FFT), a drone should show one tall, narrow peak. A patch of
 background (sky, trees) should not.
 
-Pipeline:
+Pipeline for one FRED sequence:
   1. Read the raw events (x, y, polarity, t) from events.npy, made once per
-     sequence by src/data/ecf_convert.py.
-  2. For each annotated drone, follow its bounding box over time and count the
-     events inside it in 0.5 ms bins. That gives a signal sampled at 2 kHz.
-  3. Do the same for "background" boxes: same size, same motion as the drone
-     box, shifted to a place with no drone in it.
-  4. Cut each signal into sliding windows, FFT each window, and record
-     (a) the peak frequency and (b) a prominence score =
-         peak magnitude / median magnitude, both measured in 50-1000 Hz.
-  5. Call "drone" when prominence > threshold. Drone windows are positives,
-     background windows are negatives -> precision and recall.
+     sequence by src/data/ecf_convert.py, and the boxes from coordinates.txt.
+  2. Build a list of "box streams": each drone's own box, plus background boxes
+     of the same size (two kinds, see BACKGROUND BOXES below).
+  3. Count the events inside every box in 0.5 ms bins (a signal sampled at
+     2 kHz).
+  4. Cut each signal into 0.5 s windows (0.25 s step), Hann taper, FFT, and
+     score each window by prominence = tallest peak / median magnitude, both
+     inside 50-1000 Hz.
+  5. Write one CSV row per usable window per box. Drone windows are positives,
+     background windows are negatives. A threshold on the score gives
+     precision and recall (done across sequences by src/phase1_multiseq.py).
+
+LOCKED SETTINGS (every reported number uses these; there are no options to
+change them): 0.5 ms bins, 50-1000 Hz band, 0.5 s windows, 0.25 s step.
+A wider band would raise the false-alarm rate at the same threshold, because
+the tallest of more noise bins is taller. Earlier exploratory runs at 0.1 ms /
+50-5000 Hz live in git history and in experiments/*_bin0.1ms_* files.
+
+BACKGROUND BOXES (negatives)
+  "shifted": the drone's box moved by a fixed (dx, dy), so it has the same
+      size and the same motion as the drone box. Candidate shifts are
+      +-150/300/450 px in x and +-150/250 px in y; we keep the N_SHIFTED shifts
+      that are valid in the most annotation frames. A frame is valid if the
+      shifted box is fully inside the image and at least 10 px from EVERY
+      drone box (all tracks). These land mostly on empty sky: weak negatives.
+  "active": static boxes on busy parts of the image (trees, buildings,
+      lights, noisy pixels, anything that makes events). No RGB frames are
+      available, so we pick them from the events themselves:
+        a. Split the recording into 5 s chunks. For each chunk, count all
+           events per pixel (an event-density map).
+        b. For each drone annotated in that chunk, take its median box size
+           in the chunk. Slide a box of that size over the image on an 8 px
+           grid. A position is allowed only if it never comes within 10 px of
+           ANY drone box annotated in the chunk (all tracks).
+        c. Keep only "active" positions: event rate at or above the 75th
+           percentile of the allowed positions in that chunk.
+        d. Among those, pick N_ACTIVE positions, not overlapping each other,
+           whose event rate is closest (smallest |log ratio|) to the drone
+           box's own event rate in that chunk. So they are busy AND
+           count-matched to the drone where the scene allows it.
+        e. Ignore times when any drone is inside its annotated life span
+           but has no box (an annotation gap): an un-annotated drone could
+           sit inside an "active" box. Those events are left out of the
+           density map and active-box windows there are not used.
+      An active box stays still for its 5 s chunk, so its windows never cross
+      a chunk boundary. How well the counts actually match is reported by
+      src/phase1_multiseq.py; when the scene has nothing as busy as the drone,
+      the busiest allowed positions are used and the match is imperfect.
+
+CSV OUTPUT: experiments/csv/<split>_<seq>.csv (with _ds2 / _ds4 for the
+simulated smaller sensors). One row per usable window per box. A window is
+usable only if its box was valid for the whole window. Columns, in order:
+  sequence        FRED sequence, e.g. train/36
+  track_id        drone ID from coordinates.txt (for a background box: the
+                  drone whose box size it copies)
+  is_background   1 for a background box, 0 for the drone's own box
+  dx, dy          shift in px of a "shifted" box (0, 0 for the drone box).
+                  For an "active" box: offset of its centre from the drone
+                  box centre at mid-window, informational only (the active
+                  box does NOT follow the drone; use box_x1..box_y2)
+  t_start_us      window start, microseconds (same clock as events.npy)
+  t_end_us        window end, microseconds (start + 500000)
+  score           FFT prominence, peak / median magnitude in 50-1000 Hz
+  label           1 = drone inside the box, 0 = no drone
+  event_count     events inside the box during the window (the count-only
+                  baseline score)
+  -- extra columns --
+  drone_class     class name from coordinates.txt for track_id
+  background_type "drone", "shifted" or "active"
+  box_name        e.g. "shifted(-450,+0)" or "active1"; one name = one stream
+  box_width_px    box width at mid-window, in this sensor's pixels
+  box_height_px   box height at mid-window
+  box_x1..box_y2  box corners at mid-window (exact for active boxes, which
+                  are static; drone and shifted boxes move during the window)
+  peak_hz         frequency of the tallest peak in 50-1000 Hz
+  downsample      1, 2 or 4 (sensor pixel size relative to 1280x720)
+
+SIMULATED SMALLER SENSOR (--downsample 2 or 4): event x, y and box
+coordinates are integer-divided by 2 or 4 (a 640 or 320 px wide sensor).
+Events that land on the same coarse pixel stay separate events. Caveats:
+coarse pixels merge rotors with the drone body, and a real small sensor
+differs in noise, contrast and refractory behaviour, so this is only a
+geometric approximation. Because the detector sums ALL events in the box,
+this approximation mostly changes box-edge rounding, not the counts.
 
 Run from the repo root, after converting the sequence:
     python -m src.data.ecf_convert data/FRED/train/36/36/Event/events.hdf5
-    python src/phase1_fft.py
-
-Options (defaults reproduce the first run):
-    --bin-ms 0.1 --f-hi 5000   finer bins (10 kHz sampling, 5 kHz limit), wider band
-    --speed-split              slow-vs-fast-drone analysis (writes *_speedsplit files only)
-Any non-default setting adds a suffix such as "_bin0.1ms_50-5000Hz" to the
-output file names, so earlier results are never overwritten.
-
+    python src/phase1_fft.py --seq train/36
+    python src/phase1_fft.py --seq train/91 --downsample 2 --no-plots
 """
 
+import csv
 import sys
 from pathlib import Path
 
@@ -41,92 +110,100 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
-
-# ----------------------------------------------------------------------------
-# Settings
-# ----------------------------------------------------------------------------
-SEQ_DIR = REPO / "data/FRED/train/36/36"
-EVENTS = SEQ_DIR / "Event/events.npy"   # written by src/data/ecf_convert.py
 OUT_DIR = REPO / "experiments"
-WIDTH, HEIGHT = 1280, 720        # sensor size (from the file's 'geometry' attribute)
+CSV_DIR = OUT_DIR / "csv"
+THRESHOLD_FILE = OUT_DIR / "phase1_threshold.json"   # written by phase1_multiseq.py
 
+# ----------------------------------------------------------------------------
+# Locked settings
+# ----------------------------------------------------------------------------
+SENSOR_W, SENSOR_H = 1280, 720   # full sensor size (from the file's 'geometry' attribute)
 BIN_US = 500                     # 0.5 ms bins -> 2000 samples per second
 FS = 1e6 / BIN_US                # sampling rate of the count signal, Hz (= 2000)
-WIN_S = 0.5                      # FFT window length, seconds
-HOP_S = 0.25                     # step between windows, seconds (50% overlap)
+WIN_S, HOP_S = 0.5, 0.25         # FFT window length and step, seconds
+WIN = int(WIN_S * FS)            # 1000 bins per window
+HOP = int(HOP_S * FS)            # 500 bins per step
 F_LO, F_HI = 50.0, 1000.0        # band (Hz) for the peak search and median
+
+# ----------------------------------------------------------------------------
+# Box and background settings
+# ----------------------------------------------------------------------------
 BOX_TOL_US = 50_000              # a box stays valid this long after its annotation
                                  # (annotations come every 33.3 ms)
-CHUNK = 4_000_000                # events read from disk per step (~64 MB)
-N_BG = 3                         # background boxes per drone
-THRESHOLDS = [2, 3, 4, 5, 6, 8, 10, 15]
-SUFFIX = ""                      # added to output file names (set in parse_args)
-SPEED_SPLIT = False              # --speed-split: slow-vs-fast analysis instead of the normal outputs
-SLOW_BW = 1.0                    # --slow-bw: "slow" = box moves < this many box-widths per second
+MARGIN_PX = 10                   # background boxes stay this far from every drone box
+N_SHIFTED = 3                    # shifted background boxes per drone
+N_ACTIVE = 3                     # active background boxes per drone per chunk
+ACTIVE_CHUNK_S = 5.0             # active boxes are re-chosen every 5 s
+ACTIVE_STRIDE_PX = 8             # grid step when sliding the candidate box
+ACTIVE_PCTL = 75                 # "active" = event rate >= this percentile of allowed spots
+CHUNK = 4_000_000                # events read from disk per step (~36 MB)
 
 
-def parse_args():
-    """Read --bin-ms, --f-lo, --f-hi from the command line and overwrite the
-    settings above. The FFT can only see frequencies up to half the sampling
-    rate (the Nyquist limit), so 0.5 ms bins see up to 1000 Hz and 0.1 ms bins
-    up to 5000 Hz. Anything faster folds back ("aliases") to a wrong, lower
-    frequency."""
-    import argparse
-    global BIN_US, FS, F_LO, F_HI, SUFFIX, SPEED_SPLIT, SLOW_BW
-    p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    p.add_argument("--bin-ms", type=float, default=0.5, help="bin width in ms (default 0.5)")
-    p.add_argument("--f-lo", type=float, default=50.0, help="band low edge, Hz (default 50)")
-    p.add_argument("--f-hi", type=float, default=1000.0, help="band high edge, Hz (default 1000)")
-    p.add_argument("--speed-split", action="store_true",
-                   help="split windows by drone speed (slow vs fast) and write only those outputs")
-    p.add_argument("--slow-bw", type=float, default=1.0,
-                   help="absolute 'slow' cut, in box-widths per second (default 1.0)")
-    a = p.parse_args()
-    SPEED_SPLIT, SLOW_BW = a.speed_split, a.slow_bw
-    BIN_US = int(round(a.bin_ms * 1000))
-    FS = 1e6 / BIN_US
-    F_LO, F_HI = a.f_lo, a.f_hi
-    if F_HI > FS / 2:
-        sys.exit(f"--f-hi {F_HI} is above the Nyquist limit {FS / 2:.0f} Hz for {a.bin_ms} ms bins")
-    if (BIN_US, F_LO, F_HI) != (500, 50.0, 1000.0):
-        SUFFIX = f"_bin{a.bin_ms:g}ms_{F_LO:g}-{F_HI:g}Hz"
-DRONE_NAMES = {1: "ID 1 DJI Mini 3", 2: "ID 2 DarwinFPV cineape20"}
+# ----------------------------------------------------------------------------
+# 0. Paths
+# ----------------------------------------------------------------------------
+def seq_dir(seq):
+    """'train/91' -> data/FRED/train/91/91 (where coordinates.txt lives)."""
+    split, num = seq.split("/")
+    return REPO / "data" / "FRED" / split / num / num
+
+
+def events_path(seq):
+    return seq_dir(seq) / "Event" / "events.npy"
+
+
+def csv_path(seq, downsample=1):
+    split, num = seq.split("/")
+    tag = "" if downsample == 1 else f"_ds{downsample}"
+    return CSV_DIR / f"{split}_{num}{tag}.csv"
 
 
 # ----------------------------------------------------------------------------
 # 1. Annotations
 # ----------------------------------------------------------------------------
-def load_tracks(path):
+def load_tracks(path, downsample=1):
     """Read coordinates.txt -> {drone_id: dict of arrays}.
 
     Each line is  'time: x1, y1, x2, y2, id, class'  with time in seconds.
     We convert time to microseconds so it matches the event timestamps.
     Boxes can stick out of the image (the "extended" boxes), so we clip them.
+    The class name is read from the file, so any drone type works.
+    With downsample > 1 the box corners are integer-divided like the events.
     """
     rows = []
     for line in open(path):
+        line = line.strip()
+        if not line:
+            continue
         t_str, rest = line.split(":", 1)
-        f = rest.split(",")
-        rows.append([float(t_str), float(f[0]), float(f[1]), float(f[2]), float(f[3]), int(f[4])])
-    a = np.array(rows)
+        f = [s.strip() for s in rest.split(",")]
+        cls = ",".join(f[5:]).strip() or "unknown"
+        rows.append((float(t_str), float(f[0]), float(f[1]), float(f[2]), float(f[3]),
+                     int(float(f[4])), cls))
     tracks = {}
-    for i in np.unique(a[:, 5]).astype(int):
-        b = a[a[:, 5] == i]
-        b = b[np.argsort(b[:, 0])]
-        tracks[i] = {
-            "t": np.round(b[:, 0] * 1e6).astype(np.int64),   # microseconds
-            "x1": np.clip(b[:, 1], 0, WIDTH), "y1": np.clip(b[:, 2], 0, HEIGHT),
-            "x2": np.clip(b[:, 3], 0, WIDTH), "y2": np.clip(b[:, 4], 0, HEIGHT),
+    for i in sorted({r[5] for r in rows}):
+        b = sorted((r for r in rows if r[5] == i), key=lambda r: r[0])
+        a = np.array([r[:5] for r in b])
+        names = [r[6] for r in b]
+        tr = {
+            "t": np.round(a[:, 0] * 1e6).astype(np.int64),   # microseconds
+            "x1": np.clip(a[:, 1], 0, SENSOR_W), "y1": np.clip(a[:, 2], 0, SENSOR_H),
+            "x2": np.clip(a[:, 3], 0, SENSOR_W), "y2": np.clip(a[:, 4], 0, SENSOR_H),
+            "cls": max(set(names), key=names.count),           # most common name for this ID
         }
+        if downsample > 1:
+            for k in ("x1", "y1", "x2", "y2"):
+                tr[k] = np.floor(tr[k] / downsample)
+        tracks[i] = tr
     return tracks
 
 
-def frame_index(track_t, t):
-    """For each time in t, the index of the latest annotation at or before it,
-    and whether that annotation is recent enough (within BOX_TOL_US) to trust."""
-    k = np.searchsorted(track_t, t, side="right") - 1
-    kc = np.clip(k, 0, len(track_t) - 1)
-    ok = (k >= 0) & (t - track_t[kc] <= BOX_TOL_US)
+def frame_index(key_t, t, tol=BOX_TOL_US):
+    """For each time in t, the index of the latest key time at or before it,
+    and whether that key is recent enough (within tol) to trust."""
+    k = np.searchsorted(key_t, t, side="right") - 1
+    kc = np.clip(k, 0, len(key_t) - 1)
+    ok = (k >= 0) & (t - key_t[kc] <= tol)
     return kc, ok
 
 
@@ -135,365 +212,457 @@ def boxes_overlap(ax1, ay1, ax2, ay2, bx1, by1, bx2, by2):
     return (ax1 < bx2) & (bx1 < ax2) & (ay1 < by2) & (by1 < ay2)
 
 
-def choose_background_offsets(tracks, drone_id):
-    """Pick N_BG shifts (dx, dy) for drone_id's box.
-
-    A background box is the drone's box moved by (dx, dy): same size and the
-    same motion, so the only thing that differs is "drone inside or not".
-    For each frame it is valid only if it lies fully inside the image and does
-    not touch ANY drone's box. We keep the shifts valid in the most frames.
-    """
-    tr = tracks[drone_id]
-    candidates = [(dx, dy) for dx in (-450, -300, -150, 0, 150, 300, 450)
-                  for dy in (-250, -150, 0, 150, 250) if (dx, dy) != (0, 0)]
-    scored = []
-    for dx, dy in candidates:
-        valid = per_frame_bg_valid(tracks, drone_id, dx, dy)
-        scored.append((valid.mean(), dx, dy))
-    scored.sort(reverse=True)
-    return [(dx, dy) for _, dx, dy in scored[:N_BG]], scored[:N_BG]
-
-
-def per_frame_bg_valid(tracks, drone_id, dx, dy):
+# ----------------------------------------------------------------------------
+# 2a. Shifted background boxes
+# ----------------------------------------------------------------------------
+def per_frame_bg_valid(tracks, drone_id, dx, dy, downsample=1):
+    """For each annotation frame of drone_id: is the box shifted by (dx, dy)
+    fully inside the image and >= MARGIN_PX from every drone box?"""
+    W, H = SENSOR_W // downsample, SENSOR_H // downsample
+    m = MARGIN_PX / downsample
     tr = tracks[drone_id]
     x1, y1, x2, y2 = tr["x1"] + dx, tr["y1"] + dy, tr["x2"] + dx, tr["y2"] + dy
-    valid = (x1 >= 0) & (y1 >= 0) & (x2 <= WIDTH) & (y2 <= HEIGHT)
+    valid = (x1 >= 0) & (y1 >= 0) & (x2 <= W) & (y2 <= H)
     for other in tracks.values():                      # includes the drone itself
         k, ok = frame_index(other["t"], tr["t"])
-        hit = boxes_overlap(x1, y1, x2, y2, other["x1"][k] - 10, other["y1"][k] - 10,
-                            other["x2"][k] + 10, other["y2"][k] + 10)   # 10 px margin
+        hit = boxes_overlap(x1, y1, x2, y2, other["x1"][k] - m, other["y1"][k] - m,
+                            other["x2"][k] + m, other["y2"][k] + m)
         valid &= ~(hit & ok)
     return valid
 
 
-# ----------------------------------------------------------------------------
-# 2. Event counts per box, in 0.5 ms bins
-# ----------------------------------------------------------------------------
-def count_events(ev, boxes, n_bins):
-    """boxes: list of (track, dx, dy). Returns counts[n_boxes, n_bins].
-
-    We read the file in chunks so we never hold all 53 M events in memory.
-    For every event we look up which annotation frame it belongs to, then test
-    whether its pixel is inside each (shifted) box at that frame.
-    """
-    counts = np.zeros((len(boxes), n_bins), dtype=np.int64)
-    n = ev.shape[0]
-    for start in range(0, n, CHUNK):
-        e = ev[start:start + CHUNK]
-        x, y = e["x"].astype(np.float32), e["y"].astype(np.float32)
-        t = e["t"].astype(np.int64)               # stored as uint32 microseconds
-        b = t // BIN_US                           # which time bin
-        keep_t = b < n_bins
-        for j, (tr, dx, dy) in enumerate(boxes):
-            k, ok = frame_index(tr["t"], t)
-            inside = (ok & keep_t
-                      & (x >= tr["x1"][k] + dx) & (x < tr["x2"][k] + dx)
-                      & (y >= tr["y1"][k] + dy) & (y < tr["y2"][k] + dy))
-            counts[j] += np.bincount(b[inside], minlength=n_bins)[:n_bins]
-        print(f"  read {min(start + CHUNK, n):,} / {n:,} events", end="\r")
-    print()
-    return counts
+def choose_background_offsets(tracks, drone_id, downsample=1):
+    """Pick N_SHIFTED shifts (dx, dy) for drone_id's box, the ones valid in
+    the most annotation frames. Returns [(dx, dy)], [(fraction, dx, dy)]."""
+    candidates = [(dx, dy) for dx in (-450, -300, -150, 0, 150, 300, 450)
+                  for dy in (-250, -150, 0, 150, 250) if (dx, dy) != (0, 0)]
+    scored = []
+    for dx, dy in candidates:
+        dxs, dys = dx // downsample, dy // downsample      # shift in this sensor's pixels
+        valid = per_frame_bg_valid(tracks, drone_id, dxs, dys, downsample)
+        scored.append((valid.mean(), dxs, dys))
+    scored.sort(reverse=True)
+    scored = [s for s in scored[:N_SHIFTED] if s[0] > 0]
+    return [(dx, dy) for _, dx, dy in scored], scored
 
 
 # ----------------------------------------------------------------------------
-# 3. Sliding-window FFT
+# 2b. Active background boxes (busy regions, chosen from the events)
 # ----------------------------------------------------------------------------
-def window_spectra(signal, valid_bins):
-    """Cut a count signal into windows; return start times, peak freq,
-    prominence, the magnitude spectra, and which windows are usable.
-
-    A window is usable only if its box was valid for EVERY bin in it (otherwise
-    the box blinked off and the count drops to 0, which fakes a spectrum).
-    """
-    win = int(WIN_S * FS)                      # 1000 samples
-    hop = int(HOP_S * FS)                      # 500 samples
-    freqs = np.fft.rfftfreq(win, d=1 / FS)     # 0, 2, 4, ... 1000 Hz
-    band = (freqs >= F_LO) & (freqs <= F_HI)
-    hann = np.hanning(win)                     # tapers the window ends so the
-                                               # cut edges don't smear the spectrum
-    starts = np.arange(0, len(signal) - win + 1, hop)
-    peak_f = np.zeros(len(starts))
-    prom = np.zeros(len(starts))
-    usable = np.zeros(len(starts), bool)
-    spectra = np.zeros((len(starts), band.sum()))
-    for w, s in enumerate(starts):
-        seg = signal[s:s + win].astype(float)
-        usable[w] = valid_bins[s:s + win].all()
-        seg = seg - seg.mean()                 # remove the DC (average rate) term
-        mag = np.abs(np.fft.rfft(seg * hann))  # magnitude at each frequency
-        m = mag[band]
-        spectra[w] = m
-        med = np.median(m)
-        peak_f[w] = freqs[band][np.argmax(m)]
-        prom[w] = m.max() / med if med > 0 else 0.0
-    return starts / FS, peak_f, prom, usable, spectra, freqs[band]
+def integral_image(a):
+    """S[y, x] = sum of a[:y, :x]. Any box sum is then 4 lookups."""
+    S = np.zeros((a.shape[0] + 1, a.shape[1] + 1), np.int64)
+    S[1:, 1:] = a.cumsum(0).cumsum(1)
+    return S
 
 
-def valid_bin_mask(tr, dx, dy, tracks, drone_id, n_bins, bg):
-    """Which 0.5 ms bins have a trustworthy box (and, for background, a box
-    that is in-image and away from every drone)."""
-    centres = np.arange(n_bins) * BIN_US + BIN_US // 2
-    k, ok = frame_index(tr["t"], centres)
-    if bg:
-        ok &= per_frame_bg_valid(tracks, drone_id, dx, dy)[k]
+def box_sums(S, xs, ys, bw, bh):
+    """Sum inside boxes with top-left (xs, ys) and size (bw, bh), on grid xs x ys."""
+    X, Y = np.meshgrid(xs, ys)
+    return S[Y + bh, X + bw] - S[Y, X + bw] - S[Y + bh, X] + S[Y, X], X, Y
+
+
+def safe_times(tracks, t):
+    """True at times when no drone can be in the image without a box: every
+    track is either outside its annotated life span [first, last box] or has
+    a box less than BOX_TOL_US old. During an annotation gap an un-annotated
+    drone could sit inside an 'active' box, so those times are not used."""
+    ok = np.ones(len(t), bool)
+    for tr in tracks.values():
+        inside_life = (t >= tr["t"][0]) & (t <= tr["t"][-1])
+        ok &= ~inside_life | frame_index(tr["t"], t)[1]
     return ok
 
 
-# ----------------------------------------------------------------------------
-# 4. Main
-# ----------------------------------------------------------------------------
-def main():
-    OUT_DIR.mkdir(exist_ok=True)
-    tracks = load_tracks(SEQ_DIR / "coordinates.txt")
-    ev = np.load(EVENTS, mmap_mode="r")       # reads from disk on demand, not into RAM
-    t_last = int(ev["t"][-1])
-    n_bins = t_last // BIN_US + 1
-    print(f"recording length {t_last / 1e6:.2f} s -> {n_bins:,} bins of {BIN_US} us, "
-          f"sampling {FS:.0f} Hz, band {F_LO:g}-{F_HI:g} Hz")
+def choose_active_boxes(ev, tracks, t_end_us, downsample=1):
+    """Pick the 'active' background boxes (rule in the module docstring).
 
-    # Build the list of boxes: each drone, then its background boxes.
-    boxes, labels = [], []                     # labels: (drone_id, is_background, dx, dy)
-    for i, tr in tracks.items():
-        boxes.append((tr, 0, 0)); labels.append((i, False, 0, 0))
-        offsets, scored = choose_background_offsets(tracks, i)
-        for (frac, dx, dy) in scored:
-            print(f"  drone {i}: background shift ({dx:+d},{dy:+d}) px valid in {frac:.0%} of frames")
-        for dx, dy in offsets:
-            boxes.append((tr, dx, dy)); labels.append((i, True, dx, dy))
+    Returns
+      chunk_t : start time (us) of every 5 s chunk
+      boxes   : {drone_id: array [N_ACTIVE, n_chunks, 4]} of x1, y1, x2, y2,
+                NaN where no box was chosen
+      log     : list of dicts, one per (drone, chunk), for reporting
+    """
+    W, H = SENSOR_W // downsample, SENSOR_H // downsample
+    m = MARGIN_PX / downsample
+    stride = max(1, ACTIVE_STRIDE_PX // downsample)
+    ch_us = int(ACTIVE_CHUNK_S * 1e6)
+    n_chunks = t_end_us // ch_us + 1
+    chunk_t = np.arange(n_chunks, dtype=np.int64) * ch_us
+    edges = np.searchsorted(ev["t"], np.append(chunk_t, chunk_t[-1] + ch_us))
+    boxes = {i: np.full((N_ACTIVE, n_chunks, 4), np.nan) for i in tracks}
+    log = []
 
-    print(f"counting events in {len(boxes)} boxes ...")
-    counts = count_events(ev, boxes, n_bins)
-
-    results = []
-    for (i, bg, dx, dy), (tr, _, _), c in zip(labels, boxes, counts):
-        vb = valid_bin_mask(tr, dx, dy, tracks, i, n_bins, bg)
-        t0, pf, pr, us, sp, fb = window_spectra(c, vb)
-        results.append(dict(id=i, bg=bg, dx=dx, dy=dy, counts=c, t0=t0, peak_f=pf,
-                            prom=pr, usable=us, spectra=sp, freqs=fb))
-
-    if SPEED_SPLIT:
-        speed_split_analysis(tracks, results)
-        return
-
-    # ---- numbers ----------------------------------------------------------
-    summary_lines = []
-    def say(s=""):
-        print(s); summary_lines.append(s)
-
-    for i in tracks:
-        dr = next(r for r in results if r["id"] == i and not r["bg"])
-        bgs = [r for r in results if r["id"] == i and r["bg"]]
-        u = dr["usable"]
-        say(f"\n=== {DRONE_NAMES.get(i, i)} ===")
-        say(f"usable drone windows: {u.sum()} of {len(u)} ({WIN_S}s, hop {HOP_S}s)")
-        f = dr["peak_f"][u]
-        if len(f):
-            med = np.median(f)
-            near = np.mean(np.abs(f - med) <= 0.1 * med)
-            say(f"drone peak freq: median {med:.0f} Hz, IQR {np.percentile(f,25):.0f}-{np.percentile(f,75):.0f} Hz, "
-                f"{near:.0%} of windows within +-10% of median")
-            say(f"drone prominence: median {np.median(dr['prom'][u]):.2f}, "
-                f"IQR {np.percentile(dr['prom'][u],25):.2f}-{np.percentile(dr['prom'][u],75):.2f}")
-        neg = np.concatenate([b["prom"][b["usable"]] for b in bgs])
-        negf = np.concatenate([b["peak_f"][b["usable"]] for b in bgs])
-        say(f"background windows: {len(neg)}; prominence median {np.median(neg):.2f}, "
-            f"IQR {np.percentile(neg,25):.2f}-{np.percentile(neg,75):.2f}; "
-            f"peak freq median {np.median(negf):.0f} Hz")
-        pos = dr["prom"][u]
-        say(f"{'thr':>5} {'TP':>5} {'FP':>5} {'FN':>5} {'precision':>9} {'recall':>7} {'FP rate':>7}")
-        for thr in THRESHOLDS:
-            tp = int((pos > thr).sum()); fn = len(pos) - tp; fp = int((neg > thr).sum())
-            prec = tp / (tp + fp) if tp + fp else float("nan")
-            say(f"{thr:>5} {tp:>5} {fp:>5} {fn:>5} {prec:>9.3f} {tp/len(pos):>7.3f} {fp/len(neg):>7.3f}")
-        # threshold-free separation: probability a random drone window
-        # outscores a random background window (= ROC AUC)
-        auc = (pos[:, None] > neg[None, :]).mean() + 0.5 * (pos[:, None] == neg[None, :]).mean()
-        say(f"AUC (P[drone score > background score]): {auc:.3f}")
-    # Mean events per bin inside each box, over the bins where that box is
-    # usable. Tells us how much signal each box actually has.
-    say("\nmean events per bin (usable bins only):")
-    for (i, bg, dx, dy), (tr, _, _), c in zip(labels, boxes, counts):
-        vb = valid_bin_mask(tr, dx, dy, tracks, i, n_bins, bg)
-        name = f"background ({dx:+d},{dy:+d})" if bg else "drone box"
-        say(f"  drone {i} {name:>22}: {c[vb].mean():.3f}")
-    (OUT_DIR / f"phase1_fft_seq36_results{SUFFIX}.txt").write_text("\n".join(summary_lines) + "\n")
-
-    make_plots(tracks, results)
-
-
-# ----------------------------------------------------------------------------
-# 4b. Slow vs fast windows (--speed-split)
-# ----------------------------------------------------------------------------
-# Question: is the FPV's rotor tone hidden by its body motion? When the box
-# moves fast, the drone's outline sweeps across many pixels and floods the box
-# with edge events that carry no rotor rhythm. If the rotor tone is there but
-# drowned, it should reappear in the windows where the drone is nearly still.
-
-def window_motion(tr, t0_s):
-    """For each window start (s), the box-centre speed (px/s, path length over
-    the window divided by its duration) and the mean box width (px)."""
-    cx = (tr["x1"] + tr["x2"]) / 2
-    cy = (tr["y1"] + tr["y2"]) / 2
-    w = tr["x2"] - tr["x1"]
-    speed = np.full(len(t0_s), np.nan)
-    width = np.full(len(t0_s), np.nan)
-    area = np.full(len(t0_s), np.nan)
-    for k, t0 in enumerate(t0_s):
-        a = np.searchsorted(tr["t"], t0 * 1e6)
-        b = np.searchsorted(tr["t"], (t0 + WIN_S) * 1e6)
-        if b - a < 2:
+    for c in range(n_chunks):
+        c0, c1 = int(chunk_t[c]), int(chunk_t[c] + ch_us)
+        dur_s = (min(c1, t_end_us) - c0) / 1e6
+        if edges[c + 1] <= edges[c] or dur_s <= 0:
             continue
-        path = np.hypot(np.diff(cx[a:b]), np.diff(cy[a:b])).sum()
-        speed[k] = path / ((tr["t"][b - 1] - tr["t"][a]) / 1e6)
-        width[k] = w[a:b].mean()
-        area[k] = (w[a:b] * (tr["y2"][a:b] - tr["y1"][a:b])).mean()
-    return speed, width, area
+
+        excl = np.zeros((H, W), bool)          # pixels within MARGIN of any drone box
+        for tr in tracks.values():
+            sel = np.flatnonzero((tr["t"] >= c0 - BOX_TOL_US) & (tr["t"] < c1))
+            for k in sel:                      # paint every annotated box, grown by the margin
+                xa, xb = int(max(0, np.floor(tr["x1"][k] - m))), int(min(W, np.ceil(tr["x2"][k] + m)))
+                ya, yb = int(max(0, np.floor(tr["y1"][k] - m))), int(min(H, np.ceil(tr["y2"][k] + m)))
+                excl[ya:yb, xa:xb] = True
+
+        # (a) event-density map for this chunk
+        e = ev[edges[c]:edges[c + 1]]
+        x = e["x"].astype(np.int64) // downsample
+        y = e["y"].astype(np.int64) // downsample
+        t = e["t"].astype(np.int64)
+        good = (x < W) & (y < H) & safe_times(tracks, t)   # (e) only events from safe times
+        if not good.any():
+            continue
+        dens = np.bincount(y[good] * W + x[good], minlength=W * H).reshape(H, W)
+        S, E = integral_image(dens), integral_image(excl.astype(np.int64))
+
+        for i, tr in tracks.items():
+            in_chunk = (tr["t"] >= c0) & (tr["t"] < c1)
+            if in_chunk.sum() < 15:             # drone needs >= 0.5 s of boxes in the chunk
+                continue
+            bw = max(1, int(round(np.median(tr["x2"][in_chunk] - tr["x1"][in_chunk]))))
+            bh = max(1, int(round(np.median(tr["y2"][in_chunk] - tr["y1"][in_chunk]))))
+            if bw >= W or bh >= H:
+                continue
+            # the drone's own event rate in this chunk (events per second)
+            k, ok = frame_index(tr["t"], t)
+            inside = ok & (x >= tr["x1"][k]) & (x < tr["x2"][k]) & (y >= tr["y1"][k]) & (y < tr["y2"][k])
+            centres = np.arange(c0, min(c1, t_end_us), BIN_US) + BIN_US // 2
+            covered_s = frame_index(tr["t"], centres)[1].sum() * BIN_US / 1e6
+            if covered_s <= 0:
+                continue
+            drone_rate = inside.sum() / covered_s
+
+            # (b) candidate positions on the grid, allowed if they touch no drone box
+            xs = np.arange(0, W - bw + 1, stride)
+            ys = np.arange(0, H - bh + 1, stride)
+            cnt, X, Y = box_sums(S, xs, ys, bw, bh)
+            hit, _, _ = box_sums(E, xs, ys, bw, bh)
+            allowed = (hit == 0).ravel()
+            if not allowed.any():
+                continue
+            rate = cnt.ravel() / dur_s
+            X, Y = X.ravel(), Y.ravel()
+            # (c) active = at or above the 75th percentile of allowed positions
+            floor = np.percentile(rate[allowed], ACTIVE_PCTL)
+            cand = np.flatnonzero(allowed & (rate >= floor))
+            # (d) closest event rate to the drone's, greedy, no overlap between picks
+            mismatch = np.abs(np.log((rate[cand] + 1) / (drone_rate + 1)))
+            chosen, chosen_rates = [], []
+            for j in cand[np.argsort(mismatch, kind="stable")]:
+                bx, by = X[j], Y[j]
+                if all(not boxes_overlap(bx, by, bx + bw, by + bh, *b) for b in chosen):
+                    chosen.append((bx, by, bx + bw, by + bh))
+                    chosen_rates.append(rate[j])
+                if len(chosen) == N_ACTIVE:
+                    break
+            for s, b in enumerate(chosen):
+                boxes[i][s, c] = b
+            log.append(dict(track_id=i, chunk=c, drone_rate=drone_rate, active_rates=chosen_rates,
+                            max_allowed_rate=rate[allowed].max()))
+    return chunk_t, boxes, log
 
 
-def spearman(a, b):
-    """Rank correlation: Pearson correlation of the ranks (no SciPy needed)."""
-    ra = np.argsort(np.argsort(a)); rb = np.argsort(np.argsort(b))
-    return np.corrcoef(ra, rb)[0, 1]
+# ----------------------------------------------------------------------------
+# 2c. Box streams: drone box + background boxes, in one common format
+# ----------------------------------------------------------------------------
+def build_streams(tracks, chunk_t, active, downsample=1):
+    """One 'stream' per box that we count events in.
+
+    Every stream is a list of key times (key_t) with a box per key. At time t
+    the box is the one of the latest key at or before t, if that key is less
+    than 'tol' old and ok_key is True. 'seg_key' marks which keys belong to
+    the same static placement; a window may not span two segments.
+    """
+    streams = []
+    for i, tr in tracks.items():
+        n = len(tr["t"])
+        base = dict(track_id=i, cls=tr["cls"], key_t=tr["t"], tol=BOX_TOL_US,
+                    seg_key=np.zeros(n, np.int64))
+        streams.append(dict(base, kind="drone", name="drone", dx=0, dy=0,
+                            x1=tr["x1"], y1=tr["y1"], x2=tr["x2"], y2=tr["y2"],
+                            ok_key=np.ones(n, bool)))
+        offsets, _ = choose_background_offsets(tracks, i, downsample)
+        for dx, dy in offsets:
+            streams.append(dict(base, kind="shifted", name=f"shifted({dx:+d},{dy:+d})", dx=dx, dy=dy,
+                                x1=tr["x1"] + dx, y1=tr["y1"] + dy, x2=tr["x2"] + dx, y2=tr["y2"] + dy,
+                                ok_key=per_frame_bg_valid(tracks, i, dx, dy, downsample)))
+        for s in range(N_ACTIVE):
+            b = active[i][s]                                    # [n_chunks, 4]
+            streams.append(dict(track_id=i, cls=tr["cls"], kind="active", name=f"active{s + 1}",
+                                dx=0, dy=0, key_t=chunk_t, tol=int(ACTIVE_CHUNK_S * 1e6) - 1,
+                                seg_key=np.arange(len(chunk_t)), ok_key=~np.isnan(b[:, 0]),
+                                x1=np.nan_to_num(b[:, 0]), y1=np.nan_to_num(b[:, 1]),
+                                x2=np.nan_to_num(b[:, 2]), y2=np.nan_to_num(b[:, 3])))
+    return streams
 
 
+# ----------------------------------------------------------------------------
+# 3. Event counts per box, in 0.5 ms bins
+# ----------------------------------------------------------------------------
+def count_events(ev, streams, n_bins, downsample=1):
+    """Returns counts[n_streams, n_bins].
+
+    We read the file in chunks so we never hold all events in memory. For
+    every event we look up which key (annotation frame or 5 s chunk) it
+    belongs to, then test whether its pixel is inside each box at that key.
+    Streams that share key times share the lookup (cache).
+    """
+    counts = np.zeros((len(streams), n_bins), dtype=np.int64)
+    n = ev.shape[0]
+    for start in range(0, n, CHUNK):
+        e = ev[start:start + CHUNK]
+        x = e["x"].astype(np.int32) // downsample
+        y = e["y"].astype(np.int32) // downsample
+        t = e["t"].astype(np.int64)               # stored as uint32 microseconds
+        b = t // BIN_US                           # which time bin
+        keep_t = b < n_bins
+        cache = {}
+        for j, s in enumerate(streams):
+            key = (id(s["key_t"]), s["tol"])
+            if key not in cache:
+                cache[key] = frame_index(s["key_t"], t, s["tol"])
+            k, ok = cache[key]
+            inside = (ok & keep_t & s["ok_key"][k]
+                      & (x >= s["x1"][k]) & (x < s["x2"][k])
+                      & (y >= s["y1"][k]) & (y < s["y2"][k]))
+            counts[j] += np.bincount(b[inside], minlength=n_bins)[:n_bins]
+        print(f"  read {min(start + CHUNK, n):,} / {n:,} events", end="\r", file=sys.stderr)
+    print(file=sys.stderr)
+    return counts
+
+
+def valid_bins(s, n_bins):
+    """Which 0.5 ms bins have a trustworthy box, and the segment of each bin."""
+    centres = np.arange(n_bins, dtype=np.int64) * BIN_US + BIN_US // 2
+    k, ok = frame_index(s["key_t"], centres, s["tol"])
+    return ok & s["ok_key"][k], s["seg_key"][k]
+
+
+# ----------------------------------------------------------------------------
+# 4. Sliding-window FFT
+# ----------------------------------------------------------------------------
+def window_spectra(signal, valid, seg):
+    """Cut a count signal into windows and score each one.
+
+    A window is usable only if its box was valid for EVERY bin in it (otherwise
+    the box blinked off and the count drops to 0, which fakes a spectrum) and,
+    for active boxes, it stays inside one 5 s placement.
+    Returns a dict of arrays, one entry per usable window.
+    """
+    from numpy.lib.stride_tricks import sliding_window_view
+    freqs = np.fft.rfftfreq(WIN, d=1 / FS)     # 0, 2, 4, ... 1000 Hz
+    band = (freqs >= F_LO) & (freqs <= F_HI)
+    starts = np.arange(0, len(signal) - WIN + 1, HOP)
+    usable = (sliding_window_view(valid, WIN)[::HOP].all(axis=1)
+              & (seg[starts] == seg[starts + WIN - 1]))
+    segs = sliding_window_view(signal, WIN)[::HOP][usable].astype(float)
+    n_ev = segs.sum(axis=1)                    # events in the window (count baseline)
+    segs = segs - segs.mean(axis=1, keepdims=True)   # remove the DC (average rate) term
+    hann = np.hanning(WIN)                     # tapers the window ends so the cut
+                                               # edges don't smear the spectrum
+    mag = np.abs(np.fft.rfft(segs * hann, axis=1))[:, band]
+    if len(mag):
+        med = np.median(mag, axis=1)
+        prom = np.where(med > 0, mag.max(axis=1) / np.where(med > 0, med, 1), 0.0)
+        peak_f = freqs[band][np.argmax(mag, axis=1)]
+    else:
+        prom = peak_f = np.zeros(0)
+    return dict(start_bin=starts[usable], prom=prom, peak_f=peak_f, n_ev=n_ev,
+                spectra=mag, freqs=freqs[band])
+
+
+# ----------------------------------------------------------------------------
+# 5. One sequence -> CSV
+# ----------------------------------------------------------------------------
+CSV_COLUMNS = ["sequence", "track_id", "is_background", "dx", "dy", "t_start_us", "t_end_us",
+               "score", "label", "event_count",
+               "drone_class", "background_type", "box_name", "box_width_px", "box_height_px",
+               "box_x1", "box_y1", "box_x2", "box_y2", "peak_hz", "downsample"]
+
+
+def box_at(s, t_us):
+    """Box corners of stream s at times t_us (array)."""
+    k, _ = frame_index(s["key_t"], t_us, s["tol"])
+    return s["x1"][k], s["y1"][k], s["x2"][k], s["y2"][k]
+
+
+def run_sequence(seq, downsample=1, write_csv=True):
+    """Run the detector on one sequence. Returns (tracks, streams, results,
+    rows, active_log); results[j] holds the window scores of streams[j]."""
+    ev = np.load(events_path(seq), mmap_mode="r")   # reads from disk on demand, not into RAM
+    tracks = load_tracks(seq_dir(seq) / "coordinates.txt", downsample)
+    t_end = int(ev["t"][-1])
+    n_bins = t_end // BIN_US + 1
+    print(f"{seq} ds{downsample}: {t_end / 1e6:.1f} s, {ev.shape[0]:,} events, "
+          f"{len(tracks)} drone(s): " + ", ".join(f"{i} {tr['cls']}" for i, tr in tracks.items()),
+          file=sys.stderr)
+
+    chunk_t, active, active_log = choose_active_boxes(ev, tracks, t_end, downsample)
+    streams = build_streams(tracks, chunk_t, active, downsample)
+    counts = count_events(ev, streams, n_bins, downsample)
+
+    centres = np.arange(n_bins, dtype=np.int64) * BIN_US + BIN_US // 2
+    safe_bins = safe_times(tracks, centres)
+    results, rows = [], []
+    drone_stream = {s["track_id"]: s for s in streams if s["kind"] == "drone"}
+    for s, c in zip(streams, counts):
+        vb, seg = valid_bins(s, n_bins)
+        if s["kind"] == "active":              # step (e): no un-annotated drone around
+            vb &= safe_bins
+        r = window_spectra(c, vb, seg)
+        results.append(r)
+        t0 = r["start_bin"].astype(np.int64) * BIN_US
+        mid = t0 + int(WIN_S * 1e6) // 2
+        x1, y1, x2, y2 = box_at(s, mid)
+        if s["kind"] == "active":              # informational offset from the drone box
+            dx1, dy1, dx2, dy2 = box_at(drone_stream[s["track_id"]], mid)
+            dxs = np.round((x1 + x2 - dx1 - dx2) / 2).astype(int)
+            dys = np.round((y1 + y2 - dy1 - dy2) / 2).astype(int)
+        else:
+            dxs = np.full(len(t0), s["dx"]); dys = np.full(len(t0), s["dy"])
+        is_bg = int(s["kind"] != "drone")
+        for w in range(len(t0)):
+            rows.append([seq, s["track_id"], is_bg, int(dxs[w]), int(dys[w]), int(t0[w]),
+                         int(t0[w] + WIN_S * 1e6), round(float(r["prom"][w]), 4), 1 - is_bg,
+                         int(r["n_ev"][w]), s["cls"], s["kind"], s["name"],
+                         round(float(x2[w] - x1[w]), 2), round(float(y2[w] - y1[w]), 2),
+                         round(float(x1[w]), 2), round(float(y1[w]), 2),
+                         round(float(x2[w]), 2), round(float(y2[w]), 2),
+                         float(r["peak_f"][w]), downsample])
+    if write_csv:
+        CSV_DIR.mkdir(parents=True, exist_ok=True)
+        with open(csv_path(seq, downsample), "w", newline="") as fh:
+            wr = csv.writer(fh)
+            wr.writerow(CSV_COLUMNS)
+            wr.writerows(rows)
+        print(f"wrote {csv_path(seq, downsample)} ({len(rows)} rows)", file=sys.stderr)
+    return tracks, streams, results, rows, active_log
+
+
+# ----------------------------------------------------------------------------
+# 6. Single-sequence summary and plots
+# ----------------------------------------------------------------------------
 def auc(pos, neg):
-    return (pos[:, None] > neg[None, :]).mean() + 0.5 * (pos[:, None] == neg[None, :]).mean()
+    """P[random positive scores higher than random negative], ties count half
+    (= ROC AUC, computed from ranks so it is fast for big arrays)."""
+    pos, neg = np.asarray(pos, float), np.asarray(neg, float)
+    if len(pos) == 0 or len(neg) == 0:
+        return float("nan")
+    allv = np.concatenate([pos, neg])
+    order = np.argsort(allv, kind="mergesort")
+    _, first, cnt = np.unique(allv[order], return_index=True, return_counts=True)
+    ranks = np.empty(len(allv))
+    ranks[order] = np.repeat(first + (cnt - 1) / 2.0 + 1, cnt)   # average rank for ties
+    r_pos = ranks[:len(pos)].sum()
+    return float((r_pos - len(pos) * (len(pos) + 1) / 2) / (len(pos) * len(neg)))
 
 
-def speed_split_analysis(tracks, results):
+def load_frozen_threshold():
+    """The frozen thresholds from phase1_multiseq.py, or None before tuning."""
+    import json
+    if THRESHOLD_FILE.exists():
+        return json.loads(THRESHOLD_FILE.read_text())
+    return None
+
+
+def summarise(seq, tracks, streams, results, active_log):
     lines = []
     def say(s=""):
         print(s); lines.append(s)
-    say(f"speed split: bins {BIN_US} us, band {F_LO:g}-{F_HI:g} Hz, windows {WIN_S}s hop {HOP_S}s")
-    win = int(WIN_S * FS)
-    fig, axes = plt.subplots(len(tracks), 2, figsize=(14, 3.6 * len(tracks)))
-    axes = np.atleast_2d(axes)
-
-    def norm_median(sp):
-        sp = sp / np.median(sp, axis=1, keepdims=True).clip(1e-12)
-        return np.median(sp, axis=0)
-
-    for row, i in zip(axes, tracks):
-        dr = next(r for r in results if r["id"] == i and not r["bg"])
-        bgs = [r for r in results if r["id"] == i and r["bg"]]
-        neg = np.concatenate([b["prom"][b["usable"]] for b in bgs])
-        bgsp = np.vstack([b["spectra"][b["usable"]] for b in bgs])
-        speed, width, area = window_motion(tracks[i], dr["t0"])
-        u = dr["usable"] & np.isfinite(speed)
-        sp_u, bw_u = speed[u], speed[u] / width[u]       # px/s and box-widths/s
-        starts = (dr["t0"][u] * FS).astype(int)
-        n_ev = np.array([dr["counts"][s:s + win].sum() for s in starts])
-        density = n_ev / area[u] / WIN_S                  # events per px^2 per s
-
-        say(f"\n=== {DRONE_NAMES.get(i, i)} ===  ({u.sum()} usable windows)")
-        say("speed px/s percentiles 10/25/50/75/90: " +
-            " / ".join(f"{np.percentile(sp_u, q):.0f}" for q in (10, 25, 50, 75, 90)))
-        say("speed box-widths/s percentiles 10/25/50/75/90: " +
-            " / ".join(f"{np.percentile(bw_u, q):.2f}" for q in (10, 25, 50, 75, 90)))
-        say(f"box width px median {np.median(width[u]):.0f}")
-        say(f"rank corr(speed px/s, events per window)        = {spearman(sp_u, n_ev):+.2f}")
-        say(f"rank corr(speed px/s, events per px^2 per s)    = {spearman(sp_u, density):+.2f}")
-        say(f"rank corr(speed px/s, prominence)               = {spearman(sp_u, dr['prom'][u]):+.2f}")
-        say(f"background: {len(neg)} windows, prominence median {np.median(neg):.2f}")
-
-        tercile = np.percentile(sp_u, 100 / 3)
-        splits = [(f"slow tercile (< {tercile:.0f} px/s)", sp_u < tercile),
-                  (f"fast (>= {tercile:.0f} px/s)", sp_u >= tercile),
-                  (f"slow absolute (< {SLOW_BW:g} box-widths/s)", bw_u < SLOW_BW),
-                  (f"fast absolute (>= {SLOW_BW:g} box-widths/s)", bw_u >= SLOW_BW)]
-        say(f"{'group':<38} {'n':>4} {'peak med':>8} {'IQR':>11} {'+-10%':>6} {'prom med':>8} {'AUC':>6} {'ev/win':>8}")
-        for k, (name, m) in enumerate(splits):
-            n = int(m.sum())
-            if n == 0:
-                say(f"{name:<38} {0:>4}  (no windows)"); continue
-            f = dr["peak_f"][u][m]; pr = dr["prom"][u][m]; med = np.median(f)
-            near = np.mean(np.abs(f - med) <= 0.1 * med)
-            say(f"{name:<38} {n:>4} {med:>8.0f} {np.percentile(f,25):>5.0f}-{np.percentile(f,75):<5.0f} "
-                f"{near:>6.0%} {np.median(pr):>8.2f} {auc(pr, neg):>6.3f} {np.median(n_ev[m]):>8.0f}"
-                + ("   <-- fewer than 20 windows: too few to conclude" if n < 20 else ""))
-            if k < 2 and n:   # plot the tercile split
-                row[0].plot(dr["freqs"], norm_median(dr["spectra"][u][m]), lw=0.8,
-                            label=f"drone, {name} (n={n})")
-        row[0].plot(dr["freqs"], norm_median(bgsp), lw=0.8, color="0.5", label="background boxes")
-        row[0].set_title(f"{DRONE_NAMES[i]}: median normalised spectrum, slow vs fast")
-        row[0].set_xlabel("frequency (Hz)"); row[0].set_ylabel("magnitude / band median")
-        row[0].legend(fontsize=8)
-        row[1].scatter(sp_u, n_ev, s=6, c=dr["prom"][u], cmap="viridis", vmin=2.5, vmax=8)
-        row[1].axvline(tercile, color="k", ls="--", lw=0.8, label="speed tercile")
-        row[1].set_xscale("log"); row[1].set_yscale("log")
-        row[1].set_xlabel("box-centre speed (px/s)"); row[1].set_ylabel("events per 0.5 s window")
-        row[1].set_title(f"{DRONE_NAMES[i]}: events vs speed (colour = prominence)")
-        row[1].legend(fontsize=8)
-    fig.tight_layout()
-    fig.savefig(OUT_DIR / f"phase1_d_speed_split{SUFFIX}_speedsplit.png", dpi=120); plt.close(fig)
-    (OUT_DIR / f"phase1_fft_seq36_results{SUFFIX}_speedsplit.txt").write_text("\n".join(lines) + "\n")
+    thr = load_frozen_threshold()
+    say(f"Phase 1 FFT detector, {seq}. Locked: {BIN_US / 1000:g} ms bins, {F_LO:g}-{F_HI:g} Hz, "
+        f"{WIN_S} s windows, {HOP_S} s step.")
+    if thr:
+        say(f"Frozen thresholds from {THRESHOLD_FILE.name}: FFT score > {thr['fft_threshold']:.3f}, "
+            f"count > {thr['count_threshold']:.0f} ({thr['rule']})")
+    for i, tr in tracks.items():
+        idx = [j for j, s in enumerate(streams) if s["track_id"] == i]
+        dr = next(results[j] for j in idx if streams[j]["kind"] == "drone")
+        say(f"\n=== ID {i} {tr['cls']} ===")
+        say(f"usable drone windows: {len(dr['prom'])}")
+        if len(dr["prom"]):
+            f = dr["peak_f"]; med = np.median(f)
+            say(f"drone peak freq: median {med:.0f} Hz, IQR {np.percentile(f, 25):.0f}-{np.percentile(f, 75):.0f} Hz, "
+                f"{np.mean(np.abs(f - med) <= 0.1 * med):.0%} within +-10% of median")
+            say(f"drone prominence: median {np.median(dr['prom']):.2f}; events/window median {np.median(dr['n_ev']):.0f}")
+        for kind in ("shifted", "active"):
+            bg = [results[j] for j in idx if streams[j]["kind"] == kind]
+            neg = np.concatenate([b["prom"] for b in bg]) if bg else np.zeros(0)
+            negc = np.concatenate([b["n_ev"] for b in bg]) if bg else np.zeros(0)
+            if len(neg) == 0:
+                say(f"{kind:>8}: no usable windows"); continue
+            line = (f"{kind:>8}: {len(neg)} windows, events/window median {np.median(negc):.0f}; "
+                    f"AUC FFT {auc(dr['prom'], neg):.3f}, AUC count {auc(dr['n_ev'], negc):.3f}")
+            if thr:
+                ft, ct = thr["fft_threshold"], thr["count_threshold"]
+                line += (f"; at frozen thr: FFT recall {np.mean(dr['prom'] > ft):.3f} FA {np.mean(neg > ft):.3f}, "
+                         f"count recall {np.mean(dr['n_ev'] > ct):.3f} FA {np.mean(negc > ct):.3f}")
+            say(line)
+        lg = [a for a in active_log if a["track_id"] == i and a["active_rates"]]
+        if lg:
+            ratio = np.concatenate([np.array(a["active_rates"]) / max(a["drone_rate"], 1e-9) for a in lg])
+            say(f"active box event rate / drone event rate (per chunk): median {np.median(ratio):.2f}, "
+                f"IQR {np.percentile(ratio, 25):.2f}-{np.percentile(ratio, 75):.2f} over {len(lg)} chunks; "
+                f"busiest allowed spot / drone: median "
+                f"{np.median([a['max_allowed_rate'] / max(a['drone_rate'], 1e-9) for a in lg]):.2f}")
+    split, num = seq.split("/")
+    (OUT_DIR / f"phase1_fft_{split}_{num}_results.txt").write_text("\n".join(lines) + "\n")
 
 
-# ----------------------------------------------------------------------------
-# 5. Plots
-# ----------------------------------------------------------------------------
-def make_plots(tracks, results):
+def make_plots(seq, tracks, streams, results):
+    """Median spectrum (drone vs shifted vs active) and prominence over time."""
+    split, num = seq.split("/")
     ids = list(tracks)
-
-    # (a) raw event-count signal, 100 ms snippet from the most prominent window
-    fig, axes = plt.subplots(len(ids), 1, figsize=(10, 3 * len(ids)))
-    for ax, i in zip(np.atleast_1d(axes), ids):
-        dr = next(r for r in results if r["id"] == i and not r["bg"])
-        bg = next(r for r in results if r["id"] == i and r["bg"])
-        w = np.argmax(np.where(dr["usable"], dr["prom"], -1))
-        s = int(dr["t0"][w] * FS); n = int(0.1 * FS)
-        tt = (np.arange(s, s + n) / FS - dr["t0"][w]) * 1000
-        ax.plot(tt, dr["counts"][s:s + n], lw=0.8, label="drone box")
-        ax.plot(tt, bg["counts"][s:s + n], lw=0.8, label="background box", alpha=0.8)
-        ax.set_title(f"{DRONE_NAMES[i]}: events per 0.5 ms bin, t = {dr['t0'][w]:.2f} s "
-                     f"(peak {dr['peak_f'][w]:.0f} Hz)")
-        ax.set_xlabel("time in window (ms)"); ax.set_ylabel("events / bin"); ax.legend()
-    fig.tight_layout(); fig.savefig(OUT_DIR / f"phase1_a_signal_snippet{SUFFIX}.png", dpi=120); plt.close(fig)
-
-    # (b) spectrum: median over usable windows (normalised per window by its own
-    #     band median, so the y axis is "times the noise floor"), drone vs background
-    fig, axes = plt.subplots(len(ids), 1, figsize=(10, 3.2 * len(ids)))
-    for ax, i in zip(np.atleast_1d(axes), ids):
-        dr = next(r for r in results if r["id"] == i and not r["bg"])
-        bgs = [r for r in results if r["id"] == i and r["bg"]]
-        def norm_median(r):
-            sp = r["spectra"][r["usable"]]
-            sp = sp / np.median(sp, axis=1, keepdims=True).clip(1e-12)
-            return np.median(sp, axis=0)
-        ax.plot(dr["freqs"], norm_median(dr), label="drone box")
-        bgsp = np.vstack([b["spectra"][b["usable"]] for b in bgs])
-        bgsp = bgsp / np.median(bgsp, axis=1, keepdims=True).clip(1e-12)
-        ax.plot(dr["freqs"], np.median(bgsp, axis=0), label="background boxes", alpha=0.8)
-        ax.set_title(f"{DRONE_NAMES[i]}: median spectrum over usable {WIN_S}s windows")
-        ax.set_xlabel("frequency (Hz)"); ax.set_ylabel("magnitude / band median"); ax.legend()
-    fig.tight_layout(); fig.savefig(OUT_DIR / f"phase1_b_spectrum_drone_vs_control{SUFFIX}.png", dpi=120); plt.close(fig)
-
-    # (c) prominence over time, and (d) peak frequency over time
-    fig, axes = plt.subplots(len(ids), 2, figsize=(14, 3.2 * len(ids)))
-    axes = np.atleast_2d(axes)
+    fig, axes = plt.subplots(len(ids), 2, figsize=(14, 3.4 * len(ids)), squeeze=False)
     for row, i in zip(axes, ids):
-        dr = next(r for r in results if r["id"] == i and not r["bg"])
-        bgs = [r for r in results if r["id"] == i and r["bg"]]
-        u = dr["usable"]
-        row[0].plot(dr["t0"][u], dr["prom"][u], ".", ms=3, label="drone box")
-        row[1].plot(dr["t0"][u], dr["peak_f"][u], ".", ms=3, label="drone box")
-        for k, b in enumerate(bgs):
-            ub = b["usable"]
-            row[0].plot(b["t0"][ub], b["prom"][ub], ".", ms=2, alpha=0.5, color="C1",
-                        label="background boxes" if k == 0 else None)
-            row[1].plot(b["t0"][ub], b["peak_f"][ub], ".", ms=2, alpha=0.3, color="C1",
-                        label="background boxes" if k == 0 else None)
-        row[0].set_yscale("log"); row[0].set_ylabel("prominence (peak / median)")
-        row[0].set_title(f"{DRONE_NAMES[i]}: prominence per window")
-        row[1].set_ylabel("peak frequency (Hz)"); row[1].set_title(f"{DRONE_NAMES[i]}: peak frequency per window")
+        name = f"ID {i} {tracks[i]['cls']}"
+        for kind, col in (("drone", "C0"), ("shifted", "0.5"), ("active", "C3")):
+            rs = [r for s, r in zip(streams, results)
+                  if s["track_id"] == i and s["kind"] == kind and len(r["prom"])]
+            if rs:
+                sp = np.vstack([r["spectra"] for r in rs])
+                sp = sp / np.median(sp, axis=1, keepdims=True).clip(1e-12)
+                row[0].plot(rs[0]["freqs"], np.median(sp, axis=0), color=col, lw=0.9, label=f"{kind} boxes")
+            for k, r in enumerate(rs):
+                row[1].plot(r["start_bin"] / FS, r["prom"], ".", ms=3 if kind == "drone" else 2,
+                            color=col, alpha=0.9 if kind == "drone" else 0.5,
+                            label=f"{kind} boxes" if k == 0 else None)
+        row[0].set_title(f"{seq} {name}: median spectrum (each window / its band median)", fontsize=9)
+        row[0].set_xlabel("frequency (Hz)"); row[0].set_ylabel("magnitude / band median")
+        row[1].set_yscale("log"); row[1].set_title(f"{seq} {name}: prominence per window", fontsize=9)
+        row[1].set_xlabel("window start (s)"); row[1].set_ylabel("prominence")
         for ax in row:
-            ax.set_xlabel("time (s)"); ax.legend(markerscale=3)
-    fig.tight_layout(); fig.savefig(OUT_DIR / f"phase1_c_prominence_over_time{SUFFIX}.png", dpi=120); plt.close(fig)
+            ax.legend(fontsize=8, markerscale=3)
+    fig.tight_layout()
+    fig.savefig(OUT_DIR / f"phase1_spectrum_prominence_{split}_{num}.png", dpi=110)
+    plt.close(fig)
+
+
+def parse_args(argv=None):
+    import argparse
+    p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    p.add_argument("--seq", default="train/36", help="FRED sequence as split/number (default train/36)")
+    p.add_argument("--downsample", type=int, default=1, choices=(1, 2, 4),
+                   help="simulate a smaller sensor: divide pixel coordinates by 2 or 4 (default 1)")
+    p.add_argument("--no-plots", action="store_true", help="skip the per-sequence plot")
+    return p.parse_args(argv)
+
+
+def main():
+    a = parse_args()
+    if not events_path(a.seq).exists():
+        sys.exit(f"missing {events_path(a.seq)}\nconvert first: python -m src.data.ecf_convert "
+                 f"{seq_dir(a.seq) / 'Event/events.hdf5'}")
+    OUT_DIR.mkdir(exist_ok=True)
+    tracks, streams, results, rows, active_log = run_sequence(a.seq, a.downsample)
+    if a.downsample == 1:
+        summarise(a.seq, tracks, streams, results, active_log)
+        if not a.no_plots:
+            make_plots(a.seq, tracks, streams, results)
 
 
 if __name__ == "__main__":
-    if not EVENTS.exists():
-        sys.exit(f"missing {EVENTS}\nconvert first: python -m src.data.ecf_convert "
-                 f"{SEQ_DIR / 'Event/events.hdf5'}")
-    parse_args()
     main()

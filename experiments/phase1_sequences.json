@@ -1,0 +1,7 @@
+{
+  "_note": "Phase 1 evaluation sets. tune: pick the threshold here. heldout: report frozen-threshold results. challenging: FRED challenging test split subset, never tuned on. Seq 36 is in the challenging split but was used for development, so it is reported separately and never counted as challenging.",
+  "tune":        ["train/91", "train/67", "train/96", "train/225", "train/218"],
+  "heldout":     ["train/92", "train/58", "train/95", "train/224", "train/199"],
+  "challenging": ["test/111", "train/108", "test/21", "train/78", "test/178", "train/177", "train/99", "train/100", "train/35"],
+  "development": ["train/36"]
+}

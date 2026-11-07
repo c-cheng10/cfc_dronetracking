@@ -2,6 +2,8 @@
 
 Written November 6, 2026. State of `main` after merging `phase1-fft-detector`.
 
+**Superseded results:** the numbers below come from train/36 alone, tuned on itself, against empty-sky negatives. The current results (20 sequences, frozen threshold, busy backgrounds, count-only baseline) are in `docs/FINDINGS.md`. The run commands have also changed: use `python src/phase1_fft.py --seq train/36` for one sequence and `python src/phase1_multiseq.py` for the full evaluation.
+
 ## What Phase 1 tests
 
 A spinning propeller blade sweeps the same pixels many times a second, so the number of events inside a drone's bounding box rises and falls at the blade-pass frequency (revolutions per second × blades). `src/phase1_fft.py` counts the events inside each drone box in fixed time bins, runs an FFT on every 0.5 s window (0.25 s step, Hann taper), and scores each window by prominence: the tallest peak divided by the median magnitude in the band. It does the same for background boxes of the same size, shifted away from any drone. Drone windows are positives, background windows are negatives, and a threshold on prominence gives precision and recall. No machine learning.

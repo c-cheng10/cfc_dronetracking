@@ -1,0 +1,18 @@
+Phase 1 FFT detector, train/36. Locked: 0.5 ms bins, 50-1000 Hz, 0.5 s windows, 0.25 s step.
+Frozen thresholds from phase1_threshold.json: FFT score > 5.298, count > 4578 (lowest threshold with false-alarm rate <= 2% on active background windows pooled over the tune sequences (decision: score > threshold))
+
+=== ID 1 DJI Mini 3 ===
+usable drone windows: 262
+drone peak freq: median 228 Hz, IQR 206-264 Hz, 45% within +-10% of median
+drone prominence: median 4.93; events/window median 15244
+ shifted: 735 windows, events/window median 51; AUC FFT 0.910, AUC count 0.983; at frozen thr: FFT recall 0.454 FA 0.011, count recall 0.897 FA 0.000
+  active: 657 windows, events/window median 418; AUC FFT 0.736, AUC count 0.949; at frozen thr: FFT recall 0.454 FA 0.178, count recall 0.897 FA 0.044
+active box event rate / drone event rate (per chunk): median 0.02, IQR 0.01-0.05 over 19 chunks; busiest allowed spot / drone: median 0.03
+
+=== ID 2 DarwinFPV cineape20 ===
+usable drone windows: 361
+drone peak freq: median 558 Hz, IQR 288-784 Hz, 11% within +-10% of median
+drone prominence: median 3.13; events/window median 3230
+ shifted: 1002 windows, events/window median 20; AUC FFT 0.780, AUC count 0.999; at frozen thr: FFT recall 0.033 FA 0.004, count recall 0.360 FA 0.000
+  active: 600 windows, events/window median 421; AUC FFT 0.504, AUC count 0.874; at frozen thr: FFT recall 0.033 FA 0.178, count recall 0.360 FA 0.000
+active box event rate / drone event rate (per chunk): median 0.05, IQR 0.01-0.16 over 18 chunks; busiest allowed spot / drone: median 0.11
