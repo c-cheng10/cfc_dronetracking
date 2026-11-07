@@ -3,4 +3,5 @@ numpy
 h5py
 matplotlib
 tqdm
+huggingface_hub   # downloads FRED one sequence at a time
 ncps==1.0.1   # reference CfC only; known bug: don't pass timespans with batch size > 1

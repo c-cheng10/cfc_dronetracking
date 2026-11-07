@@ -15,19 +15,19 @@ notebooks/     exploration and plots
 data/          datasets (git-ignored)
 ```
 
-## Plan
+## Plan (timeline set 2026-11-01)
 
-| Step | Goal | Done when |
-|---|---|---|
-| 0 | Environment + a CfC trains on a toy sine wave | Loss goes to ~0 |
-| 1 | Load FRED, plot events around a drone box | You can see the rotors flicker in a plot |
-| 2 | Patch dataset: drone vs background, events counted in time bins | Balanced train/val/test split saved to disk |
-| 3 | FFT baseline (spectrum + logistic regression) | F1 over 5 seeds |
-| 4 | GRU + Δt baseline | F1 over 5 seeds, parameter count recorded |
-| 5 | CfC via `ncps` | Same table, same parameter count |
-| 6 | Our own CfC cell (batched, variable Δt) | Matches `ncps` accuracy; works at batch size > 1 |
-| 7 | Our own DJI Mini 4K recordings; test on SkyEV | Generalization numbers |
-| 8 | Latency on a Raspberry Pi 5 | ms per patch |
+Target: **IDEaS Counter-UAS (Urban) Sandbox 2027**. Applications close **1 Dec 2026, 2:00 PM EDT** through the Defence Innovation Portal. The application needs TRL 5, or TRL 4 plus a plan to reach TRL 5 by **10 Mar 2027**, and a real (not simulated) demo video of up to 3 minutes. The sandbox runs in Ottawa, late July 2027.
+
+| Phase | When | Goal | Done when |
+|---|---|---|---|
+| 0 | Week of Nov 2 | Confirm eligibility ✅; order the camera ✅ (both reported done 2026-11-06); measure the Mini 4K's blade-pass frequency (phone spectrogram); CfC sine test ✅ | Eligibility answer in writing; camera shipped |
+| 1 | Nov 2–20 | FRED: plot events, then an **FFT rotor-frequency detector** (NumPy only, no ML) | Precision/recall on FRED train and the challenging split |
+| 2 | Nov 15–30 | **Dec 1 sprint:** live camera + FFT detector on the Mini 4K, a 3-min unedited video, TRL 4 application | Application submitted (or a deliberate no-go by Nov 22) |
+| 3 | Dec–Jan | ML baselines on FRED patches: FFT + logistic regression, GRU+Δt, `ncps` CfC, 5 seeds, matched params; then test on SkyEV / held-out data | Comparison table |
+| 4 | Jan–Feb | **Our own CfC cell**: batched variable Δt, quantization, Raspberry Pi 5 latency | Matches `ncps`; ms per patch on a Pi 5 |
+| 5 | Feb–Mar 10 | Field tests: hover at 20 / 50 m, passes at 5 / 10 / 16 m/s; our own Mini 4K dataset; fine-tune | TRL 5 evidence by Mar 10 |
+| 6 | Mar–Jul | Science fair (if chosen), sandbox prep | |
 
 ## Rules
 
