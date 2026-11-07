@@ -1,0 +1,42 @@
+
+=== ID 1 DJI Mini 3 ===
+usable drone windows: 262 of 453 (0.5s, hop 0.25s)
+drone peak freq: median 234 Hz, IQR 210-456 Hz, 37% of windows within +-10% of median
+drone prominence: median 5.06, IQR 3.86-8.05
+background windows: 735; prominence median 3.26, IQR 3.11-3.44; peak freq median 2598 Hz
+  thr    TP    FP    FN precision  recall FP rate
+    2   262   730     0     0.264   1.000   0.993
+    3   259   655     3     0.283   0.989   0.891
+    4   190    26    72     0.880   0.725   0.035
+    5   135     9   127     0.938   0.515   0.012
+    6   103     7   159     0.936   0.393   0.010
+    8    69     6   193     0.920   0.263   0.008
+   10    42     2   220     0.955   0.160   0.003
+   15    18     1   244     0.947   0.069   0.001
+AUC (P[drone score > background score]): 0.920
+
+=== ID 2 DarwinFPV cineape20 ===
+usable drone windows: 361 of 453 (0.5s, hop 0.25s)
+drone peak freq: median 2120 Hz, IQR 892-3280 Hz, 8% of windows within +-10% of median
+drone prominence: median 3.44, IQR 3.26-3.74
+background windows: 1002; prominence median 3.06, IQR 2.87-3.25; peak freq median 2455 Hz
+  thr    TP    FP    FN precision  recall FP rate
+    2   361   992     0     0.267   1.000   0.990
+    3   358   594     3     0.376   0.992   0.593
+    4    49    10   312     0.831   0.136   0.010
+    5    16     4   345     0.800   0.044   0.004
+    6     4     4   357     0.500   0.011   0.004
+    8     3     4   358     0.429   0.008   0.004
+   10     0     2   361     0.000   0.000   0.002
+   15     0     0   361       nan   0.000   0.000
+AUC (P[drone score > background score]): 0.848
+
+mean events per bin (usable bins only):
+  drone 1              drone box: 9.410
+  drone 1   background (+0,+250): 0.024
+  drone 1   background (+0,+150): 0.027
+  drone 1 background (+150,+250): 0.019
+  drone 2              drone box: 2.109
+  drone 2   background (+0,+150): 0.008
+  drone 2   background (+0,+250): 0.008
+  drone 2 background (+150,+150): 0.013
