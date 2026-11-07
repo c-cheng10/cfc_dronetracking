@@ -1,0 +1,19 @@
+{
+  "cell_px": 48,
+  "k_mean": 16.0,
+  "min_count": 10,
+  "max_cands": 1,
+  "hot_frac": 0.9,
+  "fft_threshold": 3.25,
+  "iou_match": 0.1,
+  "min_gt_frames": 12,
+  "rule": "max pooled F1(precision of FFT-passing candidates, detection recall) over tune sequences, jointly over the cluster grid and thresholds 2..15 step 0.25",
+  "tune_sequences": [
+    "train/91",
+    "train/67",
+    "train/96",
+    "train/225",
+    "train/218"
+  ],
+  "tune_F1": 0.6906
+}

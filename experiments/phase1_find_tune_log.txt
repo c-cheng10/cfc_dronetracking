@@ -1,0 +1,51 @@
+Phase 1 finder: tuning (tune sequences only)
+Grid search log:
+cell 16 k  8.0 min  10 K  1 | best thr  3.25 F1 0.614 candRec 0.579 detRec 0.524 prec 0.741 false/min 107 falsePass/min 41.6
+cell 16 k  8.0 min  10 K  2 | best thr  3.50 F1 0.633 candRec 0.795 detRec 0.612 prec 0.656 false/min 280 falsePass/min 72.8
+cell 16 k  8.0 min  10 K  3 | best thr  3.50 F1 0.596 candRec 0.888 detRec 0.646 prec 0.553 false/min 476 falsePass/min 118.5
+cell 16 k 12.0 min  10 K  1 | best thr  3.25 F1 0.644 candRec 0.618 detRec 0.557 prec 0.765 false/min 98 falsePass/min 38.7
+cell 16 k 12.0 min  10 K  2 | best thr  3.50 F1 0.641 candRec 0.814 detRec 0.619 prec 0.665 false/min 257 falsePass/min 70.7
+cell 16 k 12.0 min  10 K  3 | best thr  3.50 F1 0.605 candRec 0.887 detRec 0.646 prec 0.569 false/min 437 falsePass/min 111.0
+cell 16 k 16.0 min  10 K  1 | best thr  3.25 F1 0.663 candRec 0.648 detRec 0.577 prec 0.780 false/min 91 falsePass/min 37.0
+cell 16 k 16.0 min  10 K  2 | best thr  3.50 F1 0.652 candRec 0.816 detRec 0.623 prec 0.683 false/min 251 falsePass/min 65.5
+cell 16 k 16.0 min  10 K  3 | best thr  3.50 F1 0.614 candRec 0.885 detRec 0.648 prec 0.583 false/min 422 falsePass/min 104.8
+cell 32 k  8.0 min  10 K  1 | best thr  3.25 F1 0.617 candRec 0.580 detRec 0.529 prec 0.740 false/min 106 falsePass/min 42.3
+cell 32 k  8.0 min  10 K  2 | best thr  3.50 F1 0.644 candRec 0.799 detRec 0.613 prec 0.678 false/min 257 falsePass/min 65.9
+cell 32 k  8.0 min  10 K  3 | best thr  3.50 F1 0.616 candRec 0.892 detRec 0.649 prec 0.587 false/min 418 falsePass/min 103.6
+cell 32 k 12.0 min  10 K  1 | best thr  3.25 F1 0.659 candRec 0.635 detRec 0.572 prec 0.777 false/min 94 falsePass/min 37.2
+cell 32 k 12.0 min  10 K  2 | best thr  3.50 F1 0.657 candRec 0.804 detRec 0.617 prec 0.703 false/min 237 falsePass/min 59.0
+cell 32 k 12.0 min  10 K  3 | best thr  3.50 F1 0.629 candRec 0.861 detRec 0.638 prec 0.619 false/min 373 falsePass/min 89.1
+cell 32 k 16.0 min  10 K  1 | best thr  3.25 F1 0.672 candRec 0.655 detRec 0.582 prec 0.796 false/min 89 falsePass/min 33.8
+cell 32 k 16.0 min  10 K  2 | best thr  3.50 F1 0.664 candRec 0.799 detRec 0.610 prec 0.728 false/min 220 falsePass/min 51.7
+cell 32 k 16.0 min  10 K  3 | best thr  3.50 F1 0.642 candRec 0.845 detRec 0.627 prec 0.658 false/min 318 falsePass/min 73.9
+cell 48 k  8.0 min  10 K  1 | best thr  3.25 F1 0.650 candRec 0.625 detRec 0.562 prec 0.770 false/min 96 falsePass/min 38.3
+cell 48 k  8.0 min  10 K  2 | best thr  3.50 F1 0.651 candRec 0.786 detRec 0.604 prec 0.706 false/min 237 falsePass/min 56.9
+cell 48 k  8.0 min  10 K  3 | best thr  3.50 F1 0.632 candRec 0.857 detRec 0.633 prec 0.632 false/min 349 falsePass/min 83.6
+cell 48 k 12.0 min  10 K  1 | best thr  3.25 F1 0.670 candRec 0.657 detRec 0.579 prec 0.794 false/min 87 falsePass/min 34.2
+cell 48 k 12.0 min  10 K  2 | best thr  3.50 F1 0.662 candRec 0.777 detRec 0.598 prec 0.741 false/min 199 falsePass/min 47.3
+cell 48 k 12.0 min  10 K  3 | best thr  3.50 F1 0.653 candRec 0.824 detRec 0.618 prec 0.693 false/min 266 falsePass/min 62.0
+cell 48 k 16.0 min  10 K  1 | best thr  3.25 F1 0.691 candRec 0.673 detRec 0.592 prec 0.828 false/min 78 falsePass/min 27.9
+cell 48 k 16.0 min  10 K  2 | best thr  3.25 F1 0.682 candRec 0.760 detRec 0.647 prec 0.722 false/min 156 falsePass/min 56.6
+cell 48 k 16.0 min  10 K  3 | best thr  3.50 F1 0.671 candRec 0.784 detRec 0.599 prec 0.763 false/min 199 falsePass/min 42.1
+
+Chosen: {"cell_px": 48, "k_mean": 16.0, "min_count": 10, "max_cands": 1, "hot_frac": 0.9, "fft_threshold": 3.25, "iou_match": 0.1, "min_gt_frames": 12, "rule": "max pooled F1(precision of FFT-passing candidates, detection recall) over tune sequences, jointly over the cluster grid and thresholds 2..15 step 0.25", "tune_sequences": ["train/91", "train/67", "train/96", "train/225", "train/218"], "tune_F1": 0.6906}
+
+TUNE (in-sample)  (FFT threshold 3.25)
+group                                    win  candRec  detRec false/min falsePass/min precision  nPass
+train/91 (DJI Mini 3)                    420    0.895   0.843      25.9         20.28     0.908    392
+train/67 (DarwinFPV cineape20)           395    0.294   0.208     169.3         47.66     0.500    170
+train/96 (Betafpv air75)                 376    0.394   0.285     157.9         51.92     0.527    207
+train/225 (DJI Tello EDU)                482    0.871   0.753      11.0          7.47     0.960    378
+train/218 (DJI Mini 2)                   255    0.929   0.925       4.5          4.46     0.979    243
+  -- per drone type (pooled) --
+Betafpv air75                            376    0.394   0.285     157.9         51.92     0.527    207
+DJI Mini 2                               255    0.929   0.925       4.5          4.46     0.979    243
+DJI Mini 3                               420    0.895   0.843      25.9         20.28     0.908    392
+DJI Tello EDU                            482    0.871   0.753      11.0          7.47     0.960    378
+DarwinFPV cineape20                      395    0.294   0.208     169.3         47.66     0.500    170
+ALL (pooled)                            1928    0.673   0.592      78.5         27.87     0.828   1390
+
+Round 1 grid (cell 8/16/32, k 3/5/8, min 10/30, K 3/5/10) best: cell 32 k 8 K 3, F1 0.616 (edge of grid).
+Round 2 is the grid logged above. Round 3 probe, K 1, pooled tune F1 at best threshold:
+  cell 48 k 24: 0.677 | cell 64 k 16: 0.644 | cell 64 k 24: 0.631 | cell 48 k 32: 0.649
+All below the round-2 winner (cell 48, k 16, K 1, F1 0.691), which is frozen.

@@ -1,0 +1,110 @@
+Phase 1 finder results (parameters frozen on tune; see phase1_find_params.json)
+params: {'cell_px': 48, 'k_mean': 16.0, 'min_count': 10, 'max_cands': 1, 'hot_frac': 0.9}, FFT threshold 3.25
+Match: IoU(candidate box, drone box swept over the 0.5 s window) > 0.1.
+Present window: drone has >= 12 of ~15 annotation frames in it.
+false/min: candidates matching no drone, per minute (240 windows/min). falsePass/min: same, prominence > threshold.
+Per-type rows: recall over that type's windows; false/min and precision over the sequences containing that type.
+Runtime: finder + FFT only (file loading excluded), single process.
+
+TUNE (in-sample, tuned here)  (FFT threshold 3.25)
+group                                    win  candRec  detRec false/min falsePass/min precision  nPass
+train/91 (DJI Mini 3)                    420    0.895   0.843      25.9         20.28     0.908    392
+train/67 (DarwinFPV cineape20)           395    0.294   0.208     169.3         47.66     0.500    170
+train/96 (Betafpv air75)                 376    0.394   0.285     157.9         51.92     0.527    207
+train/225 (DJI Tello EDU)                482    0.871   0.753      11.0          7.47     0.960    378
+train/218 (DJI Mini 2)                   255    0.929   0.925       4.5          4.46     0.979    243
+  -- per drone type (pooled) --
+Betafpv air75                            376    0.394   0.285     157.9         51.92     0.527    207
+DJI Mini 2                               255    0.929   0.925       4.5          4.46     0.979    243
+DJI Mini 3                               420    0.895   0.843      25.9         20.28     0.908    392
+DJI Tello EDU                            482    0.871   0.753      11.0          7.47     0.960    378
+DarwinFPV cineape20                      395    0.294   0.208     169.3         47.66     0.500    170
+ALL (pooled)                            1928    0.673   0.592      78.5         27.87     0.828   1390
+  threshold context (pooled ALL):
+    thr  3: detRec 0.638 falsePass/min 49.10 precision 0.747
+    thr  4: detRec 0.476 falsePass/min 7.46 precision 0.935
+    thr  5: detRec 0.384 falsePass/min 5.36 precision 0.942
+    thr  6: detRec 0.310 falsePass/min 4.78 precision 0.936
+    thr  8: detRec 0.218 falsePass/min 2.68 precision 0.948
+
+HELDOUT  (FFT threshold 3.25)
+group                                    win  candRec  detRec false/min falsePass/min precision  nPass
+train/92 (DJI Mini 3)                    428    0.876   0.843      36.6         18.30     0.914    397
+train/58 (DarwinFPV cineape20)           414    0.889   0.621      40.4         20.71     0.870    301
+train/95 (Betafpv air75)                 383    0.274   0.219     181.1         57.37     0.444    196
+train/224 (DJI Tello EDU)                466    0.961   0.955       8.2          8.22     0.965    461
+train/199 (DJI Mini 2)                   451    0.761   0.761       1.6          1.57     0.991    347
+  -- per drone type (pooled) --
+Betafpv air75                            383    0.274   0.219     181.1         57.37     0.444    196
+DJI Mini 2                               451    0.761   0.761       1.6          1.57     0.991    347
+DJI Mini 3                               428    0.876   0.843      36.6         18.30     0.914    397
+DJI Tello EDU                            466    0.961   0.955       8.2          8.22     0.965    461
+DarwinFPV cineape20                      414    0.889   0.621      40.4         20.71     0.870    301
+ALL (pooled)                            2142    0.765   0.696      53.4         21.16     0.882   1702
+  threshold context (pooled ALL):
+    thr  3: detRec 0.735 falsePass/min 34.95 precision 0.827
+    thr  4: detRec 0.577 falsePass/min 8.42 precision 0.939
+    thr  5: detRec 0.486 falsePass/min 6.63 precision 0.943
+    thr  6: detRec 0.428 falsePass/min 6.00 precision 0.942
+    thr  8: detRec 0.335 falsePass/min 5.16 precision 0.936
+
+CHALLENGING  (FFT threshold 3.25)
+group                                    win  candRec  detRec false/min falsePass/min precision  nPass
+test/111 (DJI Mini 3)                    374    0.765   0.310      10.7          2.24     0.967    120
+train/108 (DJI Mini 3)                   387    0.612   0.282      37.6         14.50     0.810    142
+test/21 (DarwinFPV cineape20)            167    0.551   0.287      94.9         28.51     0.495    109
+train/78 (DarwinFPV cineape20)           405    0.158   0.099     197.8         58.63     0.272    147
+test/178 (DJI Tello EDU)                 391    0.169   0.069       3.5          1.50     0.903     31
+train/177 (DJI Tello EDU)                299    0.177   0.064       2.0          0.98     0.913     23
+train/99 (Betafpv air75)                 423    0.381   0.262     150.0         50.36     0.548    208
+train/100 (Betafpv air75)                437    0.375   0.236     150.4         49.07     0.528    195
+train/35 (DJI Mini 3, DarwinFPV cineape20)   744    0.575   0.383       4.8          3.21     0.979    280
+  -- per drone type (pooled) --
+Betafpv air75                            860    0.378   0.249     150.2         49.71     0.538    403
+DJI Mini 3                              1123    0.594   0.282      17.8          6.71     0.932    542
+DJI Tello EDU                            690    0.172   0.067       2.7          1.24     0.907     54
+DarwinFPV cineape20                      954    0.461   0.295      98.3         29.87     0.687    536
+ALL (pooled)                            3627    0.428   0.237      71.3         22.87     0.689   1255
+  threshold context (pooled ALL):
+    thr  3: detRec 0.330 falsePass/min 42.52 precision 0.624
+    thr  4: detRec 0.092 falsePass/min 3.05 precision 0.865
+    thr  5: detRec 0.056 falsePass/min 1.64 precision 0.877
+    thr  6: detRec 0.042 falsePass/min 1.35 precision 0.868
+    thr  8: detRec 0.026 falsePass/min 0.88 precision 0.862
+
+DEVELOPMENT  (FFT threshold 3.25)
+group                                    win  candRec  detRec false/min falsePass/min precision  nPass
+train/36 (DJI Mini 3, DarwinFPV cineape20)   644    0.516   0.396      49.8         11.13     0.923    273
+  -- per drone type (pooled) --
+DJI Mini 3                               273    0.821   0.703      49.8         11.13     0.923    273
+DarwinFPV cineape20                      371    0.291   0.170      49.8         11.13     0.923    273
+ALL (pooled)                             644    0.516   0.396      49.8         11.13     0.923    273
+  threshold context (pooled ALL):
+    thr  3: detRec 0.453 falsePass/min 28.08 precision 0.845
+    thr  4: detRec 0.284 falsePass/min 3.71 precision 0.961
+    thr  5: detRec 0.200 falsePass/min 2.65 precision 0.961
+    thr  6: detRec 0.151 falsePass/min 2.65 precision 0.950
+    thr  8: detRec 0.107 falsePass/min 2.12 precision 0.944
+
+Runtime per sequence (s compute / s data):
+  tune         train/91     1.08 s /  106.8 s = 0.010   hot pixels 14
+  tune         train/67     1.11 s /  107.5 s = 0.010   hot pixels 6
+  tune         train/96     1.31 s /  113.7 s = 0.012   hot pixels 16
+  tune         train/225    1.65 s /  120.8 s = 0.014   hot pixels 313
+  tune         train/218    7.67 s /   67.6 s = 0.113   hot pixels 2722
+  heldout      train/92     1.26 s /  111.9 s = 0.011   hot pixels 14
+  heldout      train/58     0.86 s /  113.3 s = 0.008   hot pixels 8
+  heldout      train/95     1.65 s /  114.3 s = 0.014   hot pixels 334
+  heldout      train/224    2.73 s /  117.2 s = 0.023   hot pixels 273
+  heldout      train/199   15.39 s /  115.1 s = 0.134   hot pixels 3843
+  challenging  test/111     4.33 s /  107.4 s = 0.040   hot pixels 335
+  challenging  train/108    2.21 s /  112.1 s = 0.020   hot pixels 73
+  challenging  test/21      1.22 s /  116.0 s = 0.011   hot pixels 2
+  challenging  train/78     3.35 s /  109.8 s = 0.030   hot pixels 236
+  challenging  test/178    12.99 s /  120.6 s = 0.108   hot pixels 527
+  challenging  train/177   13.52 s /  122.3 s = 0.111   hot pixels 520
+  challenging  train/99     1.56 s /  112.4 s = 0.014   hot pixels 16
+  challenging  train/100    1.51 s /  113.0 s = 0.013   hot pixels 17
+  challenging  train/35     3.92 s /  112.5 s = 0.035   hot pixels 24
+  development  train/36     4.82 s /  113.6 s = 0.042   hot pixels 35
+  overall 0.038 s of compute per s of data
