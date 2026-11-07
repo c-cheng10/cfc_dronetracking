@@ -1,7 +1,96 @@
 {
   "fft_threshold": 5.2981,
   "count_threshold": 4578.0,
+  "fft_stab_threshold": 4.6431,
   "rule": "lowest threshold with false-alarm rate <= 2% on active background windows pooled over the tune sequences (decision: score > threshold)",
+  "stability": {
+    "n_s": 4.0,
+    "s_cut": 0.4,
+    "min_sep_s": 0.5,
+    "match_hz": 2.0,
+    "rule": "grid N in [1.0, 2.0, 3.0, 4.0] s, s_cut in 0.30..0.95; highest tune recall with <= 5% of tune drone windows rejected"
+  },
+  "lr_models": {
+    "basic": {
+      "features": [
+        "log_count",
+        "log_prom"
+      ],
+      "mean": [
+        4.285875453086478,
+        -0.22063087146305782
+      ],
+      "std": [
+        3.1028763099464,
+        2.9743169273110035
+      ],
+      "weights": [
+        2.937262729272204,
+        1.0199772898905908
+      ],
+      "bias": -2.515069235884698,
+      "threshold": 1.896300697705593,
+      "loso_recall": 0.4571129707112971,
+      "loso_auc_active": 0.833212689119748
+    },
+    "stab": {
+      "features": [
+        "log_count",
+        "log_prom",
+        "stability"
+      ],
+      "mean": [
+        4.285875453086478,
+        -0.22063087146305782,
+        0.13879688860998574
+      ],
+      "std": [
+        3.1028763099464,
+        2.9743169273110035,
+        0.2770989373708019
+      ],
+      "weights": [
+        2.941103104714308,
+        0.9742860836901571,
+        0.09186179423428256
+      ],
+      "bias": -2.455972713086299,
+      "threshold": 1.9070465272360733,
+      "loso_recall": 0.45502092050209203,
+      "loso_auc_active": 0.8319091350207614
+    },
+    "stab_area": {
+      "features": [
+        "log_count",
+        "log_prom",
+        "stability",
+        "log_area"
+      ],
+      "mean": [
+        4.285875453086478,
+        -0.22063087146305782,
+        0.13879688860998574,
+        7.111241955632111
+      ],
+      "std": [
+        3.1028763099464,
+        2.9743169273110035,
+        0.2770989373708019,
+        0.5108280700771523
+      ],
+      "weights": [
+        3.07657953930955,
+        1.2690017575425248,
+        0.1973690299069964,
+        -0.6065223671433622
+      ],
+      "bias": -2.807344991241425,
+      "threshold": 1.8553258696467538,
+      "loso_recall": 0.49110878661087864,
+      "loso_auc_active": 0.8572302626445363
+    }
+  },
+  "combined_model": "stab_area",
   "tuned_on": [
     "train/91",
     "train/67",

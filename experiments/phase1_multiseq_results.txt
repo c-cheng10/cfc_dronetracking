@@ -1,114 +1,418 @@
-Phase 1 multi-sequence evaluation: FFT rotor detector vs count-only baseline
+Phase 1 multi-sequence evaluation: FFT rotor detector vs count-only and combined baselines
 Locked settings: 0.5 ms bins, 50-1000 Hz, 0.5 s windows, 0.25 s step. Written by src/phase1_multiseq.py.
 tune        : train/91, train/67, train/96, train/225, train/218
 heldout     : train/92, train/58, train/95, train/224, train/199
 challenging : test/111, train/108, test/21, train/78, test/178, train/177, train/99, train/100, train/35
 development : train/36
 
-FROZEN THRESHOLDS (phase1_threshold.json): FFT prominence > 5.2981, event_count > 4578
-Rule: lowest threshold with false-alarm rate <= 2% on active background windows pooled over the tune sequences (decision: score > threshold). 5523 active tune windows.
-Why: fixes the false-alarm budget on the hardest negatives, and does not depend on the
-number of background boxes per drone (precision and F1 do). One global count threshold
-is crude because event counts scale with box size and distance; that is the baseline's problem.
+FROZEN (phase1_threshold.json), rule: lowest threshold with false-alarm rate <= 2% on active background windows pooled over the tune sequences (decision: score > threshold); 5523 active tune windows.
+  FFT           score > 5.2981
+  FFT+stab      score > 4.6431
+  count         score > 4578.0000
+  LR basic      score > 1.8963
+  LR stab       score > 1.9070
+  LR stab+area  score > 1.8553
+  stability rule: N = 4 s, reject when stability > 0.40
+  combined model (the bar for the CfC): stab_area
+  LR basic: features ['log_count', 'log_prom'], weights (standardised) [2.9373, 1.02], bias -2.5151, mean [4.2859, -0.2206], std [3.1029, 2.9743]
+  LR stab: features ['log_count', 'log_prom', 'stability'], weights (standardised) [2.9411, 0.9743, 0.0919], bias -2.4560, mean [4.2859, -0.2206, 0.1388], std [3.1029, 2.9743, 0.2771]
+  LR stab_area: features ['log_count', 'log_prom', 'stability', 'log_area'], weights (standardised) [3.0766, 1.269, 0.1974, -0.6065], bias -2.8073, mean [4.2859, -0.2206, 0.1388, 7.1112], std [3.1029, 2.9743, 0.2771, 0.5108]
+Why the 2 % rule: fixes the false-alarm budget on the hardest negatives and does not depend
+on the number of background boxes per drone (precision and F1 do). A single global count
+threshold is crude because counts scale with box size; the LR models can use log box area.
 
-Notes on the columns:
-  AUC = P[drone window scores higher than background window], threshold-free.
-  prec/recall/FA use the frozen thresholds. Precision depends on our ratio of background to
-  drone windows (up to 3 shifted + 3 active boxes per drone), so compare it between rows, not
-  to the outside world. FA/min = false alarms per minute of background box-time
-  (each window adds 0.25 s; per single background box).
+Columns: AUC = P[drone window scores higher than background window], threshold-free.
+prec/recall/FA use the frozen thresholds. Precision depends on our ratio of background to
+drone windows (up to 3 shifted + 3 active boxes per drone): compare between rows only.
+FA/min = false alarms per minute of single-background-box time (each window adds 0.25 s).
 
-=== HELDOUT (frozen threshold, never tuned on) ===
-drone type            bg      scorer  n_pos  n_neg    AUC   prec recall  FA/win  FA/min
-Betafpv air75         shifted FFT       381   1125  0.974  0.927  0.100   0.003    0.64
-Betafpv air75         shifted count     381   1125  0.994  1.000  0.231   0.000    0.00
-Betafpv air75         active  FFT       381   1107  0.764  0.826  0.100   0.007    1.73
-Betafpv air75         active  count     381   1107  0.705  0.427  0.231   0.107   25.58
-DJI Mini 2            shifted FFT       451   1353  0.996  1.000  0.929   0.000    0.00
-DJI Mini 2            shifted count     451   1353  0.999  0.984  0.976   0.005    1.24
-DJI Mini 2            active  FFT       451   1311  0.981  0.948  0.929   0.018    4.21
-DJI Mini 2            active  count     451   1311  0.982  0.849  0.976   0.059   14.28
-DJI Mini 3            shifted FFT       427   1271  0.989  0.957  0.677   0.010    2.45
-DJI Mini 3            shifted count     427   1271  1.000  1.000  0.635   0.000    0.00
-DJI Mini 3            active  FFT       427   1224  0.948  0.835  0.677   0.047   11.18
-DJI Mini 3            active  count     427   1224  0.978  0.968  0.635   0.007    1.76
-DJI Tello EDU         shifted FFT       465   1395  0.997  0.987  0.809   0.004    0.86
-DJI Tello EDU         shifted count     465   1395  1.000  0.996  0.972   0.001    0.34
-DJI Tello EDU         active  FFT       465   1332  0.963  0.858  0.809   0.047   11.17
-DJI Tello EDU         active  count     465   1332  0.987  0.890  0.972   0.042   10.09
-DarwinFPV cineape20   shifted FFT       407   1146  0.980  0.846  0.054   0.003    0.84
-DarwinFPV cineape20   shifted count     407   1146  0.998  1.000  0.260   0.000    0.00
-DarwinFPV cineape20   active  FFT       407   1173  0.750  0.379  0.054   0.031    7.37
-DarwinFPV cineape20   active  count     407   1173  0.969  0.972  0.260   0.003    0.61
-ALL TYPES             shifted FFT      2131   6290  0.965  0.979  0.537   0.004    0.95
-ALL TYPES             shifted count    2131   6290  0.992  0.993  0.637   0.001    0.34
-ALL TYPES             active  FFT      2131   6147  0.886  0.860  0.537   0.030    7.26
-ALL TYPES             active  count    2131   6147  0.932  0.837  0.637   0.043   10.31
+=== STABILITY TUNING (tune set only) ===
+stability = fraction of the same box's windows 0.5..N s away whose peak is within +-1 FFT bin
+(2 Hz). Reject when stability > s_cut. FFT threshold re-tuned per row (2 % rule).
+Chosen: highest tune recall with drone rejection <= 5%. act rej = active windows rejected.
+  N s  s_cut     thr  recall drone rej  act rej
+ none          5.298   0.385     0.000    0.000
+    1   0.30   4.510   0.412     0.058    0.069
+    1   0.35   4.620   0.422     0.026    0.054
+    1   0.40   4.667   0.419     0.025    0.053
+    1   0.45   4.667   0.419     0.025    0.053
+    1   0.50   4.748   0.427     0.010    0.045
+    1   0.55   4.748   0.427     0.010    0.045
+    1   0.60   4.748   0.428     0.009    0.044
+    1   0.65   4.748   0.428     0.009    0.044
+    1   0.70   4.845   0.425     0.003    0.035
+    1   0.75   4.852   0.425     0.003    0.033
+    1   0.80   4.852   0.425     0.003    0.032
+    1   0.85   4.994   0.414     0.001    0.025
+    1   0.90   4.994   0.414     0.001    0.025
+    1   0.95   4.994   0.414     0.001    0.025
+    2   0.30   4.643   0.424     0.024    0.056
+    2   0.35   4.643   0.425     0.021    0.054
+    2   0.40   4.667   0.431     0.013    0.052
+    2   0.45   4.690   0.431     0.010    0.049
+    2   0.50   4.725   0.433     0.006    0.047
+    2   0.55   4.725   0.433     0.006    0.045
+    2   0.60   4.725   0.435     0.005    0.042
+    2   0.65   4.748   0.435     0.003    0.040
+    2   0.70   4.761   0.435     0.002    0.036
+    2   0.75   4.801   0.429     0.001    0.031
+    2   0.80   4.852   0.427     0.001    0.027
+    2   0.85   4.975   0.415     0.001    0.024
+    2   0.90   5.101   0.405     0.000    0.017
+    2   0.95   5.101   0.405     0.000    0.014
+    3   0.30   4.619   0.429     0.018    0.058
+    3   0.35   4.619   0.434     0.013    0.055
+    3   0.40   4.667   0.434     0.010    0.051
+    3   0.45   4.690   0.435     0.007    0.049
+    3   0.50   4.725   0.436     0.003    0.046
+    3   0.55   4.725   0.438     0.001    0.045
+    3   0.60   4.725   0.438     0.001    0.042
+    3   0.65   4.725   0.439     0.001    0.039
+    3   0.70   4.748   0.437     0.001    0.037
+    3   0.75   4.891   0.422     0.001    0.031
+    3   0.80   4.891   0.422     0.001    0.028
+    3   0.85   5.097   0.404     0.001    0.022
+    3   0.90   5.097   0.404     0.001    0.017
+    3   0.95   5.152   0.401     0.000    0.009
+    4   0.30   4.619   0.434     0.014    0.057
+    4   0.35   4.619   0.437     0.010    0.055
+    4   0.40   4.643   0.443     0.003    0.052
+    4   0.45   4.690   0.440     0.001    0.049
+    4   0.50   4.725   0.439     0.001    0.048
+    4   0.55   4.725   0.439     0.001    0.047
+    4   0.60   4.725   0.439     0.001    0.043
+    4   0.65   4.725   0.439     0.001    0.039
+    4   0.70   4.748   0.437     0.000    0.037
+    4   0.75   4.967   0.417     0.000    0.031
+    4   0.80   4.970   0.417     0.000    0.030
+    4   0.85   5.077   0.407     0.000    0.022
+    4   0.90   5.121   0.404     0.000    0.015
+    4   0.95   5.186   0.396     0.000    0.005
 
-=== CHALLENGING (frozen threshold, never tuned on) ===
-drone type            bg      scorer  n_pos  n_neg    AUC   prec recall  FA/win  FA/min
-Betafpv air75         shifted FFT       854   2480  0.966  0.542  0.015   0.004    1.06
-Betafpv air75         shifted count     854   2480  0.998  1.000  0.201   0.000    0.00
-Betafpv air75         active  FFT       854   2457  0.684  0.115  0.015   0.041    9.77
-Betafpv air75         active  count     854   2457  0.777  0.677  0.201   0.033    8.01
-DJI Mini 3            shifted FFT      1108   3219  0.690  0.359  0.054   0.033    7.98
-DJI Mini 3            shifted count    1108   3219  0.971  1.000  0.361   0.000    0.00
-DJI Mini 3            active  FFT      1108   3177  0.296  0.037  0.054   0.493  118.22
-DJI Mini 3            active  count    1108   3177  0.738  0.797  0.361   0.032    7.71
-DJI Tello EDU         shifted FFT       679   2003  0.520  1.000  0.006   0.000    0.00
-DJI Tello EDU         shifted count     679   2003  0.979  0.968  0.619   0.007    1.68
-DJI Tello EDU         active  FFT       679   2016  0.501  0.160  0.006   0.010    2.50
-DJI Tello EDU         active  count     679   2016  0.955  0.968  0.619   0.007    1.67
-DarwinFPV cineape20   shifted FFT       940   2681  0.887  0.943  0.141   0.003    0.72
-DarwinFPV cineape20   shifted count     940   2681  0.991  1.000  0.368   0.000    0.00
-DarwinFPV cineape20   active  FFT       940   2556  0.668  0.417  0.141   0.073   17.46
-DarwinFPV cineape20   active  count     940   2556  0.794  0.785  0.368   0.037    8.92
-ALL TYPES             shifted FFT      3581  10383  0.795  0.625  0.059   0.012    2.91
-ALL TYPES             shifted count    3581  10383  0.966  0.990  0.374   0.001    0.32
-ALL TYPES             active  FFT      3581  10206  0.527  0.101  0.059   0.183   44.02
-ALL TYPES             active  count    3581  10206  0.797  0.820  0.374   0.029    6.89
+=== LOGISTIC MODELS (fit on tune windows: drone vs shifted + active background) ===
+Newton's method, standardised features, balanced class weights, L2 = 1e-3.
+LOSO = leave one tune sequence out (fit on 4, score the 5th, pool, 2 % rule).
+model      features                                       LOSO recall LOSO AUC act
+basic      log_count, log_prom                                  0.457        0.833
+stab       log_count, log_prom, stability                       0.455        0.832
+stab_area  log_count, log_prom, stability, log_area             0.491        0.857
+
+=== HELDOUT (frozen thresholds, never tuned on) ===
+drone type            bg      scorer        n_pos  n_neg    AUC   prec recall  FA/win  FA/min
+Betafpv air75         shifted FFT             381   1125  0.974  0.927  0.100   0.003    0.64
+Betafpv air75         shifted FFT+stab        381   1125  0.978  0.966  0.147   0.002    0.43
+Betafpv air75         shifted count           381   1125  0.994  1.000  0.231   0.000    0.00
+Betafpv air75         shifted LR basic        381   1125  0.994  1.000  0.252   0.000    0.00
+Betafpv air75         shifted LR stab         381   1125  0.991  1.000  0.249   0.000    0.00
+Betafpv air75         shifted LR stab+area    381   1125  0.992  1.000  0.249   0.000    0.00
+Betafpv air75         active  FFT             381   1107  0.764  0.826  0.100   0.007    1.73
+Betafpv air75         active  FFT+stab        381   1107  0.765  0.889  0.147   0.006    1.52
+Betafpv air75         active  count           381   1107  0.705  0.427  0.231   0.107   25.58
+Betafpv air75         active  LR basic        381   1107  0.717  0.464  0.252   0.100   24.07
+Betafpv air75         active  LR stab         381   1107  0.717  0.470  0.249   0.097   23.20
+Betafpv air75         active  LR stab+area    381   1107  0.750  0.457  0.249   0.102   24.50
+
+DJI Mini 2            shifted FFT             451   1353  0.996  1.000  0.929   0.000    0.00
+DJI Mini 2            shifted FFT+stab        451   1353  0.993  1.000  0.951   0.000    0.00
+DJI Mini 2            shifted count           451   1353  0.999  0.984  0.976   0.005    1.24
+DJI Mini 2            shifted LR basic        451   1353  1.000  0.987  0.987   0.004    1.06
+DJI Mini 2            shifted LR stab         451   1353  1.000  0.987  0.984   0.004    1.06
+DJI Mini 2            shifted LR stab+area    451   1353  1.000  1.000  1.000   0.000    0.00
+DJI Mini 2            active  FFT             451   1311  0.981  0.948  0.929   0.018    4.21
+DJI Mini 2            active  FFT+stab        451   1311  0.979  0.947  0.951   0.018    4.39
+DJI Mini 2            active  count           451   1311  0.982  0.849  0.976   0.059   14.28
+DJI Mini 2            active  LR basic        451   1311  0.984  0.862  0.987   0.054   13.00
+DJI Mini 2            active  LR stab         451   1311  0.984  0.871  0.984   0.050   12.08
+DJI Mini 2            active  LR stab+area    451   1311  0.988  0.949  1.000   0.018    4.39
+
+DJI Mini 3            shifted FFT             427   1271  0.989  0.957  0.677   0.010    2.45
+DJI Mini 3            shifted FFT+stab        427   1271  0.991  0.962  0.763   0.010    2.45
+DJI Mini 3            shifted count           427   1271  1.000  1.000  0.635   0.000    0.00
+DJI Mini 3            shifted LR basic        427   1271  1.000  1.000  0.686   0.000    0.00
+DJI Mini 3            shifted LR stab         427   1271  1.000  1.000  0.686   0.000    0.00
+DJI Mini 3            shifted LR stab+area    427   1271  1.000  1.000  0.703   0.000    0.00
+DJI Mini 3            active  FFT             427   1224  0.948  0.835  0.677   0.047   11.18
+DJI Mini 3            active  FFT+stab        427   1224  0.952  0.825  0.763   0.056   13.53
+DJI Mini 3            active  count           427   1224  0.978  0.968  0.635   0.007    1.76
+DJI Mini 3            active  LR basic        427   1224  0.982  0.967  0.686   0.008    1.96
+DJI Mini 3            active  LR stab         427   1224  0.982  0.954  0.686   0.011    2.75
+DJI Mini 3            active  LR stab+area    427   1224  0.991  0.977  0.703   0.006    1.37
+
+DJI Tello EDU         shifted FFT             465   1395  0.997  0.987  0.809   0.004    0.86
+DJI Tello EDU         shifted FFT+stab        465   1395  0.997  0.986  0.877   0.004    1.03
+DJI Tello EDU         shifted count           465   1395  1.000  0.996  0.972   0.001    0.34
+DJI Tello EDU         shifted LR basic        465   1395  1.000  0.996  0.976   0.001    0.34
+DJI Tello EDU         shifted LR stab         465   1395  1.000  0.996  0.976   0.001    0.34
+DJI Tello EDU         shifted LR stab+area    465   1395  1.000  0.996  1.000   0.001    0.34
+DJI Tello EDU         active  FFT             465   1332  0.963  0.858  0.809   0.047   11.17
+DJI Tello EDU         active  FFT+stab        465   1332  0.965  0.870  0.877   0.046   10.99
+DJI Tello EDU         active  count           465   1332  0.987  0.890  0.972   0.042   10.09
+DJI Tello EDU         active  LR basic        465   1332  0.985  0.878  0.976   0.047   11.35
+DJI Tello EDU         active  LR stab         465   1332  0.985  0.880  0.976   0.047   11.17
+DJI Tello EDU         active  LR stab+area    465   1332  0.985  0.882  1.000   0.047   11.17
+
+DarwinFPV cineape20   shifted FFT             407   1146  0.980  0.846  0.054   0.003    0.84
+DarwinFPV cineape20   shifted FFT+stab        407   1146  0.983  0.980  0.123   0.001    0.21
+DarwinFPV cineape20   shifted count           407   1146  0.998  1.000  0.260   0.000    0.00
+DarwinFPV cineape20   shifted LR basic        407   1146  0.997  1.000  0.310   0.000    0.00
+DarwinFPV cineape20   shifted LR stab         407   1146  0.997  1.000  0.297   0.000    0.00
+DarwinFPV cineape20   shifted LR stab+area    407   1146  0.998  1.000  0.192   0.000    0.00
+DarwinFPV cineape20   active  FFT             407   1173  0.750  0.379  0.054   0.031    7.37
+DarwinFPV cineape20   active  FFT+stab        407   1173  0.769  0.588  0.123   0.030    7.16
+DarwinFPV cineape20   active  count           407   1173  0.969  0.972  0.260   0.003    0.61
+DarwinFPV cineape20   active  LR basic        407   1173  0.963  0.881  0.310   0.014    3.48
+DarwinFPV cineape20   active  LR stab         407   1173  0.962  0.877  0.297   0.014    3.48
+DarwinFPV cineape20   active  LR stab+area    407   1173  0.967  0.821  0.192   0.014    3.48
+
+ALL TYPES             shifted FFT            2131   6290  0.965  0.979  0.537   0.004    0.95
+ALL TYPES             shifted FFT+stab       2131   6290  0.965  0.983  0.595   0.003    0.84
+ALL TYPES             shifted count          2131   6290  0.992  0.993  0.637   0.001    0.34
+ALL TYPES             shifted LR basic       2131   6290  0.993  0.994  0.664   0.001    0.31
+ALL TYPES             shifted LR stab        2131   6290  0.992  0.994  0.660   0.001    0.31
+ALL TYPES             shifted LR stab+area   2131   6290  0.996  0.999  0.652   0.000    0.08
+ALL TYPES             active  FFT            2131   6147  0.886  0.860  0.537   0.030    7.26
+ALL TYPES             active  FFT+stab       2131   6147  0.891  0.866  0.595   0.032    7.65
+ALL TYPES             active  count          2131   6147  0.932  0.837  0.637   0.043   10.31
+ALL TYPES             active  LR basic       2131   6147  0.936  0.839  0.664   0.044   10.62
+ALL TYPES             active  LR stab        2131   6147  0.935  0.841  0.660   0.043   10.39
+ALL TYPES             active  LR stab+area   2131   6147  0.952  0.862  0.652   0.036    8.71
+
+=== CHALLENGING (frozen thresholds, never tuned on) ===
+drone type            bg      scorer        n_pos  n_neg    AUC   prec recall  FA/win  FA/min
+Betafpv air75         shifted FFT             854   2480  0.966  0.542  0.015   0.004    1.06
+Betafpv air75         shifted FFT+stab        854   2480  0.970  0.758  0.029   0.003    0.77
+Betafpv air75         shifted count           854   2480  0.998  1.000  0.201   0.000    0.00
+Betafpv air75         shifted LR basic        854   2480  0.998  1.000  0.206   0.000    0.00
+Betafpv air75         shifted LR stab         854   2480  0.998  1.000  0.206   0.000    0.00
+Betafpv air75         shifted LR stab+area    854   2480  0.998  0.988  0.198   0.001    0.19
+Betafpv air75         active  FFT             854   2457  0.684  0.115  0.015   0.041    9.77
+Betafpv air75         active  FFT+stab        854   2457  0.722  0.424  0.029   0.014    3.32
+Betafpv air75         active  count           854   2457  0.777  0.677  0.201   0.033    8.01
+Betafpv air75         active  LR basic        854   2457  0.780  0.696  0.206   0.031    7.52
+Betafpv air75         active  LR stab         854   2457  0.779  0.696  0.206   0.031    7.52
+Betafpv air75         active  LR stab+area    854   2457  0.803  0.585  0.198   0.049   11.72
+
+DJI Mini 3            shifted FFT            1108   3219  0.690  0.359  0.054   0.033    7.98
+DJI Mini 3            shifted FFT+stab       1108   3219  0.705  0.553  0.076   0.021    5.07
+DJI Mini 3            shifted count          1108   3219  0.971  1.000  0.361   0.000    0.00
+DJI Mini 3            shifted LR basic       1108   3219  0.968  1.000  0.361   0.000    0.00
+DJI Mini 3            shifted LR stab        1108   3219  0.967  1.000  0.358   0.000    0.00
+DJI Mini 3            shifted LR stab+area   1108   3219  0.983  1.000  0.097   0.000    0.00
+DJI Mini 3            active  FFT            1108   3177  0.296  0.037  0.054   0.493  118.22
+DJI Mini 3            active  FFT+stab       1108   3177  0.803  0.431  0.076   0.035    8.39
+DJI Mini 3            active  count          1108   3177  0.738  0.797  0.361   0.032    7.71
+DJI Mini 3            active  LR basic       1108   3177  0.685  0.571  0.361   0.094   22.66
+DJI Mini 3            active  LR stab        1108   3177  0.643  0.513  0.358   0.119   28.48
+DJI Mini 3            active  LR stab+area   1108   3177  0.596  0.425  0.097   0.046   11.03
+
+DJI Tello EDU         shifted FFT             679   2003  0.520  1.000  0.006   0.000    0.00
+DJI Tello EDU         shifted FFT+stab        679   2003  0.520  0.833  0.007   0.000    0.12
+DJI Tello EDU         shifted count           679   2003  0.979  0.968  0.619   0.007    1.68
+DJI Tello EDU         shifted LR basic        679   2003  0.979  0.972  0.610   0.006    1.44
+DJI Tello EDU         shifted LR stab         679   2003  0.979  0.972  0.604   0.006    1.44
+DJI Tello EDU         shifted LR stab+area    679   2003  0.991  1.000  0.476   0.000    0.00
+DJI Tello EDU         active  FFT             679   2016  0.501  0.160  0.006   0.010    2.50
+DJI Tello EDU         active  FFT+stab        679   2016  0.503  0.179  0.007   0.011    2.74
+DJI Tello EDU         active  count           679   2016  0.955  0.968  0.619   0.007    1.67
+DJI Tello EDU         active  LR basic        679   2016  0.954  0.965  0.610   0.007    1.79
+DJI Tello EDU         active  LR stab         679   2016  0.954  0.967  0.604   0.007    1.67
+DJI Tello EDU         active  LR stab+area    679   2016  0.950  0.961  0.476   0.006    1.55
+
+DarwinFPV cineape20   shifted FFT             940   2681  0.887  0.943  0.141   0.003    0.72
+DarwinFPV cineape20   shifted FFT+stab        940   2681  0.882  0.954  0.154   0.003    0.63
+DarwinFPV cineape20   shifted count           940   2681  0.991  1.000  0.368   0.000    0.00
+DarwinFPV cineape20   shifted LR basic        940   2681  0.991  1.000  0.376   0.000    0.00
+DarwinFPV cineape20   shifted LR stab         940   2681  0.991  1.000  0.373   0.000    0.00
+DarwinFPV cineape20   shifted LR stab+area    940   2681  0.997  1.000  0.224   0.000    0.00
+DarwinFPV cineape20   active  FFT             940   2556  0.668  0.417  0.141   0.073   17.46
+DarwinFPV cineape20   active  FFT+stab        940   2556  0.719  0.767  0.154   0.017    4.13
+DarwinFPV cineape20   active  count           940   2556  0.794  0.785  0.368   0.037    8.92
+DarwinFPV cineape20   active  LR basic        940   2556  0.785  0.566  0.376   0.106   25.45
+DarwinFPV cineape20   active  LR stab         940   2556  0.783  0.566  0.373   0.105   25.26
+DarwinFPV cineape20   active  LR stab+area    940   2556  0.805  0.577  0.224   0.061   14.55
+
+ALL TYPES             shifted FFT            3581  10383  0.795  0.625  0.059   0.012    2.91
+ALL TYPES             shifted FFT+stab       3581  10383  0.799  0.755  0.072   0.008    1.94
+ALL TYPES             shifted count          3581  10383  0.966  0.990  0.374   0.001    0.32
+ALL TYPES             shifted LR basic       3581  10383  0.965  0.991  0.375   0.001    0.28
+ALL TYPES             shifted LR stab        3581  10383  0.964  0.991  0.373   0.001    0.28
+ALL TYPES             shifted LR stab+area   3581  10383  0.979  0.998  0.226   0.000    0.05
+ALL TYPES             active  FFT            3581  10206  0.527  0.101  0.059   0.183   44.02
+ALL TYPES             active  FFT+stab       3581  10206  0.706  0.550  0.072   0.021    4.99
+ALL TYPES             active  count          3581  10206  0.797  0.820  0.374   0.029    6.89
+ALL TYPES             active  LR basic       3581  10206  0.776  0.669  0.375   0.065   15.59
+ALL TYPES             active  LR stab        3581  10206  0.760  0.644  0.373   0.072   17.33
+ALL TYPES             active  LR stab+area   3581  10206  0.775  0.651  0.226   0.043   10.21
 
 === DEVELOPMENT train/36 (detector designed on it earlier; not a test) ===
-drone type            bg      scorer  n_pos  n_neg    AUC   prec recall  FA/win  FA/min
-DJI Mini 3            shifted FFT       262    735  0.910  0.937  0.454   0.011    2.61
-DJI Mini 3            shifted count     262    735  0.983  1.000  0.897   0.000    0.00
-DJI Mini 3            active  FFT       262    657  0.736  0.504  0.454   0.178   42.74
-DJI Mini 3            active  count     262    657  0.949  0.890  0.897   0.044   10.59
-DarwinFPV cineape20   shifted FFT       361   1002  0.780  0.750  0.033   0.004    0.96
-DarwinFPV cineape20   shifted count     361   1002  0.999  1.000  0.360   0.000    0.00
-DarwinFPV cineape20   active  FFT       361    600  0.504  0.101  0.033   0.178   42.80
-DarwinFPV cineape20   active  count     361    600  0.874  1.000  0.360   0.000    0.00
-ALL TYPES             shifted FFT       623   1737  0.811  0.916  0.210   0.007    1.66
-ALL TYPES             shifted count     623   1737  0.993  1.000  0.586   0.000    0.00
-ALL TYPES             active  FFT       623   1257  0.592  0.369  0.210   0.178   42.77
-ALL TYPES             active  count     623   1257  0.894  0.926  0.586   0.023    5.54
+drone type            bg      scorer        n_pos  n_neg    AUC   prec recall  FA/win  FA/min
+DJI Mini 3            shifted FFT             262    735  0.910  0.937  0.454   0.011    2.61
+DJI Mini 3            shifted FFT+stab        262    735  0.910  0.941  0.546   0.012    2.94
+DJI Mini 3            shifted count           262    735  0.983  1.000  0.897   0.000    0.00
+DJI Mini 3            shifted LR basic        262    735  0.983  1.000  0.908   0.000    0.00
+DJI Mini 3            shifted LR stab         262    735  0.983  1.000  0.905   0.000    0.00
+DJI Mini 3            shifted LR stab+area    262    735  0.994  1.000  0.424   0.000    0.00
+DJI Mini 3            active  FFT             262    657  0.736  0.504  0.454   0.178   42.74
+DJI Mini 3            active  FFT+stab        262    657  0.866  0.812  0.546   0.050   12.05
+DJI Mini 3            active  count           262    657  0.949  0.890  0.897   0.044   10.59
+DJI Mini 3            active  LR basic        262    657  0.932  0.657  0.908   0.189   45.30
+DJI Mini 3            active  LR stab         262    657  0.922  0.653  0.905   0.192   46.03
+DJI Mini 3            active  LR stab+area    262    657  0.929  0.881  0.424   0.023    5.48
 
-=== TUNE (threshold chosen here; in-sample, for reference only) ===
-drone type            bg      scorer  n_pos  n_neg    AUC   prec recall  FA/win  FA/min
-Betafpv air75         shifted FFT       373   1091  0.974  0.783  0.048   0.005    1.10
-Betafpv air75         shifted count     373   1091  0.998  1.000  0.161   0.000    0.00
-Betafpv air75         active  FFT       373   1107  0.757  1.000  0.048   0.000    0.00
-Betafpv air75         active  count     373   1107  0.767  0.612  0.161   0.034    8.24
-DJI Mini 2            shifted FFT       251    753  0.997  1.000  0.829   0.000    0.00
-DJI Mini 2            shifted count     251    753  1.000  1.000  0.972   0.000    0.00
-DJI Mini 2            active  FFT       251    729  0.972  0.929  0.829   0.022    5.27
-DJI Mini 2            active  count     251    729  0.985  0.942  0.972   0.021    4.94
-DJI Mini 3            shifted FFT       419   1242  0.977  0.905  0.706   0.025    5.99
-DJI Mini 3            shifted count     419   1242  0.993  1.000  0.656   0.000    0.00
-DJI Mini 3            active  FFT       419   1200  0.920  0.813  0.706   0.057   13.60
-DJI Mini 3            active  count     419   1200  0.961  0.896  0.656   0.027    6.40
-DJI Tello EDU         shifted FFT       482   1446  0.966  0.995  0.413   0.001    0.17
-DJI Tello EDU         shifted count     482   1446  1.000  1.000  0.593   0.000    0.00
-DJI Tello EDU         active  FFT       482   1374  0.855  0.971  0.413   0.004    1.05
-DJI Tello EDU         active  count     482   1374  0.941  0.941  0.593   0.013    3.14
-DarwinFPV cineape20   shifted FFT       387   1129  0.979  0.842  0.041   0.003    0.64
-DarwinFPV cineape20   shifted count     387   1129  0.998  1.000  0.031   0.000    0.00
-DarwinFPV cineape20   active  FFT       387   1113  0.720  0.444  0.041   0.018    4.31
-DarwinFPV cineape20   active  count     387   1113  0.703  0.632  0.031   0.006    1.51
-ALL TYPES             shifted FFT      1912   5661  0.960  0.949  0.385   0.007    1.70
-ALL TYPES             shifted count    1912   5661  0.997  1.000  0.459   0.000    0.00
-ALL TYPES             active  FFT      1912   5523  0.833  0.870  0.385   0.020    4.78
-ALL TYPES             active  count    1912   5523  0.855  0.889  0.459   0.020    4.78
+DarwinFPV cineape20   shifted FFT             361   1002  0.780  0.750  0.033   0.004    0.96
+DarwinFPV cineape20   shifted FFT+stab        361   1002  0.780  0.810  0.047   0.004    0.96
+DarwinFPV cineape20   shifted count           361   1002  0.999  1.000  0.360   0.000    0.00
+DarwinFPV cineape20   shifted LR basic        361   1002  0.999  1.000  0.341   0.000    0.00
+DarwinFPV cineape20   shifted LR stab         361   1002  0.999  1.000  0.341   0.000    0.00
+DarwinFPV cineape20   shifted LR stab+area    361   1002  1.000  1.000  0.133   0.000    0.00
+DarwinFPV cineape20   active  FFT             361    600  0.504  0.101  0.033   0.178   42.80
+DarwinFPV cineape20   active  FFT+stab        361    600  0.647  0.436  0.047   0.037    8.80
+DarwinFPV cineape20   active  count           361    600  0.874  1.000  0.360   0.000    0.00
+DarwinFPV cineape20   active  LR basic        361    600  0.824  0.564  0.341   0.158   38.00
+DarwinFPV cineape20   active  LR stab         361    600  0.817  0.559  0.341   0.162   38.80
+DarwinFPV cineape20   active  LR stab+area    361    600  0.816  0.369  0.133   0.137   32.80
+
+ALL TYPES             shifted FFT             623   1737  0.811  0.916  0.210   0.007    1.66
+ALL TYPES             shifted FFT+stab        623   1737  0.811  0.925  0.257   0.007    1.80
+ALL TYPES             shifted count           623   1737  0.993  1.000  0.586   0.000    0.00
+ALL TYPES             shifted LR basic        623   1737  0.992  1.000  0.579   0.000    0.00
+ALL TYPES             shifted LR stab         623   1737  0.992  1.000  0.578   0.000    0.00
+ALL TYPES             shifted LR stab+area    623   1737  0.997  1.000  0.255   0.000    0.00
+ALL TYPES             active  FFT             623   1257  0.592  0.369  0.210   0.178   42.77
+ALL TYPES             active  FFT+stab        623   1257  0.728  0.744  0.257   0.044   10.50
+ALL TYPES             active  count           623   1257  0.894  0.926  0.586   0.023    5.54
+ALL TYPES             active  LR basic        623   1257  0.860  0.622  0.579   0.174   41.81
+ALL TYPES             active  LR stab         623   1257  0.852  0.617  0.578   0.177   42.58
+ALL TYPES             active  LR stab+area    623   1257  0.872  0.621  0.255   0.077   18.52
+
+=== TUNE (all choices made here; in-sample, for reference only) ===
+drone type            bg      scorer        n_pos  n_neg    AUC   prec recall  FA/win  FA/min
+Betafpv air75         shifted FFT             373   1091  0.974  0.783  0.048   0.005    1.10
+Betafpv air75         shifted FFT+stab        373   1091  0.978  0.933  0.113   0.003    0.66
+Betafpv air75         shifted count           373   1091  0.998  1.000  0.161   0.000    0.00
+Betafpv air75         shifted LR basic        373   1091  0.997  1.000  0.174   0.000    0.00
+Betafpv air75         shifted LR stab         373   1091  0.997  1.000  0.166   0.000    0.00
+Betafpv air75         shifted LR stab+area    373   1091  0.998  1.000  0.139   0.000    0.00
+Betafpv air75         active  FFT             373   1107  0.757  1.000  0.048   0.000    0.00
+Betafpv air75         active  FFT+stab        373   1107  0.757  0.977  0.113   0.001    0.22
+Betafpv air75         active  count           373   1107  0.767  0.612  0.161   0.034    8.24
+Betafpv air75         active  LR basic        373   1107  0.777  0.657  0.174   0.031    7.37
+Betafpv air75         active  LR stab         373   1107  0.777  0.653  0.166   0.030    7.15
+Betafpv air75         active  LR stab+area    373   1107  0.795  0.547  0.139   0.039    9.32
+
+DJI Mini 2            shifted FFT             251    753  0.997  1.000  0.829   0.000    0.00
+DJI Mini 2            shifted FFT+stab        251    753  0.989  1.000  0.900   0.000    0.00
+DJI Mini 2            shifted count           251    753  1.000  1.000  0.972   0.000    0.00
+DJI Mini 2            shifted LR basic        251    753  1.000  1.000  0.988   0.000    0.00
+DJI Mini 2            shifted LR stab         251    753  1.000  1.000  0.984   0.000    0.00
+DJI Mini 2            shifted LR stab+area    251    753  1.000  1.000  1.000   0.000    0.00
+DJI Mini 2            active  FFT             251    729  0.972  0.929  0.829   0.022    5.27
+DJI Mini 2            active  FFT+stab        251    729  0.964  0.930  0.900   0.023    5.60
+DJI Mini 2            active  count           251    729  0.985  0.942  0.972   0.021    4.94
+DJI Mini 2            active  LR basic        251    729  0.983  0.943  0.988   0.021    4.94
+DJI Mini 2            active  LR stab         251    729  0.983  0.943  0.984   0.021    4.94
+DJI Mini 2            active  LR stab+area    251    729  0.982  0.944  1.000   0.021    4.94
+
+DJI Mini 3            shifted FFT             419   1242  0.977  0.905  0.706   0.025    5.99
+DJI Mini 3            shifted FFT+stab        419   1242  0.975  0.938  0.752   0.017    4.06
+DJI Mini 3            shifted count           419   1242  0.993  1.000  0.656   0.000    0.00
+DJI Mini 3            shifted LR basic        419   1242  0.993  0.997  0.697   0.001    0.19
+DJI Mini 3            shifted LR stab         419   1242  0.991  0.997  0.695   0.001    0.19
+DJI Mini 3            shifted LR stab+area    419   1242  0.995  1.000  0.601   0.000    0.00
+DJI Mini 3            active  FFT             419   1200  0.920  0.813  0.706   0.057   13.60
+DJI Mini 3            active  FFT+stab        419   1200  0.923  0.814  0.752   0.060   14.40
+DJI Mini 3            active  count           419   1200  0.961  0.896  0.656   0.027    6.40
+DJI Mini 3            active  LR basic        419   1200  0.963  0.896  0.697   0.028    6.80
+DJI Mini 3            active  LR stab         419   1200  0.962  0.893  0.695   0.029    7.00
+DJI Mini 3            active  LR stab+area    419   1200  0.978  0.926  0.601   0.017    4.00
+
+DJI Tello EDU         shifted FFT             482   1446  0.966  0.995  0.413   0.001    0.17
+DJI Tello EDU         shifted FFT+stab        482   1446  0.966  0.992  0.498   0.001    0.33
+DJI Tello EDU         shifted count           482   1446  1.000  1.000  0.593   0.000    0.00
+DJI Tello EDU         shifted LR basic        482   1446  1.000  1.000  0.622   0.000    0.00
+DJI Tello EDU         shifted LR stab         482   1446  1.000  1.000  0.616   0.000    0.00
+DJI Tello EDU         shifted LR stab+area    482   1446  1.000  1.000  0.772   0.000    0.00
+DJI Tello EDU         active  FFT             482   1374  0.855  0.971  0.413   0.004    1.05
+DJI Tello EDU         active  FFT+stab        482   1374  0.855  0.960  0.498   0.007    1.75
+DJI Tello EDU         active  count           482   1374  0.941  0.941  0.593   0.013    3.14
+DJI Tello EDU         active  LR basic        482   1374  0.944  0.940  0.622   0.014    3.32
+DJI Tello EDU         active  LR stab         482   1374  0.944  0.940  0.616   0.014    3.32
+DJI Tello EDU         active  LR stab+area    482   1374  0.964  0.939  0.772   0.017    4.19
+
+DarwinFPV cineape20   shifted FFT             387   1129  0.979  0.842  0.041   0.003    0.64
+DarwinFPV cineape20   shifted FFT+stab        387   1129  0.981  0.828  0.062   0.004    1.06
+DarwinFPV cineape20   shifted count           387   1129  0.998  1.000  0.031   0.000    0.00
+DarwinFPV cineape20   shifted LR basic        387   1129  0.998  1.000  0.041   0.000    0.00
+DarwinFPV cineape20   shifted LR stab         387   1129  0.998  1.000  0.041   0.000    0.00
+DarwinFPV cineape20   shifted LR stab+area    387   1129  0.998  1.000  0.052   0.000    0.00
+DarwinFPV cineape20   active  FFT             387   1113  0.720  0.444  0.041   0.018    4.31
+DarwinFPV cineape20   active  FFT+stab        387   1113  0.735  0.706  0.062   0.009    2.16
+DarwinFPV cineape20   active  count           387   1113  0.703  0.632  0.031   0.006    1.51
+DarwinFPV cineape20   active  LR basic        387   1113  0.708  0.667  0.041   0.007    1.73
+DarwinFPV cineape20   active  LR stab         387   1113  0.707  0.667  0.041   0.007    1.73
+DarwinFPV cineape20   active  LR stab+area    387   1113  0.705  0.714  0.052   0.007    1.73
+
+ALL TYPES             shifted FFT            1912   5661  0.960  0.949  0.385   0.007    1.70
+ALL TYPES             shifted FFT+stab       1912   5661  0.961  0.965  0.443   0.005    1.31
+ALL TYPES             shifted count          1912   5661  0.997  1.000  0.459   0.000    0.00
+ALL TYPES             shifted LR basic       1912   5661  0.997  0.999  0.482   0.000    0.04
+ALL TYPES             shifted LR stab        1912   5661  0.996  0.999  0.478   0.000    0.04
+ALL TYPES             shifted LR stab+area   1912   5661  0.997  1.000  0.495   0.000    0.00
+ALL TYPES             active  FFT            1912   5523  0.833  0.870  0.385   0.020    4.78
+ALL TYPES             active  FFT+stab       1912   5523  0.836  0.885  0.443   0.020    4.78
+ALL TYPES             active  count          1912   5523  0.855  0.889  0.459   0.020    4.78
+ALL TYPES             active  LR basic       1912   5523  0.860  0.893  0.482   0.020    4.78
+ALL TYPES             active  LR stab        1912   5523  0.860  0.892  0.478   0.020    4.78
+ALL TYPES             active  LR stab+area   1912   5523  0.884  0.896  0.495   0.020    4.78
+
+=== DRONE WINDOWS LOST TO THE STABILITY RULE ===
+split       drone type             n_pos rejected lost hits
+rejected = drone windows with stability > s_cut; lost hits = drone windows above the plain
+FFT threshold that the rule rejects, as a fraction of those hits.
+tune        Betafpv air75            373    0.000     0.000
+tune        DJI Mini 2               251    0.008     0.010
+tune        DJI Mini 3               419    0.010     0.014
+tune        DJI Tello EDU            482    0.000     0.000
+tune        DarwinFPV cineape20      387    0.000     0.000
+tune        ALL TYPES               1912    0.003     0.008
+heldout     Betafpv air75            381    0.000     0.000
+heldout     DJI Mini 2               451    0.002     0.002
+heldout     DJI Mini 3               427    0.002     0.003
+heldout     DJI Tello EDU            465    0.000     0.000
+heldout     DarwinFPV cineape20      407    0.000     0.000
+heldout     ALL TYPES               2131    0.001     0.002
+challenging Betafpv air75            854    0.000     0.000
+challenging DJI Mini 3              1108    0.000     0.000
+challenging DJI Tello EDU            679    0.000     0.000
+challenging DarwinFPV cineape20      940    0.006     0.045
+challenging ALL TYPES               3581    0.002     0.029
+development DJI Mini 3               262    0.000     0.000
+development DarwinFPV cineape20      361    0.000     0.000
+development ALL TYPES                623    0.000     0.000
+
+=== FLICKER CHECK: active-box false alarms on a 50/60 Hz mains harmonic (+-2 Hz) ===
+Reported only; the stability rule itself never looks at the frequency value.
+sequence    active  FA FFT on mains FA FFT+stab on mains FA comb on mains
+train/91      1200      68       11          72       15      20        1
+train/67      1113      20        0          10        0       8        0
+train/96      1107       0        0           1        0      43        9
+train/225     1374       6        2          10        3      24        8
+train/218      729      16        2          17        3      15        2
+train/92      1224      57        7          69        9       7        0
+train/58      1173      36        2          35        4      17        1
+train/95      1107       8        0           7        0     113       16
+train/224     1332      62       11          61       11      62       11
+train/199     1311      23       14          24       14      24       14
+test/111      1098     791      791          41       41       0        0
+train/108     1116     582      578           7        0       3        0
+test/21        504       0        0           0        0       0        0
+train/78      1146       1        0           2        1      99       18
+test/178      1113       2        0           3        0       3        0
+train/177      903      19        4          20        4      10        3
+train/99      1212      44        0          16        1      61        5
+train/100     1245      56        0          18        1      59       10
+train/35      1869     377      354         105       78     199      187
+train/36      1257     224      201          55       29      97       82
 
 === ACTIVE BACKGROUNDS: event counts vs the drone box (per sequence, per track) ===
 cnt = median events per 0.5 s window. act/drone = active median / drone median.
@@ -136,7 +440,7 @@ train/35   2     DJI Mini 3                 351      5677        384        32  
 train/36   1     DJI Mini 3                 262     15244        418        51     0.027     0.910      0.736      0.949
 train/36   2     DarwinFPV cineape20        361      3230        421        20     0.130     0.780      0.504      0.874
 
-=== BOX WIDTH (all sequences incl. tune and development, full resolution) ===
+=== BOX WIDTH (all sequences incl. tune and development, full resolution, plain FFT) ===
 Negatives in a width bin are the backgrounds of drones in that bin (same box size).
 width px  drone type             n_pos n_act rec FFT rec cnt AUCfft sh AUCfft act AUCcnt act
 0-20      Betafpv air75              4     0   0.000   0.000     0.917        nan        nan
@@ -178,7 +482,7 @@ width px  drone type             n_pos n_act rec FFT rec cnt AUCfft sh AUCfft ac
 >150      DarwinFPV cineape20       31    42   0.419   1.000     0.883      0.866      1.000
 >150      ALL TYPES                140   165   0.557   1.000     0.908      0.793      0.897
 
-=== SIMULATED SMALLER SENSOR (heldout + challenging pooled, frozen threshold) ===
+=== SIMULATED SMALLER SENSOR (heldout + challenging pooled, plain FFT, frozen threshold) ===
 x, y and boxes integer-divided by 2 / 4; events on the same coarse pixel kept separate.
 drone type             sensor n_pos rec FFT FA act AUCfft sh AUCfft act AUCcnt act
 Betafpv air75            1280  1235   0.041  0.030     0.969      0.707      0.749
@@ -200,27 +504,20 @@ ALL TYPES                1280  5712   0.237  0.126     0.872      0.663      0.8
 ALL TYPES                 640  5712   0.237  0.125     0.870      0.660      0.852
 ALL TYPES                 320  5712   0.237  0.126     0.870      0.660      0.851
 
-=== NOTES (written by hand after the November 6, 2026 run; re-running the script drops this block) ===
-1. The FFT does NOT beat count-only on active backgrounds overall. AUC, FFT vs count:
-   heldout 0.886 vs 0.932, challenging 0.527 vs 0.797. Per type it wins only for Betafpv air75
-   on heldout (0.764 vs 0.705); Mini 2 ties (0.981 vs 0.982).
-2. Count matching mostly failed: in 18 of 22 tracks the active boxes have under half the drone's
-   median events (act/drone 0.02-0.46); the scene has nothing as busy as a nearby drone. Where it
-   came closer (train/95 0.52, train/78 0.62, train/67 0.46) the FFT edges out count
-   (0.764/0.705, 0.671/0.658, 0.720/0.703). In the one matched sequence (test/111, 1.06) the
-   FFT collapses (0.056) because of item 3.
-3. Most active-box false alarms peak at exactly 100, 200 or 300 Hz: light flicker at harmonics of
-   50 Hz mains (test/111: 705 of 1098 active windows peak at 200 Hz; train/108 and train/36 the
-   same). The prominence score cannot tell a rotor from a flickering light. Not fixed here; an
-   obvious next step is to reject peaks within a few Hz of 100*k Hz (tune it on the tune set only;
-   the Mini 3's blade-pass near 200-230 Hz sits close to the 200 Hz line).
-4. DJI Tello EDU in test/178 and train/177: FFT AUC ~0.52 even against shifted boxes, i.e. no
-   rotor signal at all there; count still works (0.95).
-5. Downsampling by 2 and 4 changes nothing (all AUCs within 0.005). Expected: the score sums every
-   event in the box, and integer-dividing coordinates only moves box edges by under one coarse
-   pixel. This simulation cannot answer "does a smaller sensor lose the rotor"; that needs a model
-   of per-pixel event generation (contrast threshold, refractory merging), not coordinate binning.
-6. Width: FFT recall at the frozen threshold rises with box width (0.07 below 20 px [n=31],
-   0.17 at 20-30, 0.19 at 30-45, 0.31 at 45-70, 0.39 at 70-100, 0.43 at 100-150, 0.56 above 150).
-   There is no sharp width where the peak vanishes; drone type matters more than width
-   (Mini 2 recall 0.64 at 20-30 px, Betafpv 0.02-0.09 at every width it appears).
+=== NOTES (generated from the numbers above) ===
+- heldout, ALL TYPES vs active: AUC FFT 0.886, FFT+stab 0.891, count 0.932, LR stab+area 0.952. FFT+stab does NOT beat count, so the rotor signal alone does not do the work.
+  Types where FFT+stab beats count on active: Betafpv air75.
+  Combined vs count on active: 0.952 vs 0.932; vs shifted: 0.996 vs 0.992.
+- challenging, ALL TYPES vs active: AUC FFT 0.527, FFT+stab 0.706, count 0.797, LR stab+area 0.775. FFT+stab does NOT beat count, so the rotor signal alone does not do the work.
+  Types where FFT+stab beats count on active: DJI Mini 3.
+  Combined vs count on active: 0.775 vs 0.797; vs shifted: 0.979 vs 0.966.
+- Count matching: in 19 of 22 tracks the active boxes have under half the drone's median event count; scenes rarely hold anything as busy as a nearby drone, so
+  count-only keeps an advantage the active backgrounds were meant to remove.
+- Flicker: 1977 active-box FFT false alarms peak on a 50/60 Hz mains harmonic (+-2 Hz); after the stability rule 214. Worst sequence test/111: 791 -> 41 (all FAs 791 -> 41).
+- 119 of 2392 active FFT false alarms peak at the 50 Hz band edge: slow (< 50 Hz) changes leaking into the band, not a narrow tone.
+- Drone windows rejected by the stability rule, heldout: Betafpv air75 0.0% (lost hits 0.0%); DJI Mini 2 0.2% (lost hits 0.2%); DJI Mini 3 0.2% (lost hits 0.3%); DJI Tello EDU 0.0% (lost hits 0.0%); DarwinFPV cineape20 0.0% (lost hits 0.0%).
+- Drone windows rejected by the stability rule, challenging: Betafpv air75 0.0% (lost hits 0.0%); DJI Mini 3 0.0% (lost hits 0.0%); DJI Tello EDU 0.0% (lost hits 0.0%); DarwinFPV cineape20 0.6% (lost hits 4.5%).
+- Simulated smaller sensor: the largest AUC change at 640 or 320 px is 0.007. The score sums every event in the box, and integer-dividing
+  coordinates only moves box edges by under one coarse pixel, so this simulation cannot answer
+  whether a smaller sensor loses the rotor; that needs a per-pixel event-generation model.
+- FFT recall at the frozen threshold by box width (all types): 0-20: 0.06 (n=31), 20-30: 0.17 (n=840), 30-45: 0.19 (n=3095), 45-70: 0.31 (n=2744), 70-100: 0.39 (n=984), 100-150: 0.43 (n=413), >150: 0.56 (n=140).

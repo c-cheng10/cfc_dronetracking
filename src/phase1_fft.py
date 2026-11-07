@@ -84,6 +84,17 @@ usable only if its box was valid for the whole window. Columns, in order:
                   are static; drone and shifted boxes move during the window)
   peak_hz         frequency of the tallest peak in 50-1000 Hz
   downsample      1, 2 or 4 (sensor pixel size relative to 1280x720)
+  -- derived columns, present once src/phase1_multiseq.py has tuned them --
+  stability       fraction of the same box's windows 0.5..N s away whose
+                  peak is within +-1 FFT bin (2 Hz) of this window's peak
+                  (N tuned on the tune set; NaN = no such window). See
+                  peak_stability().
+  score_fft_stab  FFT prominence, set to 0 when stability > s_cut (a peak
+                  frozen in frequency: flicker, not a rotor)
+  score_lr_*      logistic-regression log-odds from log(event_count+1),
+                  log(prominence) [and stability, log box area]; weights
+                  frozen in experiments/phase1_threshold.json. The model the
+                  CfC has to beat is named there as "combined_model".
 
 SIMULATED SMALLER SENSOR (--downsample 2 or 4): event x, y and box
 coordinates are integer-divided by 2 or 4 (a 640 or 320 px wide sensor).
@@ -532,14 +543,105 @@ def run_sequence(seq, downsample=1, write_csv=True):
                          round(float(x1[w]), 2), round(float(y1[w]), 2),
                          round(float(x2[w]), 2), round(float(y2[w]), 2),
                          float(r["peak_f"][w]), downsample])
+    header = list(CSV_COLUMNS)
+    params = load_frozen_threshold()
+    if params and "stability" in params and rows:
+        c = {name: [r[k] for r in rows] for k, name in enumerate(CSV_COLUMNS)}
+        keys = [stability_key(r[0], r[1], r[11], r[12], r[15], r[16]) for r in rows]
+        extra = derived_scores(params, keys, c["t_start_us"], c["peak_hz"], c["score"],
+                               c["event_count"], c["box_width_px"], c["box_height_px"])
+        header += list(extra)
+        for w, r in enumerate(rows):
+            r.extend(round(float(v[w]), 4) for v in extra.values())
     if write_csv:
         CSV_DIR.mkdir(parents=True, exist_ok=True)
         with open(csv_path(seq, downsample), "w", newline="") as fh:
             wr = csv.writer(fh)
-            wr.writerow(CSV_COLUMNS)
+            wr.writerow(header)
             wr.writerows(rows)
         print(f"wrote {csv_path(seq, downsample)} ({len(rows)} rows)", file=sys.stderr)
     return tracks, streams, results, rows, active_log
+
+
+# ----------------------------------------------------------------------------
+# 5b. Derived scores: peak stability (flicker rejection) and logistic models
+# ----------------------------------------------------------------------------
+# These need parameters tuned on the tune sequences by src/phase1_multiseq.py
+# (stored in experiments/phase1_threshold.json). Before tuning, the CSV has
+# only the base columns.
+BIN_HZ = FS / WIN                # FFT frequency step: 2 Hz for 0.5 s windows
+
+
+def stability_key(seq, track_id, kind, name, x1, y1):
+    """Which windows count as 'the same box' for the stability feature.
+    Drone and shifted boxes: the whole stream. Active boxes: one static
+    placement (same name AND same position), since the slot moves every 5 s."""
+    if kind == "active":
+        return f"{seq}|{track_id}|{name}|{x1:g},{y1:g}"
+    return f"{seq}|{track_id}|{name}"
+
+
+def peak_stability(keys, t_start_us, peak_hz, n_s, min_sep_s=0.5):
+    """Stability of the peak frequency around each window.
+
+    For window w: look at the other usable windows of the same box whose
+    start is between min_sep_s and n_s seconds away (before or after).
+    stability = fraction of them whose peak is within +-1 FFT bin (2 Hz) of
+    w's peak. A light flickering off the mains holds one frequency for many
+    seconds -> near 1. A rotor drifts with throttle -> lower. NaN when no
+    such neighbour exists (then nothing is rejected).
+    Windows closer than min_sep_s overlap w (0.5 s windows, 0.25 s step),
+    so they share samples with it; we leave them out.
+    """
+    keys = np.asarray(keys); peak_hz = np.asarray(peak_hz, float)
+    step = np.round(np.asarray(t_start_us) / (HOP_S * 1e6)).astype(np.int64)  # window index
+    out = np.full(len(keys), np.nan)
+    lo_off, hi_off = int(round(min_sep_s / HOP_S)), int(round(n_s / HOP_S))
+    for key in np.unique(keys):
+        sel = np.flatnonzero(keys == key)
+        st = step[sel] - step[sel].min()
+        table = np.full(st.max() + 1, np.nan)            # peak per window slot, NaN = no window
+        table[st] = peak_hz[sel]
+        num = np.zeros(len(sel)); den = np.zeros(len(sel))
+        for off in range(lo_off, hi_off + 1):
+            for o in (off, -off):
+                j = st + o
+                ok = (j >= 0) & (j < len(table))
+                nb = np.full(len(sel), np.nan)
+                nb[ok] = table[j[ok]]
+                have = ~np.isnan(nb)
+                den += have
+                num += have & (np.abs(nb - peak_hz[sel]) <= BIN_HZ + 1e-6)
+        out[sel] = np.where(den > 0, num / np.maximum(den, 1), np.nan)
+    return out
+
+
+def lr_features(names, event_count, prom, stability, box_w, box_h):
+    """Feature matrix for the logistic models, columns in the order of names."""
+    f = {"log_count": np.log(np.asarray(event_count, float) + 1),
+         "log_prom": np.log(np.maximum(np.asarray(prom, float), 1e-3)),
+         "stability": np.nan_to_num(np.asarray(stability, float), nan=0.0),
+         "log_area": np.log(np.maximum(np.asarray(box_w, float) * np.asarray(box_h, float), 1.0))}
+    return np.column_stack([f[n] for n in names])
+
+
+def lr_score(model, X):
+    """Logistic-model score (log-odds, higher = more drone-like)."""
+    z = (X - np.array(model["mean"])) / np.array(model["std"])
+    return z @ np.array(model["weights"]) + model["bias"]
+
+
+def derived_scores(params, keys, t_start_us, peak_hz, prom, event_count, box_w, box_h):
+    """All derived columns, as {column name: array}. params = threshold json."""
+    st = params["stability"]
+    stab = peak_stability(keys, t_start_us, peak_hz, st["n_s"])
+    out = {"stability": stab,
+           # rejected windows get score 0, below any threshold
+           "score_fft_stab": np.where(stab > st["s_cut"], 0.0, np.asarray(prom, float))}
+    for name, model in params.get("lr_models", {}).items():
+        X = lr_features(model["features"], event_count, prom, stab, box_w, box_h)
+        out[f"score_lr_{name}"] = lr_score(model, X)
+    return out
 
 
 # ----------------------------------------------------------------------------

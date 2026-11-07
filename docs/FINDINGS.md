@@ -6,6 +6,38 @@ Each entry says what was run, the numbers, and where the files are. AUC is the p
 
 ---
 
+## November 6, 2026: steady-peak rejection cuts flicker; combined baseline frozen for the CfC
+
+**Run:** `src/phase1_multiseq.py`, same sets, locked settings and 2% false-alarm rule as the entry below. Both additions were tuned on the tune sequences only.
+
+**Steady-peak rejection (no mains frequency hardcoded).** For each window, look at the same box's other windows 0.5–4 s away (closer ones share samples). Stability is the fraction whose peak is within 2 Hz (one FFT bin) of this window's peak. If stability > 0.40, the window's FFT score is set to 0. The rule never looks at the frequency itself, so it works for 50 Hz or 60 Hz grids. FFT threshold re-tuned to 4.64.
+
+- Active-box false alarms on a 50 or 60 Hz mains harmonic (counted only for this report) fell from 1977 to 214. test/111: 791 → 41; train/108: 578 → 0.
+- Real drone windows rejected: 0.1% heldout, 0.2% challenging, worst DarwinFPV on challenging at 0.6%. No steady-hover problem showed up.
+- Challenging Mini 3, the case the flicker broke, went from AUC 0.296 to 0.803 against active backgrounds.
+- Caveat: the tune sequences contain almost no lights, so tuning measured the rule's cost, not its benefit. The 0.40 cut and the 4 s span are not validated against flicker.
+
+**Combined baseline (the number the CfC has to beat).** Logistic regression in NumPy, fit on tune windows, on standardised log event count, log prominence, stability and log box area (the variant with the best leave-one-tune-sequence-out recall). Weights: log count +3.08, log prominence +1.27, stability +0.20, log area −0.61, bias −2.81; decision log-odds > 1.86. All weights, means and standard deviations are in `experiments/phase1_threshold.json`. The stability weight came out positive because the tune set has no flicker to learn from.
+
+**AUC / recall / false alarms per minute, all types:**
+
+| Set, background | FFT | FFT + stability | Count | Combined |
+|---|---|---|---|---|
+| Heldout, active | 0.886 / 0.537 / 7.3 | 0.891 / 0.595 / 7.7 | 0.932 / 0.637 / 10.3 | **0.952** / 0.652 / 8.7 |
+| Heldout, shifted | 0.965 / 0.537 / 0.95 | 0.965 / 0.595 / 0.84 | 0.992 / 0.637 / 0.34 | **0.996** / 0.652 / 0.08 |
+| Challenging, active | 0.527 / 0.059 / 44.0 | 0.706 / 0.072 / 5.0 | **0.797** / 0.374 / 6.9 | 0.775 / 0.226 / 10.2 |
+| Challenging, shifted | 0.795 / 0.059 / 2.9 | 0.799 / 0.072 / 1.9 | 0.966 / 0.374 / 0.32 | **0.979** / 0.226 / 0.05 |
+
+**What it means:**
+
+- **The CfC's target:** heldout active AUC 0.952, challenging active AUC 0.775 (and count-only's 0.797 there, since the combined model loses to it). The CfC has to beat both on the same windows; the CSVs carry every score per window (`score_lr_stab_area` is the combined model).
+- **The rotor frequency still doesn't beat event count on its own.** FFT + stability beats count only for Betafpv on heldout (0.765 vs 0.705) and Mini 3 on challenging (0.803 vs 0.738).
+- **The combined model doesn't reject flicker.** It still has 187 mains-harmonic false alarms on train/35, because it never saw lights in training. Adding a sequence with lights to the tune set is the obvious fix, but it has to come from outside the challenging split.
+
+**Files:** `experiments/phase1_multiseq_results.txt` (per type, precision and false-alarm columns), `experiments/phase1_threshold.json`, CSV columns `stability`, `score_fft_stab`, `score_lr_basic`, `score_lr_stab`, `score_lr_stab_area`. The `_ds2`/`_ds4` CSVs were not regenerated.
+
+---
+
 ## November 6, 2026: finding the drone without FRED's boxes
 
 **Run:** `src/phase1_find.py` (plain NumPy). Per 0.5 s window (0.25 s step):
