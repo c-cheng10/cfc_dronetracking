@@ -24,7 +24,7 @@ Target: **IDEaS Counter-UAS (Urban) Sandbox 2027**. Applications close **1 Dec 2
 | 0 | Week of Nov 2 | Confirm eligibility (Canadian citizen; still confirm the sandbox's applicant rules); order the camera (quote forms sent to CenturyArks and Prophesee, awaiting replies as of 2026-11-06); measure the Mini 4K's blade-pass frequency (phone spectrogram); CfC sine test ✅ | Eligibility answer in writing; camera shipped |
 | 1 | Nov 2–20 | FRED: plot events, then an **FFT rotor-frequency detector** (NumPy only, no ML) | Precision/recall on FRED train and the challenging split |
 | 2 | Nov 15–30 | **Dec 1 sprint:** live camera + FFT detector on the Mini 4K, a 3-min unedited video, TRL 4 application | Application submitted (or a deliberate no-go by Nov 22) |
-| 3 | Dec–Jan | ML baselines on FRED patches: FFT + logistic regression, GRU+Δt, `ncps` CfC, 5 seeds, matched params; then test on SkyEV / held-out data | Comparison table |
+| 3 | Started Nov 2026, through Jan | ML baselines on FRED patches: FFT + logistic regression, GRU+Δt, `ncps` CfC, 5 seeds, matched params; then test on SkyEV / held-out data | Comparison table |
 | 4 | Jan–Feb | **Our own CfC cell**: batched variable Δt, quantization, Raspberry Pi 5 latency | Matches `ncps`; ms per patch on a Pi 5 |
 | 5 | Feb–Mar 10 | Field tests: hover at 20 / 50 m, passes at 5 / 10 / 16 m/s; our own Mini 4K dataset; fine-tune | TRL 5 evidence by Mar 10 |
 | 6 | Mar–Jul | Science fair (if chosen), sandbox prep | |
