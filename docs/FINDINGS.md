@@ -6,6 +6,25 @@ Each entry says what was run, the numbers, and where the files are. AUC is the p
 
 ---
 
+## November 9, 2026 · Plain FFT trails event count across 58 challenging recordings
+
+Phase 1 tested whether a sharp repeating frequency inside a labelled drone box could distinguish drone windows from background windows. It also established a baseline for later models. The experiment produced precision and recall measurements on FRED, which was the Phase 1 completion criterion in the [README](../README.md#plan-timeline-set-2026-11-01).
+
+The run evaluated the 49 remaining clips from the [FRED challenging split](https://github.com/miccunifi/FRED/blob/main/dataset_splits/challenging/challenging_test_split.txt) with [`src/phase1_fft.py`](../src/phase1_fft.py). It pooled them with the nine previous test clips and kept `train/36` separate because it was used for development. The FFT peak score threshold stayed at 5.2981 and the event count threshold at 4,578. The comparison covers the plain FFT and count scores on preselected boxes. The flicker filter, combined classifier and box finder were outside the scope of this run.
+
+| Clips, busy backgrounds | Score | Precision | Recall | AUC | False alarms per background-box minute |
+|---|---|---:|---:|---:|---:|
+| 49 new | Plain FFT | 38.5% | 17.9% | 0.632 | 23.69 |
+| 49 new | Event count | 50.3% | 51.2% | 0.789 | 42.04 |
+| 58 pooled | Plain FFT | 32.9% | 15.9% | 0.615 | 26.97 |
+| 58 pooled | Event count | 52.8% | 48.9% | 0.789 | 36.37 |
+
+The pooled results cover 21,929 drone windows and 63,264 busy background windows. Event count ranked drone windows better across thresholds and caught more of them at the frozen threshold. It also produced more false alarms per minute at that threshold, so the recall comparison is at different false-alarm rates. Plain FFT reached 0.810 AUC against shifted boxes, mostly empty sky, compared with 0.615 against busy backgrounds.
+
+See the [full report](../experiments/phase1_challenging_expansion/report.md), [run manifest](../experiments/phase1_challenging_expansion/manifest.json) and [progress log](../experiments/phase1_challenging_expansion/progress.log).
+
+---
+
 ## November 6, 2026: steady-peak rejection cuts flicker; combined baseline frozen for the CfC
 
 **Run:** `src/phase1_multiseq.py`, same sets, locked settings and 2% false-alarm rule as the entry below. Both additions were tuned on the tune sequences only.

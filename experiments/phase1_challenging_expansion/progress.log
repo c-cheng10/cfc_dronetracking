@@ -1,0 +1,1501 @@
+Starting 49 recordings, approximately 39.6 GB download.
+Downloading train/107, attempt 1
+Downloading test/110, attempt 1
+Decoding test/110
+test/110 ds1: 113.9 s, 27,184,021 events, 1 drone(s): 1 DJI Mini 3
+  read 4,000,000 / 27,184,021 events
+  read 8,000,000 / 27,184,021 events
+  read 12,000,000 / 27,184,021 events
+  read 16,000,000 / 27,184,021 events
+  read 20,000,000 / 27,184,021 events
+  read 24,000,000 / 27,184,021 events
+  read 27,184,021 / 27,184,021 events
+wrote test_110-js4go5zr/csv/test_110.csv (2605 rows)
+Downloading train/97, attempt 1
+1/49 finished test/110 in 22s
+Decoding train/107
+train/107 ds1: 112.9 s, 42,436,135 events, 1 drone(s): 1 DJI Mini 3
+  read 4,000,000 / 42,436,135 events
+  read 8,000,000 / 42,436,135 events
+  read 12,000,000 / 42,436,135 events
+  read 16,000,000 / 42,436,135 events
+  read 20,000,000 / 42,436,135 events
+  read 24,000,000 / 42,436,135 events
+  read 28,000,000 / 42,436,135 events
+  read 32,000,000 / 42,436,135 events
+  read 36,000,000 / 42,436,135 events
+  read 40,000,000 / 42,436,135 events
+  read 42,436,135 / 42,436,135 events
+wrote train_107-rba2w1h5/csv/train_107.csv (2667 rows)
+2/49 finished train/107 in 42sDownloading train/98, attempt 1
+
+Decoding train/97
+train/97 ds1: 114.1 s, 15,326,114 events, 1 drone(s): 1 Betafpv air75
+  read 4,000,000 / 15,326,114 events
+  read 8,000,000 / 15,326,114 events
+  read 12,000,000 / 15,326,114 events
+  read 15,326,114 / 15,326,114 events
+wrote train_97-7njmeh6j/csv/train_97.csv (2243 rows)
+Downloading train/79, attempt 1
+3/49 finished train/97 in 36s
+Decoding train/98
+train/98 ds1: 113.6 s, 21,451,091 events, 1 drone(s): 1 Betafpv air75
+  read 4,000,000 / 21,451,091 events
+  read 8,000,000 / 21,451,091 events
+  read 12,000,000 / 21,451,091 events
+  read 16,000,000 / 21,451,091 events
+  read 20,000,000 / 21,451,091 events
+  read 21,451,091 / 21,451,091 events
+wrote train_98-5kfna0hr/csv/train_98.csv (2811 rows)
+Downloading train/76, attempt 1
+4/49 finished train/98 in 35s
+Decoding train/79
+train/79 ds1: 114.2 s, 34,285,187 events, 1 drone(s): 1 DarwinFPV cineape20
+  read 4,000,000 / 34,285,187 events
+  read 8,000,000 / 34,285,187 events
+  read 12,000,000 / 34,285,187 events
+  read 16,000,000 / 34,285,187 events
+  read 20,000,000 / 34,285,187 events
+  read 24,000,000 / 34,285,187 events
+  read 28,000,000 / 34,285,187 events
+  read 32,000,000 / 34,285,187 events
+  read 34,285,187 / 34,285,187 events
+wrote train_79-rzwz9286/csv/train_79.csv (2693 rows)
+Downloading train/71, attempt 1
+5/49 finished train/79 in 39s
+Decoding train/76
+train/76 ds1: 112.7 s, 21,777,739 events, 1 drone(s): 1 DarwinFPV cineape20
+  read 4,000,000 / 21,777,739 events
+  read 8,000,000 / 21,777,739 events
+  read 12,000,000 / 21,777,739 events
+  read 16,000,000 / 21,777,739 events
+  read 20,000,000 / 21,777,739 events
+  read 21,777,739 / 21,777,739 events
+wrote train_76-63s3ewsb/csv/train_76.csv (2890 rows)
+6/49 finished train/76 in 27sDownloading test/34, attempt 1
+
+Decoding train/71
+train/71 ds1: 112.6 s, 27,278,914 events, 1 drone(s): 1 Betafpv air75
+  read 4,000,000 / 27,278,914 events
+  read 8,000,000 / 27,278,914 events
+  read 12,000,000 / 27,278,914 events
+  read 16,000,000 / 27,278,914 events
+  read 20,000,000 / 27,278,914 events
+  read 24,000,000 / 27,278,914 events
+  read 27,278,914 / 27,278,914 events
+wrote train_71-0gig52t_/csv/train_71.csv (2739 rows)
+Downloading train/109, attempt 1
+7/49 finished train/71 in 31s
+Decoding test/34
+test/34 ds1: 113.8 s, 46,181,532 events, 2 drone(s): 1 DJI Mini 3, 2 DarwinFPV cineape20
+  read 4,000,000 / 46,181,532 events
+  read 8,000,000 / 46,181,532 events
+  read 12,000,000 / 46,181,532 events
+  read 16,000,000 / 46,181,532 events
+  read 20,000,000 / 46,181,532 events
+  read 24,000,000 / 46,181,532 events
+  read 28,000,000 / 46,181,532 events
+  read 32,000,000 / 46,181,532 events
+  read 36,000,000 / 46,181,532 events
+  read 40,000,000 / 46,181,532 events
+  read 44,000,000 / 46,181,532 events
+  read 46,181,532 / 46,181,532 events
+wrote test_34-4dahl8gg/csv/test_34.csv (4642 rows)
+Downloading train/10, attempt 1
+8/49 finished test/34 in 41s
+Decoding train/109
+train/109 ds1: 113.2 s, 58,637,910 events, 1 drone(s): 1 DJI Mini 3
+  read 4,000,000 / 58,637,910 events
+  read 8,000,000 / 58,637,910 events
+  read 12,000,000 / 58,637,910 events
+  read 16,000,000 / 58,637,910 events
+  read 20,000,000 / 58,637,910 events
+  read 24,000,000 / 58,637,910 events
+  read 28,000,000 / 58,637,910 events
+  read 32,000,000 / 58,637,910 events
+  read 36,000,000 / 58,637,910 events
+  read 40,000,000 / 58,637,910 events
+  read 44,000,000 / 58,637,910 events
+  read 48,000,000 / 58,637,910 events
+  read 52,000,000 / 58,637,910 events
+  read 56,000,000 / 58,637,910 events
+  read 58,637,910 / 58,637,910 events
+wrote train_109-g4a8kqom/csv/train_109.csv (3002 rows)
+Downloading test/9, attempt 1
+9/49 finished train/109 in 40s
+Decoding train/10
+train/10 ds1: 110.8 s, 13,866,970 events, 1 drone(s): 1 Betafpv air75
+  read 4,000,000 / 13,866,970 events
+  read 8,000,000 / 13,866,970 events
+  read 12,000,000 / 13,866,970 events
+  read 13,866,970 / 13,866,970 events
+wrote train_10-4e4qdoo9/csv/train_10.csv (2443 rows)
+10/49 finished train/10 in 27sDownloading train/77, attempt 1
+
+Decoding test/9
+test/9 ds1: 110.4 s, 10,714,412 events, 1 drone(s): 1 Betafpv air75
+  read 4,000,000 / 10,714,412 events
+  read 8,000,000 / 10,714,412 events
+  read 10,714,412 / 10,714,412 events
+wrote test_9-xocuvt9h/csv/test_9.csv (2643 rows)
+Downloading train/105, attempt 1
+11/49 finished test/9 in 24s
+Decoding train/77
+train/77 ds1: 110.9 s, 40,868,683 events, 1 drone(s): 1 DarwinFPV cineape20
+  read 4,000,000 / 40,868,683 events
+  read 8,000,000 / 40,868,683 events
+  read 12,000,000 / 40,868,683 events
+  read 16,000,000 / 40,868,683 events
+  read 20,000,000 / 40,868,683 events
+  read 24,000,000 / 40,868,683 events
+  read 28,000,000 / 40,868,683 events
+  read 32,000,000 / 40,868,683 events
+  read 36,000,000 / 40,868,683 events
+  read 40,000,000 / 40,868,683 events
+  read 40,868,683 / 40,868,683 events
+wrote train_77-_c58s_3k/csv/train_77.csv (2518 rows)
+12/49 finished train/77 in 38sDownloading train/69, attempt 1
+
+Decoding train/105
+train/105 ds1: 114.9 s, 61,705,537 events, 1 drone(s): 1 Betafpv air75
+  read 4,000,000 / 61,705,537 events
+  read 8,000,000 / 61,705,537 events
+  read 12,000,000 / 61,705,537 events
+  read 16,000,000 / 61,705,537 events
+  read 20,000,000 / 61,705,537 events
+  read 24,000,000 / 61,705,537 events
+  read 28,000,000 / 61,705,537 events
+  read 32,000,000 / 61,705,537 events
+  read 36,000,000 / 61,705,537 events
+  read 40,000,000 / 61,705,537 events
+  read 44,000,000 / 61,705,537 events
+  read 48,000,000 / 61,705,537 events
+  read 52,000,000 / 61,705,537 events
+  read 56,000,000 / 61,705,537 events
+  read 60,000,000 / 61,705,537 events
+  read 61,705,537 / 61,705,537 events
+wrote train_105-260z2_9v/csv/train_105.csv (2929 rows)
+Downloading train/33, attempt 1
+13/49 finished train/105 in 30s
+Decoding train/69
+train/69 ds1: 114.1 s, 27,912,050 events, 1 drone(s): 1 Betafpv air75
+  read 4,000,000 / 27,912,050 events
+  read 8,000,000 / 27,912,050 events
+  read 12,000,000 / 27,912,050 events
+  read 16,000,000 / 27,912,050 events
+  read 20,000,000 / 27,912,050 events
+  read 24,000,000 / 27,912,050 events
+  read 27,912,050 / 27,912,050 events
+wrote train_69-gv16ormr/csv/train_69.csv (2705 rows)
+14/49 finished train/69 in 28sDownloading test/90, attempt 1
+
+Decoding train/33
+train/33 ds1: 113.1 s, 39,617,349 events, 2 drone(s): 1 DJI Mini 3, 2 DarwinFPV cineape20
+  read 4,000,000 / 39,617,349 events
+  read 8,000,000 / 39,617,349 events
+  read 12,000,000 / 39,617,349 events
+  read 16,000,000 / 39,617,349 events
+  read 20,000,000 / 39,617,349 events
+  read 24,000,000 / 39,617,349 events
+  read 28,000,000 / 39,617,349 events
+  read 32,000,000 / 39,617,349 events
+  read 36,000,000 / 39,617,349 events
+  read 39,617,349 / 39,617,349 events
+wrote train_33-e3123ff0/csv/train_33.csv (4860 rows)
+15/49 finished train/33 in 38sDownloading train/17, attempt 1
+
+Decoding test/90
+test/90 ds1: 111.7 s, 9,179,046 events, 1 drone(s): 1 DarwinFPV cineape20
+  read 4,000,000 / 9,179,046 events
+  read 8,000,000 / 9,179,046 events
+  read 9,179,046 / 9,179,046 events
+wrote test_90-mrmrgw_1/csv/test_90.csv (2702 rows)
+Downloading train/68, attempt 1
+16/49 finished test/90 in 25s
+Decoding train/17
+train/17 ds1: 112.7 s, 26,661,746 events, 1 drone(s): 1 DarwinFPV cineape20
+  read 4,000,000 / 26,661,746 events
+  read 8,000,000 / 26,661,746 events
+  read 12,000,000 / 26,661,746 events
+  read 16,000,000 / 26,661,746 events
+  read 20,000,000 / 26,661,746 events
+  read 24,000,000 / 26,661,746 events
+  read 26,661,746 / 26,661,746 events
+wrote train_17-jtmst96t/csv/train_17.csv (2404 rows)
+Downloading train/89, attempt 1
+17/49 finished train/17 in 21s
+Decoding train/68
+train/68 ds1: 114.9 s, 36,671,800 events, 2 drone(s): 1 Betafpv air75, 2 DJI Mini 3
+  read 4,000,000 / 36,671,800 events
+  read 8,000,000 / 36,671,800 events
+  read 12,000,000 / 36,671,800 events
+  read 16,000,000 / 36,671,800 events
+  read 20,000,000 / 36,671,800 events
+  read 24,000,000 / 36,671,800 events
+  read 28,000,000 / 36,671,800 events
+  read 32,000,000 / 36,671,800 events
+  read 36,000,000 / 36,671,800 events
+  read 36,671,800 / 36,671,800 events
+wrote train_68-3c2q5ewi/csv/train_68.csv (5572 rows)
+18/49 finished train/68 in 27sDownloading train/87, attempt 1
+
+Decoding train/89
+train/89 ds1: 114.0 s, 17,260,346 events, 1 drone(s): 1 DarwinFPV cineape20
+Decoding train/87
+train/87 ds1: 111.7 s, 14,738,207 events, 1 drone(s): 1 DarwinFPV cineape20
+  read 4,000,000 / 17,260,346 events
+  read 8,000,000 / 17,260,346 events
+  read 12,000,000 / 17,260,346 events
+  read 16,000,000 / 17,260,346 events
+  read 4,000,000 / 14,738,207 events
+  read 17,260,346 / 17,260,346 events
+wrote train_89-wmk6lub1/csv/train_89.csv (2888 rows)
+19/49 finished train/89 in 25sDownloading train/23, attempt 1
+
+  read 8,000,000 / 14,738,207 events
+  read 12,000,000 / 14,738,207 events
+  read 14,738,207 / 14,738,207 events
+wrote train_87-51lupgid/csv/train_87.csv (2358 rows)
+Downloading test/83, attempt 1
+20/49 finished train/87 in 17s
+Decoding train/23
+train/23 ds1: 112.3 s, 34,739,835 events, 1 drone(s): 1 Betafpv air75
+  read 4,000,000 / 34,739,835 events
+  read 8,000,000 / 34,739,835 events
+  read 12,000,000 / 34,739,835 events
+  read 16,000,000 / 34,739,835 events
+Decoding test/83
+  read 20,000,000 / 34,739,835 events
+  read 24,000,000 / 34,739,835 events
+  read 28,000,000 / 34,739,835 events
+test/83 ds1: 113.3 s, 46,168,514 events, 1 drone(s): 1 DarwinFPV cineape20
+  read 32,000,000 / 34,739,835 events
+  read 34,739,835 / 34,739,835 events
+wrote train_23-qxc6363g/csv/train_23.csv (2224 rows)
+21/49 finished train/23 in 29sDownloading train/88, attempt 1
+
+  read 4,000,000 / 46,168,514 events
+  read 8,000,000 / 46,168,514 events
+  read 12,000,000 / 46,168,514 events
+  read 16,000,000 / 46,168,514 events
+  read 20,000,000 / 46,168,514 events
+  read 24,000,000 / 46,168,514 events
+  read 28,000,000 / 46,168,514 events
+  read 32,000,000 / 46,168,514 events
+  read 36,000,000 / 46,168,514 events
+  read 40,000,000 / 46,168,514 events
+  read 44,000,000 / 46,168,514 events
+  read 46,168,514 / 46,168,514 events
+wrote test_83-2v7bcm01/csv/test_83.csv (2529 rows)
+Downloading test/29, attempt 1
+22/49 finished test/83 in 33s
+Decoding test/29
+test/29 ds1: 113.6 s, 49,058,859 events, 1 drone(s): 1 DarwinFPV cineape20
+  read 4,000,000 / 49,058,859 events
+  read 8,000,000 / 49,058,859 events
+  read 12,000,000 / 49,058,859 events
+  read 16,000,000 / 49,058,859 events
+  read 20,000,000 / 49,058,859 events
+  read 24,000,000 / 49,058,859 events
+  read 28,000,000 / 49,058,859 events
+  read 32,000,000 / 49,058,859 events
+  read 36,000,000 / 49,058,859 events
+  read 40,000,000 / 49,058,859 events
+  read 44,000,000 / 49,058,859 events
+  read 48,000,000 / 49,058,859 events
+  read 49,058,859 / 49,058,859 events
+wrote test_29-w_grrq0j/csv/test_29.csv (2488 rows)
+23/49 finished test/29 in 25sDownloading train/82, attempt 1
+
+Decoding train/88
+train/88 ds1: 114.5 s, 28,879,980 events, 1 drone(s): 1 DarwinFPV cineape20
+  read 4,000,000 / 28,879,980 events
+  read 8,000,000 / 28,879,980 events
+  read 12,000,000 / 28,879,980 events
+  read 16,000,000 / 28,879,980 events
+  read 20,000,000 / 28,879,980 events
+  read 24,000,000 / 28,879,980 events
+  read 28,000,000 / 28,879,980 events
+  read 28,879,980 / 28,879,980 events
+wrote train_88-svwwak4_/csv/train_88.csv (2959 rows)
+Downloading train/81, attempt 1
+24/49 finished train/88 in 34s
+Decoding train/82
+Decoding train/81
+train/82 ds1: 112.4 s, 53,248,057 events, 1 drone(s): 1 DarwinFPV cineape20
+train/81 ds1: 113.6 s, 47,053,096 events, 1 drone(s): 1 DarwinFPV cineape20
+  read 4,000,000 / 53,248,057 events
+  read 8,000,000 / 53,248,057 events
+  read 4,000,000 / 47,053,096 events
+  read 12,000,000 / 53,248,057 events
+  read 8,000,000 / 47,053,096 events
+  read 16,000,000 / 53,248,057 events
+  read 12,000,000 / 47,053,096 events
+  read 20,000,000 / 53,248,057 events
+  read 16,000,000 / 47,053,096 events
+  read 24,000,000 / 53,248,057 events
+  read 20,000,000 / 47,053,096 events
+  read 28,000,000 / 53,248,057 events
+  read 24,000,000 / 47,053,096 events
+  read 32,000,000 / 53,248,057 events
+  read 28,000,000 / 47,053,096 events
+  read 36,000,000 / 53,248,057 events
+  read 32,000,000 / 47,053,096 events
+  read 40,000,000 / 53,248,057 events
+  read 36,000,000 / 47,053,096 events
+  read 44,000,000 / 53,248,057 events
+  read 40,000,000 / 47,053,096 events
+  read 48,000,000 / 53,248,057 events
+  read 44,000,000 / 47,053,096 events
+  read 52,000,000 / 53,248,057 events
+  read 53,248,057 / 53,248,057 events
+  read 47,053,096 / 47,053,096 events
+wrote train_82-w10b6gkj/csv/train_82.csv (2327 rows)
+25/49 finished train/82 in 32sDownloading train/28, attempt 1
+
+wrote train_81-mrhb2121/csv/train_81.csv (2516 rows)
+26/49 finished train/81 in 27sDownloading train/27, attempt 1
+
+Decoding train/28
+train/28 ds1: 111.5 s, 58,360,759 events, 1 drone(s): 1 DarwinFPV cineape20
+  read 4,000,000 / 58,360,759 events
+  read 8,000,000 / 58,360,759 events
+  read 12,000,000 / 58,360,759 events
+  read 16,000,000 / 58,360,759 events
+  read 20,000,000 / 58,360,759 events
+  read 24,000,000 / 58,360,759 events
+  read 28,000,000 / 58,360,759 events
+  read 32,000,000 / 58,360,759 events
+  read 36,000,000 / 58,360,759 events
+  read 40,000,000 / 58,360,759 events
+  read 44,000,000 / 58,360,759 events
+  read 48,000,000 / 58,360,759 events
+  read 52,000,000 / 58,360,759 events
+  read 56,000,000 / 58,360,759 events
+  read 58,360,759 / 58,360,759 events
+wrote train_28-w9idwbj6/csv/train_28.csv (2301 rows)
+27/49 finished train/28 in 52sDownloading train/113, attempt 1
+
+Decoding train/27
+train/27 ds1: 113.1 s, 41,472,843 events, 1 drone(s): 1 DarwinFPV cineape20
+  read 4,000,000 / 41,472,843 events
+  read 8,000,000 / 41,472,843 events
+  read 12,000,000 / 41,472,843 events
+  read 16,000,000 / 41,472,843 events
+  read 20,000,000 / 41,472,843 events
+  read 24,000,000 / 41,472,843 events
+  read 28,000,000 / 41,472,843 events
+  read 32,000,000 / 41,472,843 events
+  read 36,000,000 / 41,472,843 events
+  read 40,000,000 / 41,472,843 events
+  read 41,472,843 / 41,472,843 events
+wrote train_27-updhikux/csv/train_27.csv (2624 rows)
+28/49 finished train/27 in 61sDownloading train/24, attempt 1
+
+Decoding train/113
+train/113 ds1: 113.8 s, 64,601,323 events, 1 drone(s): 1 DarwinFPV cineape20
+  read 4,000,000 / 64,601,323 events
+  read 8,000,000 / 64,601,323 events
+  read 12,000,000 / 64,601,323 events
+  read 16,000,000 / 64,601,323 events
+  read 20,000,000 / 64,601,323 events
+  read 24,000,000 / 64,601,323 events
+  read 28,000,000 / 64,601,323 events
+  read 32,000,000 / 64,601,323 events
+  read 36,000,000 / 64,601,323 events
+  read 40,000,000 / 64,601,323 events
+  read 44,000,000 / 64,601,323 events
+  read 48,000,000 / 64,601,323 events
+  read 52,000,000 / 64,601,323 events
+  read 56,000,000 / 64,601,323 events
+Decoding train/24
+  read 60,000,000 / 64,601,323 events
+  read 64,000,000 / 64,601,323 events
+  read 64,601,323 / 64,601,323 events
+wrote train_113-xz2b65_x/csv/train_113.csv (2460 rows)
+train/24 ds1: 114.0 s, 35,976,082 events, 1 drone(s): 1 Betafpv air75
+29/49 finished train/113 in 36sDownloading train/176, attempt 1
+
+  read 4,000,000 / 35,976,082 events
+  read 8,000,000 / 35,976,082 events
+  read 12,000,000 / 35,976,082 events
+  read 16,000,000 / 35,976,082 events
+  read 20,000,000 / 35,976,082 events
+  read 24,000,000 / 35,976,082 events
+  read 28,000,000 / 35,976,082 events
+  read 32,000,000 / 35,976,082 events
+  read 35,976,082 / 35,976,082 events
+wrote train_24-uvfiazd2/csv/train_24.csv (2778 rows)
+30/49 finished train/24 in 30sDownloading test/179, attempt 1
+
+Decoding train/176
+train/176 ds1: 117.5 s, 96,118,024 events, 1 drone(s): 1 DJI Tello EDU
+Decoding test/179
+  read 4,000,000 / 96,118,024 events
+  read 8,000,000 / 96,118,024 events
+  read 12,000,000 / 96,118,024 events
+  read 16,000,000 / 96,118,024 events
+test/179 ds1: 122.2 s, 91,123,350 events, 1 drone(s): 1 DJI Tello EDU
+  read 20,000,000 / 96,118,024 events
+  read 24,000,000 / 96,118,024 events
+  read 28,000,000 / 96,118,024 events
+  read 32,000,000 / 96,118,024 events
+  read 36,000,000 / 96,118,024 events
+  read 40,000,000 / 96,118,024 events
+  read 44,000,000 / 96,118,024 events
+  read 48,000,000 / 96,118,024 events
+  read 52,000,000 / 96,118,024 events
+  read 56,000,000 / 96,118,024 events
+  read 60,000,000 / 96,118,024 events
+  read 4,000,000 / 91,123,350 events
+  read 64,000,000 / 96,118,024 events
+  read 8,000,000 / 91,123,350 events
+  read 68,000,000 / 96,118,024 events
+  read 12,000,000 / 91,123,350 events
+  read 72,000,000 / 96,118,024 events
+  read 16,000,000 / 91,123,350 events
+  read 76,000,000 / 96,118,024 events
+  read 20,000,000 / 91,123,350 events
+  read 80,000,000 / 96,118,024 events
+  read 24,000,000 / 91,123,350 events
+  read 84,000,000 / 96,118,024 events
+  read 28,000,000 / 91,123,350 events
+  read 32,000,000 / 91,123,350 events
+  read 88,000,000 / 96,118,024 events
+  read 36,000,000 / 91,123,350 events
+  read 92,000,000 / 96,118,024 events
+  read 40,000,000 / 91,123,350 events
+  read 96,000,000 / 96,118,024 events
+  read 96,118,024 / 96,118,024 events
+wrote train_176-152jj737/csv/train_176.csv (2830 rows)
+Downloading test/114, attempt 1
+31/49 finished train/176 in 37s
+  read 44,000,000 / 91,123,350 events
+  read 48,000,000 / 91,123,350 events
+  read 52,000,000 / 91,123,350 events
+  read 56,000,000 / 91,123,350 events
+  read 60,000,000 / 91,123,350 events
+  read 64,000,000 / 91,123,350 events
+  read 68,000,000 / 91,123,350 events
+  read 72,000,000 / 91,123,350 events
+  read 76,000,000 / 91,123,350 events
+  read 80,000,000 / 91,123,350 events
+  read 84,000,000 / 91,123,350 events
+  read 88,000,000 / 91,123,350 events
+  read 91,123,350 / 91,123,350 events
+wrote test_179-17e0cnha/csv/test_179.csv (1542 rows)
+32/49 finished test/179 in 37sDownloading train/112, attempt 1
+
+Decoding test/114
+test/114 ds1: 112.1 s, 66,440,657 events, 1 drone(s): 1 DarwinFPV cineape20
+  read 4,000,000 / 66,440,657 events
+  read 8,000,000 / 66,440,657 events
+  read 12,000,000 / 66,440,657 events
+Decoding train/112
+  read 16,000,000 / 66,440,657 events
+  read 20,000,000 / 66,440,657 events
+  read 24,000,000 / 66,440,657 events
+  read 28,000,000 / 66,440,657 events
+  read 32,000,000 / 66,440,657 events
+  read 36,000,000 / 66,440,657 events
+  read 40,000,000 / 66,440,657 events
+  read 44,000,000 / 66,440,657 events
+  read 48,000,000 / 66,440,657 events
+train/112 ds1: 115.7 s, 85,989,379 events, 1 drone(s): 1 DarwinFPV cineape20
+  read 52,000,000 / 66,440,657 events
+  read 56,000,000 / 66,440,657 events
+  read 60,000,000 / 66,440,657 events
+  read 64,000,000 / 66,440,657 events
+  read 66,440,657 / 66,440,657 events
+wrote test_114-gm35bw_y/csv/test_114.csv (2461 rows)
+Downloading train/85, attempt 1
+33/49 finished test/114 in 44s
+  read 4,000,000 / 85,989,379 events
+  read 8,000,000 / 85,989,379 events
+  read 12,000,000 / 85,989,379 events
+  read 16,000,000 / 85,989,379 events
+  read 20,000,000 / 85,989,379 events
+  read 24,000,000 / 85,989,379 events
+  read 28,000,000 / 85,989,379 events
+  read 32,000,000 / 85,989,379 events
+  read 36,000,000 / 85,989,379 events
+  read 40,000,000 / 85,989,379 events
+  read 44,000,000 / 85,989,379 events
+  read 48,000,000 / 85,989,379 events
+  read 52,000,000 / 85,989,379 events
+  read 56,000,000 / 85,989,379 events
+  read 60,000,000 / 85,989,379 events
+  read 64,000,000 / 85,989,379 events
+  read 68,000,000 / 85,989,379 events
+  read 72,000,000 / 85,989,379 events
+  read 76,000,000 / 85,989,379 events
+  read 80,000,000 / 85,989,379 events
+  read 84,000,000 / 85,989,379 events
+  read 85,989,379 / 85,989,379 events
+wrote train_112-hz628id3/csv/train_112.csv (2656 rows)
+34/49 finished train/112 in 49sDownloading train/22, attempt 1
+
+Decoding train/85
+train/85 ds1: 113.3 s, 73,622,628 events, 1 drone(s): 1 DarwinFPV cineape20
+  read 4,000,000 / 73,622,628 events
+  read 8,000,000 / 73,622,628 events
+  read 12,000,000 / 73,622,628 events
+  read 16,000,000 / 73,622,628 events
+  read 20,000,000 / 73,622,628 events
+  read 24,000,000 / 73,622,628 events
+  read 28,000,000 / 73,622,628 events
+  read 32,000,000 / 73,622,628 events
+  read 36,000,000 / 73,622,628 events
+  read 40,000,000 / 73,622,628 events
+  read 44,000,000 / 73,622,628 events
+  read 48,000,000 / 73,622,628 events
+  read 52,000,000 / 73,622,628 events
+  read 56,000,000 / 73,622,628 events
+  read 60,000,000 / 73,622,628 events
+  read 64,000,000 / 73,622,628 events
+  read 68,000,000 / 73,622,628 events
+Decoding train/22
+  read 72,000,000 / 73,622,628 events
+  read 73,622,628 / 73,622,628 events
+wrote train_85-zny0_0w2/csv/train_85.csv (2921 rows)
+Downloading train/86, attempt 1
+35/49 finished train/85 in 44s
+train/22 ds1: 112.3 s, 62,685,785 events, 1 drone(s): 1 Betafpv air75
+  read 4,000,000 / 62,685,785 events
+  read 8,000,000 / 62,685,785 events
+  read 12,000,000 / 62,685,785 events
+  read 16,000,000 / 62,685,785 events
+  read 20,000,000 / 62,685,785 events
+  read 24,000,000 / 62,685,785 events
+  read 28,000,000 / 62,685,785 events
+  read 32,000,000 / 62,685,785 events
+  read 36,000,000 / 62,685,785 events
+  read 40,000,000 / 62,685,785 events
+  read 44,000,000 / 62,685,785 events
+  read 48,000,000 / 62,685,785 events
+  read 52,000,000 / 62,685,785 events
+  read 56,000,000 / 62,685,785 events
+  read 60,000,000 / 62,685,785 events
+  read 62,685,785 / 62,685,785 events
+wrote train_22-uzr5jtvq/csv/train_22.csv (2537 rows)
+36/49 finished train/22 in 43sDownloading test/194, attempt 1
+
+Decoding train/86
+train/86 ds1: 111.1 s, 107,741,117 events, 1 drone(s): 1 DarwinFPV cineape20
+  read 4,000,000 / 107,741,117 events
+  read 8,000,000 / 107,741,117 events
+  read 12,000,000 / 107,741,117 events
+  read 16,000,000 / 107,741,117 events
+  read 20,000,000 / 107,741,117 events
+  read 24,000,000 / 107,741,117 events
+  read 28,000,000 / 107,741,117 events
+  read 32,000,000 / 107,741,117 events
+  read 36,000,000 / 107,741,117 events
+  read 40,000,000 / 107,741,117 events
+  read 44,000,000 / 107,741,117 events
+  read 48,000,000 / 107,741,117 events
+  read 52,000,000 / 107,741,117 events
+  read 56,000,000 / 107,741,117 events
+  read 60,000,000 / 107,741,117 events
+  read 64,000,000 / 107,741,117 events
+  read 68,000,000 / 107,741,117 events
+  read 72,000,000 / 107,741,117 events
+  read 76,000,000 / 107,741,117 events
+  read 80,000,000 / 107,741,117 events
+  read 84,000,000 / 107,741,117 events
+  read 88,000,000 / 107,741,117 events
+  read 92,000,000 / 107,741,117 events
+  read 96,000,000 / 107,741,117 events
+  read 100,000,000 / 107,741,117 events
+Decoding test/194
+  read 104,000,000 / 107,741,117 events
+  read 107,741,117 / 107,741,117 events
+wrote train_86-ev8c1oye/csv/train_86.csv (2879 rows)
+37/49 finished train/86 in 49sDownloading train/84, attempt 1
+
+test/194 ds1: 121.3 s, 175,096,607 events, 1 drone(s): 1 DJI Tello EDU
+  read 4,000,000 / 175,096,607 events
+  read 8,000,000 / 175,096,607 events
+  read 12,000,000 / 175,096,607 events
+  read 16,000,000 / 175,096,607 events
+  read 20,000,000 / 175,096,607 events
+  read 24,000,000 / 175,096,607 events
+  read 28,000,000 / 175,096,607 events
+  read 32,000,000 / 175,096,607 events
+  read 36,000,000 / 175,096,607 events
+  read 40,000,000 / 175,096,607 events
+  read 44,000,000 / 175,096,607 events
+  read 48,000,000 / 175,096,607 events
+  read 52,000,000 / 175,096,607 events
+  read 56,000,000 / 175,096,607 events
+  read 60,000,000 / 175,096,607 events
+  read 64,000,000 / 175,096,607 events
+  read 68,000,000 / 175,096,607 events
+  read 72,000,000 / 175,096,607 events
+  read 76,000,000 / 175,096,607 events
+  read 80,000,000 / 175,096,607 events
+  read 84,000,000 / 175,096,607 events
+  read 88,000,000 / 175,096,607 events
+  read 92,000,000 / 175,096,607 events
+  read 96,000,000 / 175,096,607 events
+  read 100,000,000 / 175,096,607 events
+  read 104,000,000 / 175,096,607 events
+  read 108,000,000 / 175,096,607 events
+  read 112,000,000 / 175,096,607 events
+  read 116,000,000 / 175,096,607 events
+  read 120,000,000 / 175,096,607 events
+  read 124,000,000 / 175,096,607 events
+  read 128,000,000 / 175,096,607 events
+  read 132,000,000 / 175,096,607 events
+  read 136,000,000 / 175,096,607 events
+  read 140,000,000 / 175,096,607 events
+  read 144,000,000 / 175,096,607 events
+  read 148,000,000 / 175,096,607 events
+  read 152,000,000 / 175,096,607 events
+  read 156,000,000 / 175,096,607 events
+  read 160,000,000 / 175,096,607 events
+  read 164,000,000 / 175,096,607 events
+  read 168,000,000 / 175,096,607 events
+  read 172,000,000 / 175,096,607 events
+  read 175,096,607 / 175,096,607 events
+wrote test_194-53onqvkx/csv/test_194.csv (236 rows)
+38/49 finished test/194 in 59sDownloading train/191, attempt 1
+
+Decoding train/84
+train/84 ds1: 114.0 s, 142,594,173 events, 1 drone(s): 1 DarwinFPV cineape20
+  read 4,000,000 / 142,594,173 events
+  read 8,000,000 / 142,594,173 events
+  read 12,000,000 / 142,594,173 events
+  read 16,000,000 / 142,594,173 events
+  read 20,000,000 / 142,594,173 events
+  read 24,000,000 / 142,594,173 events
+  read 28,000,000 / 142,594,173 events
+  read 32,000,000 / 142,594,173 events
+  read 36,000,000 / 142,594,173 events
+  read 40,000,000 / 142,594,173 events
+  read 44,000,000 / 142,594,173 events
+  read 48,000,000 / 142,594,173 events
+  read 52,000,000 / 142,594,173 events
+  read 56,000,000 / 142,594,173 events
+  read 60,000,000 / 142,594,173 events
+  read 64,000,000 / 142,594,173 events
+  read 68,000,000 / 142,594,173 events
+  read 72,000,000 / 142,594,173 events
+  read 76,000,000 / 142,594,173 events
+  read 80,000,000 / 142,594,173 events
+  read 84,000,000 / 142,594,173 events
+  read 88,000,000 / 142,594,173 events
+  read 92,000,000 / 142,594,173 events
+  read 96,000,000 / 142,594,173 events
+  read 100,000,000 / 142,594,173 events
+  read 104,000,000 / 142,594,173 events
+  read 108,000,000 / 142,594,173 events
+  read 112,000,000 / 142,594,173 events
+  read 116,000,000 / 142,594,173 events
+  read 120,000,000 / 142,594,173 events
+  read 124,000,000 / 142,594,173 events
+  read 128,000,000 / 142,594,173 events
+  read 132,000,000 / 142,594,173 events
+  read 136,000,000 / 142,594,173 events
+  read 140,000,000 / 142,594,173 events
+  read 142,594,173 / 142,594,173 events
+wrote train_84-xjlols19/csv/train_84.csv (2807 rows)
+Downloading train/140, attempt 1
+39/49 finished train/84 in 57s
+Decoding train/191
+train/191 ds1: 119.5 s, 213,520,695 events, 1 drone(s): 1 DJI Tello EDU
+  read 4,000,000 / 213,520,695 events
+  read 8,000,000 / 213,520,695 events
+  read 12,000,000 / 213,520,695 events
+  read 16,000,000 / 213,520,695 events
+  read 20,000,000 / 213,520,695 events
+  read 24,000,000 / 213,520,695 events
+  read 28,000,000 / 213,520,695 events
+  read 32,000,000 / 213,520,695 events
+  read 36,000,000 / 213,520,695 events
+  read 40,000,000 / 213,520,695 events
+  read 44,000,000 / 213,520,695 events
+  read 48,000,000 / 213,520,695 events
+  read 52,000,000 / 213,520,695 events
+  read 56,000,000 / 213,520,695 events
+  read 60,000,000 / 213,520,695 events
+  read 64,000,000 / 213,520,695 events
+  read 68,000,000 / 213,520,695 events
+  read 72,000,000 / 213,520,695 events
+  read 76,000,000 / 213,520,695 events
+  read 80,000,000 / 213,520,695 events
+  read 84,000,000 / 213,520,695 events
+  read 88,000,000 / 213,520,695 events
+  read 92,000,000 / 213,520,695 events
+  read 96,000,000 / 213,520,695 events
+  read 100,000,000 / 213,520,695 events
+  read 104,000,000 / 213,520,695 events
+  read 108,000,000 / 213,520,695 events
+  read 112,000,000 / 213,520,695 events
+  read 116,000,000 / 213,520,695 events
+  read 120,000,000 / 213,520,695 events
+  read 124,000,000 / 213,520,695 events
+  read 128,000,000 / 213,520,695 events
+  read 132,000,000 / 213,520,695 events
+  read 136,000,000 / 213,520,695 events
+  read 140,000,000 / 213,520,695 events
+  read 144,000,000 / 213,520,695 events
+  read 148,000,000 / 213,520,695 events
+  read 152,000,000 / 213,520,695 events
+  read 156,000,000 / 213,520,695 events
+  read 160,000,000 / 213,520,695 events
+  read 164,000,000 / 213,520,695 events
+  read 168,000,000 / 213,520,695 events
+  read 172,000,000 / 213,520,695 events
+  read 176,000,000 / 213,520,695 events
+  read 180,000,000 / 213,520,695 events
+  read 184,000,000 / 213,520,695 events
+  read 188,000,000 / 213,520,695 events
+  read 192,000,000 / 213,520,695 events
+  read 196,000,000 / 213,520,695 events
+  read 200,000,000 / 213,520,695 events
+  read 204,000,000 / 213,520,695 events
+  read 208,000,000 / 213,520,695 events
+  read 212,000,000 / 213,520,695 events
+  read 213,520,695 / 213,520,695 events
+wrote train_191-3_1it5qy/csv/train_191.csv (236 rows)
+40/49 finished train/191 in 63s
+Downloading train/193, attempt 1
+Decoding train/140
+train/140 ds1: 120.6 s, 188,315,065 events, 1 drone(s): 1 DJI Tello EDU
+  read 4,000,000 / 188,315,065 events
+  read 8,000,000 / 188,315,065 events
+  read 12,000,000 / 188,315,065 events
+  read 16,000,000 / 188,315,065 events
+  read 20,000,000 / 188,315,065 events
+  read 24,000,000 / 188,315,065 events
+  read 28,000,000 / 188,315,065 events
+  read 32,000,000 / 188,315,065 events
+  read 36,000,000 / 188,315,065 events
+  read 40,000,000 / 188,315,065 events
+  read 44,000,000 / 188,315,065 events
+  read 48,000,000 / 188,315,065 events
+  read 52,000,000 / 188,315,065 events
+  read 56,000,000 / 188,315,065 events
+  read 60,000,000 / 188,315,065 events
+  read 64,000,000 / 188,315,065 events
+  read 68,000,000 / 188,315,065 events
+  read 72,000,000 / 188,315,065 events
+  read 76,000,000 / 188,315,065 events
+  read 80,000,000 / 188,315,065 events
+  read 84,000,000 / 188,315,065 events
+  read 88,000,000 / 188,315,065 events
+  read 92,000,000 / 188,315,065 events
+  read 96,000,000 / 188,315,065 events
+  read 100,000,000 / 188,315,065 events
+  read 104,000,000 / 188,315,065 events
+  read 108,000,000 / 188,315,065 events
+  read 112,000,000 / 188,315,065 events
+  read 116,000,000 / 188,315,065 events
+  read 120,000,000 / 188,315,065 events
+  read 124,000,000 / 188,315,065 events
+  read 128,000,000 / 188,315,065 events
+  read 132,000,000 / 188,315,065 events
+  read 136,000,000 / 188,315,065 events
+  read 140,000,000 / 188,315,065 events
+  read 144,000,000 / 188,315,065 events
+  read 148,000,000 / 188,315,065 events
+  read 152,000,000 / 188,315,065 events
+  read 156,000,000 / 188,315,065 events
+  read 160,000,000 / 188,315,065 events
+  read 164,000,000 / 188,315,065 events
+  read 168,000,000 / 188,315,065 events
+  read 172,000,000 / 188,315,065 events
+  read 176,000,000 / 188,315,065 events
+  read 180,000,000 / 188,315,065 events
+  read 184,000,000 / 188,315,065 events
+  read 188,000,000 / 188,315,065 events
+  read 188,315,065 / 188,315,065 events
+wrote train_140-wvuhqa47/csv/train_140.csv (1713 rows)
+41/49 finished train/140 in 49sDownloading train/192, attempt 1
+
+Decoding train/193
+train/193 ds1: 117.2 s, 240,208,624 events, 1 drone(s): 1 DJI Tello EDU
+  read 4,000,000 / 240,208,624 events
+  read 8,000,000 / 240,208,624 events
+  read 12,000,000 / 240,208,624 events
+  read 16,000,000 / 240,208,624 events
+  read 20,000,000 / 240,208,624 events
+  read 24,000,000 / 240,208,624 events
+  read 28,000,000 / 240,208,624 events
+  read 32,000,000 / 240,208,624 events
+  read 36,000,000 / 240,208,624 events
+  read 40,000,000 / 240,208,624 events
+  read 44,000,000 / 240,208,624 events
+  read 48,000,000 / 240,208,624 events
+  read 52,000,000 / 240,208,624 events
+  read 56,000,000 / 240,208,624 events
+  read 60,000,000 / 240,208,624 events
+  read 64,000,000 / 240,208,624 events
+  read 68,000,000 / 240,208,624 events
+  read 72,000,000 / 240,208,624 events
+  read 76,000,000 / 240,208,624 events
+  read 80,000,000 / 240,208,624 events
+  read 84,000,000 / 240,208,624 events
+  read 88,000,000 / 240,208,624 events
+  read 92,000,000 / 240,208,624 events
+  read 96,000,000 / 240,208,624 events
+  read 100,000,000 / 240,208,624 events
+  read 104,000,000 / 240,208,624 events
+  read 108,000,000 / 240,208,624 events
+  read 112,000,000 / 240,208,624 events
+  read 116,000,000 / 240,208,624 events
+  read 120,000,000 / 240,208,624 events
+  read 124,000,000 / 240,208,624 events
+  read 128,000,000 / 240,208,624 events
+  read 132,000,000 / 240,208,624 events
+  read 136,000,000 / 240,208,624 events
+  read 140,000,000 / 240,208,624 events
+  read 144,000,000 / 240,208,624 events
+  read 148,000,000 / 240,208,624 events
+  read 152,000,000 / 240,208,624 events
+  read 156,000,000 / 240,208,624 events
+  read 160,000,000 / 240,208,624 events
+  read 164,000,000 / 240,208,624 events
+  read 168,000,000 / 240,208,624 events
+  read 172,000,000 / 240,208,624 events
+  read 176,000,000 / 240,208,624 events
+  read 180,000,000 / 240,208,624 events
+  read 184,000,000 / 240,208,624 events
+  read 188,000,000 / 240,208,624 events
+  read 192,000,000 / 240,208,624 events
+  read 196,000,000 / 240,208,624 events
+  read 200,000,000 / 240,208,624 events
+  read 204,000,000 / 240,208,624 events
+  read 208,000,000 / 240,208,624 events
+  read 212,000,000 / 240,208,624 events
+  read 216,000,000 / 240,208,624 events
+  read 220,000,000 / 240,208,624 events
+  read 224,000,000 / 240,208,624 events
+Decoding train/192
+  read 228,000,000 / 240,208,624 events
+  read 232,000,000 / 240,208,624 events
+  read 236,000,000 / 240,208,624 events
+  read 240,000,000 / 240,208,624 events
+  read 240,208,624 / 240,208,624 events
+wrote train_193-4pwi1dos/csv/train_193.csv (1124 rows)
+Downloading train/141, attempt 1
+42/49 finished train/193 in 55s
+train/192 ds1: 119.5 s, 260,265,022 events, 1 drone(s): 1 DJI Tello EDU
+  read 4,000,000 / 260,265,022 events
+  read 8,000,000 / 260,265,022 events
+  read 12,000,000 / 260,265,022 events
+  read 16,000,000 / 260,265,022 events
+  read 20,000,000 / 260,265,022 events
+  read 24,000,000 / 260,265,022 events
+  read 28,000,000 / 260,265,022 events
+  read 32,000,000 / 260,265,022 events
+  read 36,000,000 / 260,265,022 events
+  read 40,000,000 / 260,265,022 events
+  read 44,000,000 / 260,265,022 events
+  read 48,000,000 / 260,265,022 events
+  read 52,000,000 / 260,265,022 events
+  read 56,000,000 / 260,265,022 events
+  read 60,000,000 / 260,265,022 events
+  read 64,000,000 / 260,265,022 events
+  read 68,000,000 / 260,265,022 events
+  read 72,000,000 / 260,265,022 events
+  read 76,000,000 / 260,265,022 events
+  read 80,000,000 / 260,265,022 events
+  read 84,000,000 / 260,265,022 events
+  read 88,000,000 / 260,265,022 events
+  read 92,000,000 / 260,265,022 events
+  read 96,000,000 / 260,265,022 events
+  read 100,000,000 / 260,265,022 events
+  read 104,000,000 / 260,265,022 events
+  read 108,000,000 / 260,265,022 events
+  read 112,000,000 / 260,265,022 events
+  read 116,000,000 / 260,265,022 events
+  read 120,000,000 / 260,265,022 events
+  read 124,000,000 / 260,265,022 events
+  read 128,000,000 / 260,265,022 events
+  read 132,000,000 / 260,265,022 events
+  read 136,000,000 / 260,265,022 events
+  read 140,000,000 / 260,265,022 events
+  read 144,000,000 / 260,265,022 events
+  read 148,000,000 / 260,265,022 events
+  read 152,000,000 / 260,265,022 events
+  read 156,000,000 / 260,265,022 events
+  read 160,000,000 / 260,265,022 events
+  read 164,000,000 / 260,265,022 events
+  read 168,000,000 / 260,265,022 events
+  read 172,000,000 / 260,265,022 events
+  read 176,000,000 / 260,265,022 events
+  read 180,000,000 / 260,265,022 events
+  read 184,000,000 / 260,265,022 events
+  read 188,000,000 / 260,265,022 events
+  read 192,000,000 / 260,265,022 events
+  read 196,000,000 / 260,265,022 events
+  read 200,000,000 / 260,265,022 events
+  read 204,000,000 / 260,265,022 events
+  read 208,000,000 / 260,265,022 events
+  read 212,000,000 / 260,265,022 events
+  read 216,000,000 / 260,265,022 events
+  read 220,000,000 / 260,265,022 events
+  read 224,000,000 / 260,265,022 events
+  read 228,000,000 / 260,265,022 events
+  read 232,000,000 / 260,265,022 events
+  read 236,000,000 / 260,265,022 events
+  read 240,000,000 / 260,265,022 events
+  read 244,000,000 / 260,265,022 events
+  read 248,000,000 / 260,265,022 events
+  read 252,000,000 / 260,265,022 events
+  read 256,000,000 / 260,265,022 events
+  read 260,000,000 / 260,265,022 events
+  read 260,265,022 / 260,265,022 events
+wrote train_192-7osa0ig_/csv/train_192.csv (1399 rows)
+43/49 finished train/192 in 57sDownloading test/195, attempt 1
+
+Decoding train/141
+train/141 ds1: 122.6 s, 282,770,857 events, 1 drone(s): 1 DJI Tello EDU
+  read 4,000,000 / 282,770,857 events
+  read 8,000,000 / 282,770,857 events
+  read 12,000,000 / 282,770,857 events
+  read 16,000,000 / 282,770,857 events
+  read 20,000,000 / 282,770,857 events
+  read 24,000,000 / 282,770,857 events
+  read 28,000,000 / 282,770,857 events
+  read 32,000,000 / 282,770,857 events
+  read 36,000,000 / 282,770,857 events
+  read 40,000,000 / 282,770,857 events
+  read 44,000,000 / 282,770,857 events
+  read 48,000,000 / 282,770,857 events
+  read 52,000,000 / 282,770,857 events
+  read 56,000,000 / 282,770,857 events
+  read 60,000,000 / 282,770,857 events
+  read 64,000,000 / 282,770,857 events
+  read 68,000,000 / 282,770,857 events
+  read 72,000,000 / 282,770,857 events
+  read 76,000,000 / 282,770,857 events
+  read 80,000,000 / 282,770,857 events
+  read 84,000,000 / 282,770,857 events
+  read 88,000,000 / 282,770,857 events
+  read 92,000,000 / 282,770,857 events
+  read 96,000,000 / 282,770,857 events
+  read 100,000,000 / 282,770,857 events
+  read 104,000,000 / 282,770,857 events
+  read 108,000,000 / 282,770,857 events
+  read 112,000,000 / 282,770,857 events
+  read 116,000,000 / 282,770,857 events
+Decoding test/195
+  read 120,000,000 / 282,770,857 events
+  read 124,000,000 / 282,770,857 events
+  read 128,000,000 / 282,770,857 events
+  read 132,000,000 / 282,770,857 events
+  read 136,000,000 / 282,770,857 events
+  read 140,000,000 / 282,770,857 events
+  read 144,000,000 / 282,770,857 events
+  read 148,000,000 / 282,770,857 events
+  read 152,000,000 / 282,770,857 events
+  read 156,000,000 / 282,770,857 events
+  read 160,000,000 / 282,770,857 events
+  read 164,000,000 / 282,770,857 events
+  read 168,000,000 / 282,770,857 events
+  read 172,000,000 / 282,770,857 events
+  read 176,000,000 / 282,770,857 events
+  read 180,000,000 / 282,770,857 events
+  read 184,000,000 / 282,770,857 events
+  read 188,000,000 / 282,770,857 events
+  read 192,000,000 / 282,770,857 events
+  read 196,000,000 / 282,770,857 events
+  read 200,000,000 / 282,770,857 events
+  read 204,000,000 / 282,770,857 events
+  read 208,000,000 / 282,770,857 events
+  read 212,000,000 / 282,770,857 events
+  read 216,000,000 / 282,770,857 events
+test/195 ds1: 117.7 s, 344,986,943 events, 1 drone(s): 1 DJI Tello EDU
+  read 220,000,000 / 282,770,857 events
+  read 224,000,000 / 282,770,857 events
+  read 228,000,000 / 282,770,857 events
+  read 232,000,000 / 282,770,857 events
+  read 236,000,000 / 282,770,857 events
+  read 240,000,000 / 282,770,857 events
+  read 244,000,000 / 282,770,857 events
+  read 248,000,000 / 282,770,857 events
+  read 252,000,000 / 282,770,857 events
+  read 256,000,000 / 282,770,857 events
+  read 260,000,000 / 282,770,857 events
+  read 264,000,000 / 282,770,857 events
+  read 268,000,000 / 282,770,857 events
+  read 272,000,000 / 282,770,857 events
+  read 276,000,000 / 282,770,857 events
+  read 280,000,000 / 282,770,857 events
+  read 282,770,857 / 282,770,857 events
+wrote train_141-wwti7r67/csv/train_141.csv (2514 rows)
+Downloading train/188, attempt 1
+44/49 finished train/141 in 82s
+  read 4,000,000 / 344,986,943 events
+  read 8,000,000 / 344,986,943 events
+  read 12,000,000 / 344,986,943 events
+  read 16,000,000 / 344,986,943 events
+  read 20,000,000 / 344,986,943 events
+  read 24,000,000 / 344,986,943 events
+  read 28,000,000 / 344,986,943 events
+  read 32,000,000 / 344,986,943 events
+  read 36,000,000 / 344,986,943 events
+  read 40,000,000 / 344,986,943 events
+  read 44,000,000 / 344,986,943 events
+  read 48,000,000 / 344,986,943 events
+  read 52,000,000 / 344,986,943 events
+  read 56,000,000 / 344,986,943 events
+  read 60,000,000 / 344,986,943 events
+  read 64,000,000 / 344,986,943 events
+  read 68,000,000 / 344,986,943 events
+  read 72,000,000 / 344,986,943 events
+  read 76,000,000 / 344,986,943 events
+  read 80,000,000 / 344,986,943 events
+  read 84,000,000 / 344,986,943 events
+  read 88,000,000 / 344,986,943 events
+  read 92,000,000 / 344,986,943 events
+  read 96,000,000 / 344,986,943 events
+  read 100,000,000 / 344,986,943 events
+  read 104,000,000 / 344,986,943 events
+  read 108,000,000 / 344,986,943 events
+  read 112,000,000 / 344,986,943 events
+  read 116,000,000 / 344,986,943 events
+  read 120,000,000 / 344,986,943 events
+  read 124,000,000 / 344,986,943 events
+  read 128,000,000 / 344,986,943 events
+  read 132,000,000 / 344,986,943 events
+  read 136,000,000 / 344,986,943 events
+  read 140,000,000 / 344,986,943 events
+  read 144,000,000 / 344,986,943 events
+  read 148,000,000 / 344,986,943 events
+  read 152,000,000 / 344,986,943 events
+  read 156,000,000 / 344,986,943 events
+  read 160,000,000 / 344,986,943 events
+  read 164,000,000 / 344,986,943 events
+  read 168,000,000 / 344,986,943 events
+  read 172,000,000 / 344,986,943 events
+  read 176,000,000 / 344,986,943 events
+  read 180,000,000 / 344,986,943 events
+  read 184,000,000 / 344,986,943 events
+  read 188,000,000 / 344,986,943 events
+  read 192,000,000 / 344,986,943 events
+  read 196,000,000 / 344,986,943 events
+  read 200,000,000 / 344,986,943 events
+  read 204,000,000 / 344,986,943 events
+  read 208,000,000 / 344,986,943 events
+  read 212,000,000 / 344,986,943 events
+  read 216,000,000 / 344,986,943 events
+  read 220,000,000 / 344,986,943 events
+  read 224,000,000 / 344,986,943 events
+  read 228,000,000 / 344,986,943 events
+  read 232,000,000 / 344,986,943 events
+  read 236,000,000 / 344,986,943 events
+  read 240,000,000 / 344,986,943 events
+  read 244,000,000 / 344,986,943 events
+  read 248,000,000 / 344,986,943 events
+  read 252,000,000 / 344,986,943 events
+  read 256,000,000 / 344,986,943 events
+  read 260,000,000 / 344,986,943 events
+  read 264,000,000 / 344,986,943 events
+  read 268,000,000 / 344,986,943 events
+  read 272,000,000 / 344,986,943 events
+  read 276,000,000 / 344,986,943 events
+  read 280,000,000 / 344,986,943 events
+  read 284,000,000 / 344,986,943 events
+  read 288,000,000 / 344,986,943 events
+  read 292,000,000 / 344,986,943 events
+  read 296,000,000 / 344,986,943 events
+  read 300,000,000 / 344,986,943 events
+  read 304,000,000 / 344,986,943 events
+  read 308,000,000 / 344,986,943 events
+  read 312,000,000 / 344,986,943 events
+  read 316,000,000 / 344,986,943 events
+  read 320,000,000 / 344,986,943 events
+  read 324,000,000 / 344,986,943 events
+  read 328,000,000 / 344,986,943 events
+  read 332,000,000 / 344,986,943 events
+  read 336,000,000 / 344,986,943 events
+  read 340,000,000 / 344,986,943 events
+  read 344,000,000 / 344,986,943 events
+  read 344,986,943 / 344,986,943 events
+wrote test_195-9f1f3cj3/csv/test_195.csv (1687 rows)
+45/49 finished test/195 in 85s
+Downloading test/142, attempt 1
+Decoding test/142
+test/142 ds1: 121.8 s, 339,869,199 events, 1 drone(s): 1 DJI Tello EDU
+  read 4,000,000 / 339,869,199 events
+  read 8,000,000 / 339,869,199 events
+  read 12,000,000 / 339,869,199 events
+  read 16,000,000 / 339,869,199 events
+  read 20,000,000 / 339,869,199 events
+  read 24,000,000 / 339,869,199 events
+  read 28,000,000 / 339,869,199 events
+  read 32,000,000 / 339,869,199 events
+  read 36,000,000 / 339,869,199 events
+  read 40,000,000 / 339,869,199 events
+  read 44,000,000 / 339,869,199 events
+  read 48,000,000 / 339,869,199 events
+  read 52,000,000 / 339,869,199 events
+  read 56,000,000 / 339,869,199 events
+  read 60,000,000 / 339,869,199 events
+  read 64,000,000 / 339,869,199 events
+  read 68,000,000 / 339,869,199 events
+  read 72,000,000 / 339,869,199 events
+  read 76,000,000 / 339,869,199 events
+  read 80,000,000 / 339,869,199 events
+  read 84,000,000 / 339,869,199 events
+  read 88,000,000 / 339,869,199 events
+  read 92,000,000 / 339,869,199 events
+  read 96,000,000 / 339,869,199 events
+  read 100,000,000 / 339,869,199 events
+  read 104,000,000 / 339,869,199 events
+  read 108,000,000 / 339,869,199 events
+  read 112,000,000 / 339,869,199 events
+  read 116,000,000 / 339,869,199 events
+  read 120,000,000 / 339,869,199 events
+  read 124,000,000 / 339,869,199 events
+  read 128,000,000 / 339,869,199 events
+  read 132,000,000 / 339,869,199 events
+  read 136,000,000 / 339,869,199 events
+  read 140,000,000 / 339,869,199 events
+  read 144,000,000 / 339,869,199 events
+  read 148,000,000 / 339,869,199 events
+  read 152,000,000 / 339,869,199 events
+  read 156,000,000 / 339,869,199 events
+  read 160,000,000 / 339,869,199 events
+  read 164,000,000 / 339,869,199 events
+  read 168,000,000 / 339,869,199 events
+  read 172,000,000 / 339,869,199 events
+  read 176,000,000 / 339,869,199 events
+  read 180,000,000 / 339,869,199 events
+  read 184,000,000 / 339,869,199 events
+  read 188,000,000 / 339,869,199 events
+  read 192,000,000 / 339,869,199 events
+  read 196,000,000 / 339,869,199 events
+  read 200,000,000 / 339,869,199 events
+  read 204,000,000 / 339,869,199 events
+  read 208,000,000 / 339,869,199 events
+  read 212,000,000 / 339,869,199 events
+  read 216,000,000 / 339,869,199 events
+  read 220,000,000 / 339,869,199 events
+  read 224,000,000 / 339,869,199 events
+  read 228,000,000 / 339,869,199 events
+  read 232,000,000 / 339,869,199 events
+  read 236,000,000 / 339,869,199 events
+  read 240,000,000 / 339,869,199 events
+  read 244,000,000 / 339,869,199 events
+  read 248,000,000 / 339,869,199 events
+  read 252,000,000 / 339,869,199 events
+  read 256,000,000 / 339,869,199 events
+  read 260,000,000 / 339,869,199 events
+  read 264,000,000 / 339,869,199 events
+  read 268,000,000 / 339,869,199 events
+  read 272,000,000 / 339,869,199 events
+  read 276,000,000 / 339,869,199 events
+  read 280,000,000 / 339,869,199 events
+  read 284,000,000 / 339,869,199 events
+  read 288,000,000 / 339,869,199 events
+  read 292,000,000 / 339,869,199 events
+  read 296,000,000 / 339,869,199 events
+  read 300,000,000 / 339,869,199 events
+  read 304,000,000 / 339,869,199 events
+  read 308,000,000 / 339,869,199 events
+  read 312,000,000 / 339,869,199 events
+  read 316,000,000 / 339,869,199 events
+  read 320,000,000 / 339,869,199 events
+  read 324,000,000 / 339,869,199 events
+  read 328,000,000 / 339,869,199 events
+  read 332,000,000 / 339,869,199 events
+  read 336,000,000 / 339,869,199 events
+  read 339,869,199 / 339,869,199 events
+wrote test_142-rr56b9mh/csv/test_142.csv (2433 rows)
+46/49 finished test/142 in 76s
+Downloading train/189, attempt 1
+Decoding train/189
+Decoding train/188
+train/189 ds1: 122.5 s, 360,106,738 events, 1 drone(s): 1 DJI Tello EDU
+train/188 ds1: 115.6 s, 357,772,221 events, 1 drone(s): 1 DJI Tello EDU
+  read 4,000,000 / 360,106,738 events
+  read 8,000,000 / 360,106,738 events
+  read 12,000,000 / 360,106,738 events
+  read 16,000,000 / 360,106,738 events
+  read 20,000,000 / 360,106,738 events
+  read 24,000,000 / 360,106,738 events
+  read 28,000,000 / 360,106,738 events
+  read 32,000,000 / 360,106,738 events
+  read 36,000,000 / 360,106,738 events
+  read 40,000,000 / 360,106,738 events
+  read 44,000,000 / 360,106,738 events
+  read 48,000,000 / 360,106,738 events
+  read 52,000,000 / 360,106,738 events
+  read 56,000,000 / 360,106,738 events
+  read 60,000,000 / 360,106,738 events
+  read 64,000,000 / 360,106,738 events
+  read 68,000,000 / 360,106,738 events
+  read 72,000,000 / 360,106,738 events
+  read 76,000,000 / 360,106,738 events
+  read 80,000,000 / 360,106,738 events
+  read 84,000,000 / 360,106,738 events
+  read 88,000,000 / 360,106,738 events
+  read 92,000,000 / 360,106,738 events
+  read 96,000,000 / 360,106,738 events
+  read 100,000,000 / 360,106,738 events
+  read 104,000,000 / 360,106,738 events
+  read 4,000,000 / 357,772,221 events
+  read 108,000,000 / 360,106,738 events
+  read 8,000,000 / 357,772,221 events
+  read 112,000,000 / 360,106,738 events
+  read 12,000,000 / 357,772,221 events
+  read 116,000,000 / 360,106,738 events
+  read 16,000,000 / 357,772,221 events
+  read 120,000,000 / 360,106,738 events
+  read 20,000,000 / 357,772,221 events
+  read 124,000,000 / 360,106,738 events
+  read 24,000,000 / 357,772,221 events
+  read 128,000,000 / 360,106,738 events
+  read 28,000,000 / 357,772,221 events
+  read 132,000,000 / 360,106,738 events
+  read 32,000,000 / 357,772,221 events
+  read 136,000,000 / 360,106,738 events
+  read 36,000,000 / 357,772,221 events
+  read 140,000,000 / 360,106,738 events
+  read 40,000,000 / 357,772,221 events
+  read 144,000,000 / 360,106,738 events
+  read 44,000,000 / 357,772,221 events
+  read 148,000,000 / 360,106,738 events
+  read 48,000,000 / 357,772,221 events
+  read 152,000,000 / 360,106,738 events
+  read 52,000,000 / 357,772,221 events
+  read 156,000,000 / 360,106,738 events
+  read 56,000,000 / 357,772,221 events
+  read 160,000,000 / 360,106,738 events
+  read 60,000,000 / 357,772,221 events
+  read 164,000,000 / 360,106,738 events
+  read 64,000,000 / 357,772,221 events
+  read 168,000,000 / 360,106,738 events
+  read 68,000,000 / 357,772,221 events
+  read 172,000,000 / 360,106,738 events
+  read 72,000,000 / 357,772,221 events
+  read 176,000,000 / 360,106,738 events
+  read 76,000,000 / 357,772,221 events
+  read 180,000,000 / 360,106,738 events
+  read 80,000,000 / 357,772,221 events
+  read 184,000,000 / 360,106,738 events
+  read 84,000,000 / 357,772,221 events
+  read 188,000,000 / 360,106,738 events
+  read 88,000,000 / 357,772,221 events
+  read 192,000,000 / 360,106,738 events
+  read 92,000,000 / 357,772,221 events
+  read 196,000,000 / 360,106,738 events
+  read 96,000,000 / 357,772,221 events
+  read 200,000,000 / 360,106,738 events
+  read 100,000,000 / 357,772,221 events
+  read 204,000,000 / 360,106,738 events
+  read 104,000,000 / 357,772,221 events
+  read 208,000,000 / 360,106,738 events
+  read 108,000,000 / 357,772,221 events
+  read 212,000,000 / 360,106,738 events
+  read 112,000,000 / 357,772,221 events
+  read 216,000,000 / 360,106,738 events
+  read 116,000,000 / 357,772,221 events
+  read 220,000,000 / 360,106,738 events
+  read 120,000,000 / 357,772,221 events
+  read 224,000,000 / 360,106,738 events
+  read 124,000,000 / 357,772,221 events
+  read 228,000,000 / 360,106,738 events
+  read 128,000,000 / 357,772,221 events
+  read 232,000,000 / 360,106,738 events
+  read 236,000,000 / 360,106,738 events
+  read 132,000,000 / 357,772,221 events
+  read 240,000,000 / 360,106,738 events
+  read 136,000,000 / 357,772,221 events
+  read 244,000,000 / 360,106,738 events
+  read 140,000,000 / 357,772,221 events
+  read 248,000,000 / 360,106,738 events
+  read 144,000,000 / 357,772,221 events
+  read 252,000,000 / 360,106,738 events
+  read 148,000,000 / 357,772,221 events
+  read 256,000,000 / 360,106,738 events
+  read 152,000,000 / 357,772,221 events
+  read 260,000,000 / 360,106,738 events
+  read 156,000,000 / 357,772,221 events
+  read 264,000,000 / 360,106,738 events
+  read 160,000,000 / 357,772,221 events
+  read 268,000,000 / 360,106,738 events
+  read 164,000,000 / 357,772,221 events
+  read 272,000,000 / 360,106,738 events
+  read 168,000,000 / 357,772,221 events
+  read 276,000,000 / 360,106,738 events
+  read 172,000,000 / 357,772,221 events
+  read 280,000,000 / 360,106,738 events
+  read 176,000,000 / 357,772,221 events
+  read 284,000,000 / 360,106,738 events
+  read 180,000,000 / 357,772,221 events
+  read 288,000,000 / 360,106,738 events
+  read 184,000,000 / 357,772,221 events
+  read 292,000,000 / 360,106,738 events
+  read 188,000,000 / 357,772,221 events
+  read 296,000,000 / 360,106,738 events
+  read 192,000,000 / 357,772,221 events
+  read 300,000,000 / 360,106,738 events
+  read 196,000,000 / 357,772,221 events
+  read 304,000,000 / 360,106,738 events
+  read 200,000,000 / 357,772,221 events
+  read 308,000,000 / 360,106,738 events
+  read 204,000,000 / 357,772,221 events
+  read 312,000,000 / 360,106,738 events
+  read 208,000,000 / 357,772,221 events
+  read 316,000,000 / 360,106,738 events
+  read 212,000,000 / 357,772,221 events
+  read 320,000,000 / 360,106,738 events
+  read 216,000,000 / 357,772,221 events
+  read 324,000,000 / 360,106,738 events
+  read 220,000,000 / 357,772,221 events
+  read 328,000,000 / 360,106,738 events
+  read 224,000,000 / 357,772,221 events
+  read 332,000,000 / 360,106,738 events
+  read 228,000,000 / 357,772,221 events
+  read 336,000,000 / 360,106,738 events
+  read 232,000,000 / 357,772,221 events
+  read 340,000,000 / 360,106,738 events
+  read 236,000,000 / 357,772,221 events
+  read 344,000,000 / 360,106,738 events
+  read 240,000,000 / 357,772,221 events
+  read 348,000,000 / 360,106,738 events
+  read 244,000,000 / 357,772,221 events
+  read 352,000,000 / 360,106,738 events
+  read 248,000,000 / 357,772,221 events
+  read 356,000,000 / 360,106,738 events
+  read 252,000,000 / 357,772,221 events
+  read 360,000,000 / 360,106,738 events
+  read 360,106,738 / 360,106,738 events
+wrote train_189-pmy8bfaf/csv/train_189.csv (1976 rows)
+  read 256,000,000 / 357,772,221 events
+Downloading train/190, attempt 1
+47/49 finished train/189 in 74s
+  read 260,000,000 / 357,772,221 events
+  read 264,000,000 / 357,772,221 events
+  read 268,000,000 / 357,772,221 events
+  read 272,000,000 / 357,772,221 events
+  read 276,000,000 / 357,772,221 events
+  read 280,000,000 / 357,772,221 events
+  read 284,000,000 / 357,772,221 events
+  read 288,000,000 / 357,772,221 events
+  read 292,000,000 / 357,772,221 events
+  read 296,000,000 / 357,772,221 events
+  read 300,000,000 / 357,772,221 events
+  read 304,000,000 / 357,772,221 events
+  read 308,000,000 / 357,772,221 events
+  read 312,000,000 / 357,772,221 events
+  read 316,000,000 / 357,772,221 events
+  read 320,000,000 / 357,772,221 events
+  read 324,000,000 / 357,772,221 events
+  read 328,000,000 / 357,772,221 events
+  read 332,000,000 / 357,772,221 events
+  read 336,000,000 / 357,772,221 events
+  read 340,000,000 / 357,772,221 events
+  read 344,000,000 / 357,772,221 events
+  read 348,000,000 / 357,772,221 events
+  read 352,000,000 / 357,772,221 events
+  read 356,000,000 / 357,772,221 events
+  read 357,772,221 / 357,772,221 events
+wrote train_188-hmwu154u/csv/train_188.csv (2909 rows)
+48/49 finished train/188 in 188s
+Decoding train/190
+train/190 ds1: 123.1 s, 376,408,942 events, 1 drone(s): 1 DJI Tello EDU
+  read 4,000,000 / 376,408,942 events
+  read 8,000,000 / 376,408,942 events
+  read 12,000,000 / 376,408,942 events
+  read 16,000,000 / 376,408,942 events
+  read 20,000,000 / 376,408,942 events
+  read 24,000,000 / 376,408,942 events
+  read 28,000,000 / 376,408,942 events
+  read 32,000,000 / 376,408,942 events
+  read 36,000,000 / 376,408,942 events
+  read 40,000,000 / 376,408,942 events
+  read 44,000,000 / 376,408,942 events
+  read 48,000,000 / 376,408,942 events
+  read 52,000,000 / 376,408,942 events
+  read 56,000,000 / 376,408,942 events
+  read 60,000,000 / 376,408,942 events
+  read 64,000,000 / 376,408,942 events
+  read 68,000,000 / 376,408,942 events
+  read 72,000,000 / 376,408,942 events
+  read 76,000,000 / 376,408,942 events
+  read 80,000,000 / 376,408,942 events
+  read 84,000,000 / 376,408,942 events
+  read 88,000,000 / 376,408,942 events
+  read 92,000,000 / 376,408,942 events
+  read 96,000,000 / 376,408,942 events
+  read 100,000,000 / 376,408,942 events
+  read 104,000,000 / 376,408,942 events
+  read 108,000,000 / 376,408,942 events
+  read 112,000,000 / 376,408,942 events
+  read 116,000,000 / 376,408,942 events
+  read 120,000,000 / 376,408,942 events
+  read 124,000,000 / 376,408,942 events
+  read 128,000,000 / 376,408,942 events
+  read 132,000,000 / 376,408,942 events
+  read 136,000,000 / 376,408,942 events
+  read 140,000,000 / 376,408,942 events
+  read 144,000,000 / 376,408,942 events
+  read 148,000,000 / 376,408,942 events
+  read 152,000,000 / 376,408,942 events
+  read 156,000,000 / 376,408,942 events
+  read 160,000,000 / 376,408,942 events
+  read 164,000,000 / 376,408,942 events
+  read 168,000,000 / 376,408,942 events
+  read 172,000,000 / 376,408,942 events
+  read 176,000,000 / 376,408,942 events
+  read 180,000,000 / 376,408,942 events
+  read 184,000,000 / 376,408,942 events
+  read 188,000,000 / 376,408,942 events
+  read 192,000,000 / 376,408,942 events
+  read 196,000,000 / 376,408,942 events
+  read 200,000,000 / 376,408,942 events
+  read 204,000,000 / 376,408,942 events
+  read 208,000,000 / 376,408,942 events
+  read 212,000,000 / 376,408,942 events
+  read 216,000,000 / 376,408,942 events
+  read 220,000,000 / 376,408,942 events
+  read 224,000,000 / 376,408,942 events
+  read 228,000,000 / 376,408,942 events
+  read 232,000,000 / 376,408,942 events
+  read 236,000,000 / 376,408,942 events
+  read 240,000,000 / 376,408,942 events
+  read 244,000,000 / 376,408,942 events
+  read 248,000,000 / 376,408,942 events
+  read 252,000,000 / 376,408,942 events
+  read 256,000,000 / 376,408,942 events
+  read 260,000,000 / 376,408,942 events
+  read 264,000,000 / 376,408,942 events
+  read 268,000,000 / 376,408,942 events
+  read 272,000,000 / 376,408,942 events
+  read 276,000,000 / 376,408,942 events
+  read 280,000,000 / 376,408,942 events
+  read 284,000,000 / 376,408,942 events
+  read 288,000,000 / 376,408,942 events
+  read 292,000,000 / 376,408,942 events
+  read 296,000,000 / 376,408,942 events
+  read 300,000,000 / 376,408,942 events
+  read 304,000,000 / 376,408,942 events
+  read 308,000,000 / 376,408,942 events
+  read 312,000,000 / 376,408,942 events
+  read 316,000,000 / 376,408,942 events
+  read 320,000,000 / 376,408,942 events
+  read 324,000,000 / 376,408,942 events
+  read 328,000,000 / 376,408,942 events
+  read 332,000,000 / 376,408,942 events
+  read 336,000,000 / 376,408,942 events
+  read 340,000,000 / 376,408,942 events
+  read 344,000,000 / 376,408,942 events
+  read 348,000,000 / 376,408,942 events
+  read 352,000,000 / 376,408,942 events
+  read 356,000,000 / 376,408,942 events
+  read 360,000,000 / 376,408,942 events
+  read 364,000,000 / 376,408,942 events
+  read 368,000,000 / 376,408,942 events
+  read 372,000,000 / 376,408,942 events
+  read 376,000,000 / 376,408,942 events
+  read 376,408,942 / 376,408,942 events
+wrote train_190-ui1u775c/csv/train_190.csv (2176 rows)
+49/49 finished train/190 in 76s
+Report: experiments/phase1_challenging_expansion/report.md
