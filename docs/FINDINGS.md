@@ -6,6 +6,38 @@ Each entry says what was run, the numbers, and where the files are. AUC is the p
 
 ---
 
+## November 22, 2026: first CfC loses to the GRU and the CNN
+
+**Run:** `src/train/recurrent.py` trained a CfC and a GRU, each with the real gap between non-empty 0.5 ms bins and with the gap fixed at 1. Windows, training recordings and validation recordings are the CNN's. Every model has 4,833 to 4,879 parameters and 5 seeds. The recurrent models use AdamW at 0.001, batch 128, gradient norm clipped at 1 and the last epoch. The 12-epoch run was fixed before any result was seen. The 40-epoch run was added after validation showed training loss still falling, so it is secondary; the CNN was retrained at 40 epochs too.
+
+"Matched AUC" compares 663 drone windows with 663 background windows from the same recordings, paired so log event counts differ by under 0.15 (`src/count_matched.py`). Event count alone scores 0.502 on it. 356 of the 663 pairs come from train/95 (Betafpv air75), so this number leans on one recording.
+
+| Model (validation) | AUC, 12 epochs | Matched, 12 | AUC, 40 epochs | Matched, 40 |
+|---|---:|---:|---:|---:|
+| Event count | 0.932 | 0.502 | | |
+| FFT + count | 0.952 | 0.608 | | |
+| Inverted variance / mean of bin counts | 0.284 | 0.786 | | |
+| CNN | 0.957 ± 0.002 | 0.735 ± 0.019 | 0.967 ± 0.003 | 0.853 ± 0.018 |
+| CfC, real gap | 0.942 ± 0.005 | 0.680 ± 0.015 | 0.953 ± 0.008 | 0.756 ± 0.009 |
+| CfC, constant gap | 0.939 ± 0.001 | 0.644 ± 0.014 | 0.944 ± 0.003 | 0.703 ± 0.015 |
+| GRU, real gap | 0.954 ± 0.007 | 0.767 ± 0.039 | 0.971 ± 0.014 | 0.867 ± 0.089 |
+| GRU, constant gap | 0.953 ± 0.003 | 0.765 ± 0.011 | 0.964 ± 0.001 | 0.864 ± 0.016 |
+
+At 40 epochs GRU seed 0 with the real gap had a training loss spike (1.195 near epoch 16) and ended at 0.708 matched AUC; the other four seeds scored 0.904 to 0.909. Seed 0 is kept in the mean, which is why the standard deviation is 0.089.
+
+**What it means:**
+
+- **The CfC target is missed.** At 40 epochs its AUC (0.953 ± 0.008) is level with the frozen FFT + count baseline (0.952) and below the CNN and both GRUs.
+- **The real gap helps the CfC,** by 0.036 matched AUC at 12 epochs and 0.053 at 40. For the GRU the difference is 0.002 and 0.003, with the 40-epoch figure inside the seed spread.
+- **Shuffling the bins lowers the 40-epoch CNN's matched AUC** from 0.853 to 0.786, the same as variance/mean. At 12 epochs shuffling changed nothing (0.735 to 0.730). Shuffled windows are unlike anything in training, so this does not separate bin order from unfamiliar input.
+- **The setup was not equal.** The CfC received raw gaps of 1 to 1,000 and the GRU received log gaps. The CfC cell also has no path that copies its state forward, which the GRU has. Neither explanation has been tested.
+
+**Not done:** the challenging split has not been scored for the CNN, CfC or GRU, and stays closed until the models stop changing. YOLO11n is untrained (`ultralytics` is not installed). The CfC cell follows the published equation and has not been checked against `ncps`.
+
+**Files:** `runs/recurrent-2026-11-22/`, `runs/recurrent-40ep-2026-11-22/` and `runs/cnn-40ep-2026-11-22/` (git-ignored); `heldout.json` in the first two has every model, seed and recording.
+
+---
+
 ## November 9, 2026 · Plain FFT trails event count across 58 challenging recordings
 
 Phase 1 tested whether a sharp repeating frequency inside a labelled drone box could distinguish drone windows from background windows. It also established a baseline for later models. The experiment produced precision and recall measurements on FRED, which was the Phase 1 completion criterion in the [README](../README.md#plan-timeline-set-2026-11-01).
