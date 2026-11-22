@@ -6,6 +6,36 @@ Each entry says what was run, the numbers, and where the files are. AUC is the p
 
 ---
 
+## November 22, 2026: event packets help the CfC, but the GRU still leads
+
+**Run:** `src/train/packets.py`, seven arms, 40 epochs, 5 seeds, settings fixed before any result. Packets hold N consecutive events and their real gap; only the arms marked "space" also see position and spread. Every window is verified against its stored event count. Same validation windows and 663 matched pairs as the entry below. The challenging split is not scored.
+
+| Arm (validation) | AUC | Matched AUC | Recall | False alarms/min |
+|---|---:|---:|---:|---:|
+| GRU, real gap | 0.979 ± 0.001 | 0.911 ± 0.006 | 0.910 | 10.2 |
+| GRU, constant gap | 0.969 ± 0.018 | 0.815 ± 0.123 | 0.874 | 11.3 |
+| CfC, real gap (gate and feature) | 0.960 ± 0.011 | 0.851 ± 0.006 | 0.825 | 8.8 |
+| CfC, real gap (gate only) | 0.957 ± 0.020 | 0.815 ± 0.033 | 0.830 | 8.4 |
+| CfC, constant gap | 0.945 ± 0.002 | 0.786 ± 0.061 | 0.809 | 8.9 |
+| GRU, position and spread added | 0.996 ± 0.003 | 0.992 ± 0.001 | 0.985 | 7.7 |
+| CfC, position and spread added | 0.996 ± 0.001 | 0.989 ± 0.003 | 0.991 | 11.2 |
+
+For comparison on the same validation windows: CNN 0.967 ± 0.003 / 0.853 ± 0.018, FFT + count 0.952 / 0.608, count-window CfC 0.953 ± 0.008 / 0.756 ± 0.009.
+
+**What it means:**
+
+- **The GRU beats the CfC on identical packets:** by 0.020 AUC (all 5 seeds) and 0.060 matched AUC (all 5 seeds). The CfC's 0.851 matched AUC is level with the CNN's 0.853, not above it.
+- **Timing helps the CfC.** Real gaps beat constant gaps by 0.015 AUC (4 of 5 seeds) and 0.066 matched AUC (5 of 5). Giving the gap only to the gate is 0.036 worse than also giving it as a feature (4 of 5 seeds).
+- **Timing helps the GRU too:** 0.096 matched AUC (5 of 5 seeds) with a large spread, because one constant-gap seed reached only 0.596.
+- **The CfC trains less steadily.** Its loss spiked up to 1.39 after epoch 5, against 0.75 for the GRU, and the last epoch is kept without selection. A lower learning rate or a decay schedule has not been tried; it would have to go to every arm.
+- **Read the space arms as untrusted.** A linear model on the average position and spread, with no timing, scores 0.918 AUC and 0.861 matched AUC on validation. Drone boxes sit on the annotated drone and background boxes sit on scenery, so part of that signal comes from how the boxes were placed. Nothing here separates that from real shape.
+
+**Not done:** the challenging split, YOLO, an `ncps` check, and any change to the CfC cell.
+
+**Files:** `runs/packets-2026-11-22/` (weights and results per arm, force-added to the `max` branch; logs and raw scores are not).
+
+---
+
 ## November 22, 2026: first CfC loses to the GRU and the CNN
 
 **Run:** `src/train/recurrent.py` trained a CfC and a GRU, each with the real gap between non-empty 0.5 ms bins and with the gap fixed at 1. Windows, training recordings and validation recordings are the CNN's. Every model has 4,833 to 4,879 parameters and 5 seeds. The recurrent models use AdamW at 0.001, batch 128, gradient norm clipped at 1 and the last epoch. The 12-epoch run was fixed before any result was seen. The 40-epoch run was added after validation showed training loss still falling, so it is secondary; the CNN was retrained at 40 epochs too.

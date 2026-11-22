@@ -1,6 +1,6 @@
 # CfC against GRU on event-camera drone windows
 
-Written November 22, 2026, on the `max` branch. Training of the event-packet models described below was still running when this was committed; results will follow in `docs/HANDOFF_cfc.md`.
+Written November 22, 2026, on the `max` branch. Results and next steps are in [HANDOFF_cfc.md](HANDOFF_cfc.md).
 
 ## The question
 
@@ -18,7 +18,7 @@ Each example is a 0.5 s window of events inside a box, from [FRED](https://githu
 
 Counting in bins removed most of the irregular timing. In validation drone windows, 96% of the gaps between non-empty bins are exactly one bin, and 48% of drone windows have no other gap. The CfC had almost nothing irregular to use. The input was also unequal: the CfC got raw gaps and the GRU got log gaps.
 
-**2. Event packets (training now).** Each window's events are grouped into packets of N consecutive events, with N chosen so a window has at most 500 packets. A packet carries:
+**2. Event packets (trained).** Each window's events are grouped into packets of N consecutive events, with N chosen so a window has at most 500 packets. A packet carries:
 
 - the gap, in milliseconds, since the previous packet's last event
 - the ON fraction (share of brightness-increase events)

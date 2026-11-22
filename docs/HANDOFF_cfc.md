@@ -1,0 +1,62 @@
+# CfC handoff
+
+Written November 22, 2026, on the `max` branch. The question, task and protocol are in [CFC_EXPERIMENT.md](CFC_EXPERIMENT.md); every result and its caveats are in [FINDINGS.md](FINDINGS.md), newest first.
+
+## Where it stands
+
+A CfC does not yet beat a GRU of the same size on FRED drone windows. With identical event packets, the GRU scores 0.979 ± 0.001 AUC and 0.911 ± 0.006 matched AUC on validation, the CfC 0.960 ± 0.011 and 0.851 ± 0.006. The CfC's matched AUC is level with the CNN's (0.853). "Matched AUC" compares windows whose event counts are nearly equal, where event count alone scores 0.502.
+
+Timing does help the CfC: real packet gaps beat constant gaps by 0.066 matched AUC in 5 of 5 seeds. It is the CfC's cell, not the input, that now has the most unexplained difference from the GRU.
+
+The challenging split has not been scored for any of these models.
+
+## What is trained
+
+| Set | Where | Arms | Seeds |
+|---|---|---|---|
+| Event packets | `runs/packets-2026-11-22/<arm>/` | `time_cfc`, `time_cfc_gate`, `time_cfc_const`, `time_gru`, `time_gru_const`, `space_cfc`, `space_gru` | 0 to 4 |
+| Count windows | `runs/recurrent-2026-11-22/` and `runs/recurrent-40ep-2026-11-22/` (not in git) | `cfc_dt`, `cfc_const`, `gru_dt`, `gru_const` | 0 to 4 |
+| Crop CNN | `runs/cnn-fred-2026-11-12/`, `runs/cnn-40ep-2026-11-22/` (not in git) | `EventCountCNN` | 0 to 4 |
+| Full-frame detector | `runs/fred-detector-2026-11-12/` (not in git) | `EventDetector` | 0 to 4 |
+
+Only the packet weights and their `results.json` files are force-added, because `.gitignore` excludes `runs/` and `*.pt`. To get the others, ask Max or rerun the training commands below.
+
+The packet models need a window's `[gap, features, mask, log_count]` tensors, which `src/train/packets.py` builds. To load one:
+
+```python
+import torch
+from src.models.packet_models import PACKET_ARMS
+from src.data.event_packets import FEATURES
+
+feature_set, constant_gap, build = PACKET_ARMS["time_cfc"]
+model = build(len(FEATURES[feature_set]))
+model.load_state_dict(torch.load("runs/packets-2026-11-22/time_cfc/seed_0.pt", map_location="cpu"))
+```
+
+## How to rerun
+
+Needs the FRED recordings listed in `experiments/phase1_sequences.json` (tune and heldout) as `events.npy`, plus numpy and torch. No GPU is needed: a packet arm takes about 8 s per epoch for a CfC on Max's Mac CPU.
+
+```
+python -m src.train.recurrent --arm cfc_dt --out runs/recurrent --epochs 40
+python -m src.train.packets --arm time_cfc --out runs/packets
+python -m src.train.evaluate_all --set heldout --recurrent runs/recurrent-40ep-2026-11-22 --cnn runs/cnn-40ep-2026-11-22 --out FILE
+```
+
+`evaluate_all` scores the count-window models and refuses to overwrite its output file. Do not point it at `--set challenging` until the models stop changing; it is a one-time measurement.
+
+## Next steps, in the order I would do them
+
+1. **Give the CfC a path that copies its state forward** (the GRU has one, the CfC does not) and rerun `time_cfc` against `time_gru`. Nothing else changes.
+2. **Check training stability:** a lower learning rate and a decay schedule, for every arm. The CfC's loss spiked up to 1.39 after epoch 5 while the GRU's peaked at 0.75.
+3. **Check the cell against `ncps`** at batch size 1. It follows the published CfC equation and is tested for batching and gradients, but has not been compared with the reference code.
+4. **Fix the placement shortcut before using position features.** A linear model on position and spread alone reaches 0.861 matched AUC, so those arms cannot show rotor timing is at work.
+5. **Add recordings.** There are five training recordings, one per drone type. Over half the matched pairs (356 of 663) come from train/95.
+6. **Then score the challenging split once** and run YOLO if the full-frame comparison is wanted (`ultralytics` is not installed and needs approval).
+
+## Known gaps
+
+- The CfC's gate and the GRU's feature see the gap as `log1p(ms)`; in the earlier count-window run the CfC had raw gaps. Do not compare CfC numbers across the two runs as if only the input changed.
+- Window-level event count is a model input at the readout in the packet arms but not in the count-window arms.
+- The camera (SilkyEvCam VGA) arrived November 18 and has no lens; nothing here has been tested on it, or on a Raspberry Pi.
+- No model has been tested on birds.
