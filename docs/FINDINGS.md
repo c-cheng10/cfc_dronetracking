@@ -6,6 +6,32 @@ Each entry says what was run, the numbers, and where the files are. AUC is the p
 
 ---
 
+## November 22, 2026: a memory path lifts the CfC to the LSTM, still below the GRU
+
+**Run:** `src/train/packets.py` with three new time-only arms, same packets, protocol and 663 matched pairs as the entry below. `time_mmcfc` is a mixed-memory CfC: an LSTM cell carries a memory and its state enters the CfC at every packet (hidden 20, backbone 27). `time_lstm` is a plain LSTM (hidden 33), added so a gain cannot be credited to the CfC when it comes from the LSTM. Parameters: 4,823 and 4,952. The challenging split is not scored.
+
+| Arm (validation) | AUC | Matched AUC | Recall | False alarms/min |
+|---|---:|---:|---:|---:|
+| GRU, real gap (from below) | 0.979 ± 0.001 | 0.911 ± 0.006 | 0.910 | 10.2 |
+| Mixed-memory CfC, real gap | 0.967 ± 0.008 | 0.889 ± 0.015 | 0.826 | 7.9 |
+| LSTM, real gap | 0.968 ± 0.011 | 0.879 ± 0.023 | 0.860 | 9.4 |
+| CfC, real gap (from below) | 0.960 ± 0.011 | 0.851 ± 0.006 | 0.825 | 8.8 |
+| Mixed-memory CfC, constant gap | 0.964 ± 0.011 | 0.834 ± 0.032 | 0.844 | 8.6 |
+
+Differences, matched AUC, paired by seed: mixed-memory CfC over plain CfC +0.037 (5 of 5 seeds); over its constant-gap version +0.054 (5 of 5); over the LSTM +0.010 (2 of 5); against the GRU −0.022 (0 of 5).
+
+**What it means:**
+
+- **The memory path helps the CfC,** by 0.037 matched AUC in every seed, and timing still matters inside it.
+- **It does not separate the CfC from an LSTM.** The mixed-memory CfC and the LSTM are level (0.889 against 0.879, 2 of 5 seeds in the CfC's favour), so this run cannot credit the gain to the CfC part.
+- **The GRU still leads** every CfC variant, by 0.022 matched AUC and 0.012 AUC in all 5 seeds, and has the lowest seed spread.
+- **Training is steadier but not steady.** The mixed-memory CfC's loss peaked at 0.80 after epoch 5 (plain CfC: 1.39). Its constant-gap version peaked at 1.57. The learning rate has still not been varied for any arm.
+- Cost: 12.5 s per epoch on the Mac CPU, against about 8 s for the plain CfC.
+
+**Files:** `runs/packets-2026-11-22/time_mmcfc*/` and `time_lstm/` (not committed).
+
+---
+
 ## November 22, 2026: event packets help the CfC, but the GRU still leads
 
 **Run:** `src/train/packets.py`, seven arms, 40 epochs, 5 seeds, settings fixed before any result. Packets hold N consecutive events and their real gap; only the arms marked "space" also see position and spread. Every window is verified against its stored event count. Same validation windows and 663 matched pairs as the entry below. The challenging split is not scored.

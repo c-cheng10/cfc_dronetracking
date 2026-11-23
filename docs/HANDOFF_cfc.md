@@ -6,7 +6,9 @@ Written November 22, 2026, on the `max` branch. The question, task and protocol 
 
 A CfC does not yet beat a GRU of the same size on FRED drone windows. With identical event packets, the GRU scores 0.979 ± 0.001 AUC and 0.911 ± 0.006 matched AUC on validation, the CfC 0.960 ± 0.011 and 0.851 ± 0.006. The CfC's matched AUC is level with the CNN's (0.853). "Matched AUC" compares windows whose event counts are nearly equal, where event count alone scores 0.502.
 
-Timing does help the CfC: real packet gaps beat constant gaps by 0.066 matched AUC in 5 of 5 seeds. It is the CfC's cell, not the input, that now has the most unexplained difference from the GRU.
+Timing does help the CfC: real packet gaps beat constant gaps by 0.066 matched AUC in 5 of 5 seeds.
+
+Adding a memory path (an LSTM cell feeding the CfC, called mixed memory) raised the CfC to 0.967 ± 0.008 AUC and 0.889 ± 0.015 matched AUC, a gain of 0.037 matched AUC in 5 of 5 seeds. A plain LSTM of the same size scores 0.968 ± 0.011 and 0.879 ± 0.023, level with it, so the gain cannot yet be credited to the CfC part. The GRU still leads every CfC variant in all 5 seeds.
 
 The challenging split has not been scored for any of these models.
 
@@ -14,7 +16,7 @@ The challenging split has not been scored for any of these models.
 
 | Set | Where | Arms | Seeds |
 |---|---|---|---|
-| Event packets | `runs/packets-2026-11-22/<arm>/` | `time_cfc`, `time_cfc_gate`, `time_cfc_const`, `time_gru`, `time_gru_const`, `space_cfc`, `space_gru` | 0 to 4 |
+| Event packets | `runs/packets-2026-11-22/<arm>/` | `time_cfc`, `time_cfc_gate`, `time_cfc_const`, `time_mmcfc`, `time_mmcfc_const`, `time_lstm`, `time_gru`, `time_gru_const`, `space_cfc`, `space_gru` | 0 to 4 |
 | Count windows | `runs/recurrent-2026-11-22/` and `runs/recurrent-40ep-2026-11-22/` (not in git) | `cfc_dt`, `cfc_const`, `gru_dt`, `gru_const` | 0 to 4 |
 | Crop CNN | `runs/cnn-fred-2026-11-12/`, `runs/cnn-40ep-2026-11-22/` (not in git) | `EventCountCNN` | 0 to 4 |
 | Full-frame detector | `runs/fred-detector-2026-11-12/` (not in git) | `EventDetector` | 0 to 4 |
@@ -47,12 +49,13 @@ python -m src.train.evaluate_all --set heldout --recurrent runs/recurrent-40ep-2
 
 ## Next steps, in the order I would do them
 
-1. **Give the CfC a path that copies its state forward** (the GRU has one, the CfC does not) and rerun `time_cfc` against `time_gru`. Nothing else changes.
-2. **Check training stability:** a lower learning rate and a decay schedule, for every arm. The CfC's loss spiked up to 1.39 after epoch 5 while the GRU's peaked at 0.75.
-3. **Check the cell against `ncps`** at batch size 1. It follows the published CfC equation and is tested for batching and gradients, but has not been compared with the reference code.
-4. **Fix the placement shortcut before using position features.** A linear model on position and spread alone reaches 0.861 matched AUC, so those arms cannot show rotor timing is at work.
-5. **Add recordings.** There are five training recordings, one per drone type. Over half the matched pairs (356 of 663) come from train/95.
-6. **Then score the challenging split once** and run YOLO if the full-frame comparison is wanted (`ultralytics` is not installed and needs approval).
+1. **Done: a memory path for the CfC** (`time_mmcfc`, with the `time_lstm` control). See above and FINDINGS.
+2. **Test the claim a CfC is supposed to win on:** train at one event rate and test at others, or drop packets at test time. On matched data the gate has not shown an advantage, so this is the experiment that decides whether the CfC is worth keeping. Run every time-only arm, the GRU and LSTM included.
+3. **Check training stability:** a lower learning rate and a decay schedule, for every arm. The CfC's loss spiked up to 1.39 after epoch 5 while the GRU's peaked at 0.75; with mixed memory the peak fell to 0.80.
+4. **Check the cell against `ncps`** at batch size 1. It follows the published CfC equation and is tested for batching and gradients, but has not been compared with the reference code.
+5. **Fix the placement shortcut before using position features.** A linear model on position and spread alone reaches 0.861 matched AUC, so those arms cannot show rotor timing is at work.
+6. **Add recordings.** There are five training recordings, one per drone type. Over half the matched pairs (356 of 663) come from train/95.
+7. **Then score the challenging split once** and run YOLO if the full-frame comparison is wanted (`ultralytics` is not installed and needs approval).
 
 ## Known gaps
 

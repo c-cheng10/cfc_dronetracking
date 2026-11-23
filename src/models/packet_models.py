@@ -52,6 +52,45 @@ class PacketGRU(nn.Module):
         return self.readout(states, mask, log_count)
 
 
+class PacketMixedCfC(nn.Module):
+    """CfC with mixed memory: an LSTM cell carries memory and its state enters the CfC.
+
+    Each packet: (h, c) = LSTM(x, (h, c)), then h = CfC(x, h, gap). The LSTM's c
+    is copied forward by its own gates, which the plain CfC cell cannot do.
+    """
+
+    def __init__(self, inputs, hidden, backbone):
+        super().__init__()
+        self.hidden = hidden
+        self.lstm = nn.LSTMCell(inputs, hidden)
+        self.cell = CfCCell(inputs, hidden, backbone)
+        self.readout = PacketReadout(hidden)
+
+    def forward(self, gap, features, mask, log_count):
+        h = features.new_zeros(len(features), self.hidden)
+        c = torch.zeros_like(h)
+        states = []
+        for t in range(features.shape[1]):
+            x = features[:, t]
+            h, c = self.lstm(x, (h, c))
+            h = self.cell(x, h, gap[:, t:t + 1])
+            states.append(h)
+        return self.readout(torch.stack(states, dim=1), mask, log_count)
+
+
+class PacketLSTM(nn.Module):
+    """Control for PacketMixedCfC: the same memory without the CfC."""
+
+    def __init__(self, inputs, hidden):
+        super().__init__()
+        self.lstm = nn.LSTM(inputs, hidden, batch_first=True)
+        self.readout = PacketReadout(hidden)
+
+    def forward(self, gap, features, mask, log_count):
+        states, _ = self.lstm(features)
+        return self.readout(states, mask, log_count)
+
+
 # name -> (feature set, constant gap, builder)
 PACKET_ARMS = {
     "time_cfc": ("time", False, lambda n: PacketCfC(n, 29, 32)),
@@ -59,6 +98,9 @@ PACKET_ARMS = {
     "time_cfc_const": ("time", True, lambda n: PacketCfC(n, 29, 32)),
     "time_gru": ("time", False, lambda n: PacketGRU(n, 38)),
     "time_gru_const": ("time", True, lambda n: PacketGRU(n, 38)),
+    "time_mmcfc": ("time", False, lambda n: PacketMixedCfC(n, 20, 27)),
+    "time_mmcfc_const": ("time", True, lambda n: PacketMixedCfC(n, 20, 27)),
+    "time_lstm": ("time", False, lambda n: PacketLSTM(n, 33)),
     "space_cfc": ("space", False, lambda n: PacketCfC(n, 28, 32)),
     "space_gru": ("space", False, lambda n: PacketGRU(n, 36)),
 }

@@ -41,7 +41,7 @@ Every arm has 4,826 to 4,912 parameters and 5 seeds. All use AdamW at 0.001, bat
 | `time_gru_const` | fixed at 1 ms | the GRU with no timing |
 | `space_cfc`, `space_gru` | real, plus position and spread | secondary, see above |
 
-The CfC cell has no path that copies its state forward, which a GRU has. It has not been given one yet, so the packet run changes only the input.
+The plain CfC cell has no path that copies its state forward, which a GRU has, so the first packet run changed only the input. A later run added three time-only arms: `time_mmcfc` (an LSTM cell feeding the CfC, called mixed memory), `time_mmcfc_const` (the same with the gap fixed at 1 ms) and `time_lstm` (a plain LSTM, so any gain can be checked against the LSTM alone). They have 4,823 to 4,952 parameters.
 
 ## How results are read
 
