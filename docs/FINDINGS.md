@@ -6,6 +6,40 @@ Each entry says what was run, the numbers, and where the files are. AUC is the p
 
 ---
 
+## November 23, 2026: dropping packets: the CfC degrades less than a plain GRU, not less than an augmented one
+
+**Claim tested** (fixed before any result): trained at normal event rates, the CfC loses less accuracy than the GRU when validation packets are dropped, even against a GRU trained with packets dropped.
+
+**Run:** `src/train/rate_shift.py`. Validation packets were removed at random at 0, 25, 50, 75 and 90%; a surviving packet's gap becomes the time since the previous survivor, and the event count is recomputed (`src/data/packet_drop.py`). Every arm sees the same dropped packets. Two new arms were trained with `--drop-augment 0.9` (each window loses packets at a rate drawn from 0 to 90%, freshly each epoch): `time_gru_aug` and `time_mmcfc_aug`. Everything else matches the entries below. At 90% the median drone gap is 6.86 ms, too coarse to sample a 200 Hz rotor, so that rate tests how each model degrades, not rotor detection.
+
+AUC, mean of 5 seeds:
+
+| Arm | 0% | 25% | 50% | 75% | 90% |
+|---|---:|---:|---:|---:|---:|
+| GRU | 0.979 | 0.919 | 0.822 | 0.811 | 0.747 |
+| CfC | 0.960 | 0.927 | 0.872 | 0.860 | 0.804 |
+| Mixed-memory CfC | 0.967 | 0.928 | 0.855 | 0.863 | 0.835 |
+| LSTM | 0.968 | 0.942 | 0.891 | 0.877 | 0.740 |
+| GRU, constant gap | 0.969 | 0.956 | 0.938 | 0.915 | 0.890 |
+| CfC, constant gap | 0.945 | 0.939 | 0.932 | 0.920 | 0.899 |
+| Mixed-memory CfC, constant gap | 0.964 | 0.957 | 0.945 | 0.924 | 0.890 |
+| GRU, drop-augmented | 0.967 | 0.964 | 0.957 | 0.945 | 0.922 |
+| Mixed-memory CfC, drop-augmented | 0.965 | 0.963 | 0.959 | 0.947 | 0.929 |
+
+Matched AUC, same order: GRU 0.911 / 0.864 / 0.861 / 0.822 / 0.537; CfC 0.851 / 0.829 / 0.799 / 0.707 / 0.547; mixed-memory CfC 0.889 / 0.865 / 0.836 / 0.788 / 0.550; LSTM 0.879 / 0.848 / 0.831 / 0.760 / 0.468; augmented GRU 0.897 / 0.889 / 0.877 / 0.851 / 0.774; augmented mixed-memory CfC 0.884 / 0.882 / 0.869 / 0.826 / 0.751. Every number per seed is in `runs/packets-2026-11-22/rate_shift.json`.
+
+**What it means:**
+
+- **The claim fails as stated.** Against the drop-augmented GRU, the drop-augmented CfC is level (AUC 0.929 against 0.922 at 90%, matched AUC 0.751 against 0.774, the GRU ahead in 5 of 5 seeds), and the unaugmented CfC is far below it (AUC −0.101 at 50%, 0 of 5 seeds).
+- **Against an unaugmented GRU, the CfC holds AUC better.** Mixed-memory CfC loses 0.100 less AUC than the GRU at 90% (5 of 5 seeds), 0.046 less at 50% (5 of 5). On matched AUC the difference is small and mixed: 0.036 less loss at 90% (4 of 5 seeds), none at 50% or 75%. So most of the CfC's advantage is in windows that event count already separates, not in the hard pairs.
+- **Real gaps make every model fragile when gaps change.** Each constant-gap arm degrades less than its real-gap version, e.g. GRU 0.890 against 0.747 at 90%. A model that learned the training gap distribution fails when it shifts; the CfC's gate softens that but does not remove it.
+- **Training with dropped packets fixes it for both models,** at a cost of 0.012 AUC for the GRU at 0% (0.979 to 0.967).
+- AUC for the unaugmented CfCs rises from 50% to 75% (0.855 to 0.863). The cause has not been checked.
+
+**For the pitch:** the CfC's timing assumption is a real but small advantage that data augmentation matches. The defensible statement is that a CfC degrades more gracefully than a GRU trained the ordinary way. It is not better than a GRU trained with dropped packets.
+
+---
+
 ## November 22, 2026: a memory path lifts the CfC to the LSTM, still below the GRU
 
 **Run:** `src/train/packets.py` with three new time-only arms, same packets, protocol and 663 matched pairs as the entry below. `time_mmcfc` is a mixed-memory CfC: an LSTM cell carries a memory and its state enters the CfC at every packet (hidden 20, backbone 27). `time_lstm` is a plain LSTM (hidden 33), added so a gain cannot be credited to the CfC when it comes from the LSTM. Parameters: 4,823 and 4,952. The challenging split is not scored.

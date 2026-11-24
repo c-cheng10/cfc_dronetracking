@@ -10,13 +10,15 @@ Timing does help the CfC: real packet gaps beat constant gaps by 0.066 matched A
 
 Adding a memory path (an LSTM cell feeding the CfC, called mixed memory) raised the CfC to 0.967 ± 0.008 AUC and 0.889 ± 0.015 matched AUC, a gain of 0.037 matched AUC in 5 of 5 seeds. A plain LSTM of the same size scores 0.968 ± 0.011 and 0.879 ± 0.023, level with it, so the gain cannot yet be credited to the CfC part. The GRU still leads every CfC variant in all 5 seeds.
 
+**Rate-shift test (November 23):** with validation packets dropped at random, the mixed-memory CfC loses less AUC than a normally trained GRU (0.835 against 0.747 at 90% dropped, 5 of 5 seeds), mostly on windows that event count already separates. A GRU trained with packets dropped matches it (AUC 0.922 against the drop-trained CfC's 0.929 at 90%, matched AUC 0.774 against 0.751). The claim we fixed in advance, that the CfC degrades less even against a drop-trained GRU, failed. Details in FINDINGS.
+
 The challenging split has not been scored for any of these models.
 
 ## What is trained
 
 | Set | Where | Arms | Seeds |
 |---|---|---|---|
-| Event packets | `runs/packets-2026-11-22/<arm>/` | `time_cfc`, `time_cfc_gate`, `time_cfc_const`, `time_mmcfc`, `time_mmcfc_const`, `time_lstm`, `time_gru`, `time_gru_const`, `space_cfc`, `space_gru` | 0 to 4 |
+| Event packets | `runs/packets-2026-11-22/<arm>/` | `time_cfc`, `time_cfc_gate`, `time_cfc_const`, `time_mmcfc`, `time_mmcfc_const`, `time_mmcfc_aug`, `time_lstm`, `time_gru`, `time_gru_aug`, `time_gru_const`, `space_cfc`, `space_gru` | 0 to 4 |
 | Count windows | `runs/recurrent-2026-11-22/` and `runs/recurrent-40ep-2026-11-22/` (not in git) | `cfc_dt`, `cfc_const`, `gru_dt`, `gru_const` | 0 to 4 |
 | Crop CNN | `runs/cnn-fred-2026-11-12/`, `runs/cnn-40ep-2026-11-22/` (not in git) | `EventCountCNN` | 0 to 4 |
 | Full-frame detector | `runs/fred-detector-2026-11-12/` (not in git) | `EventDetector` | 0 to 4 |
@@ -42,6 +44,8 @@ Needs the FRED recordings listed in `experiments/phase1_sequences.json` (tune an
 ```
 python -m src.train.recurrent --arm cfc_dt --out runs/recurrent --epochs 40
 python -m src.train.packets --arm time_cfc --out runs/packets
+python -m src.train.packets --arm time_gru --out runs/packets --drop-augment 0.9
+python -m src.train.rate_shift --runs runs/packets-2026-11-22 --out FILE
 python -m src.train.evaluate_all --set heldout --recurrent runs/recurrent-40ep-2026-11-22 --cnn runs/cnn-40ep-2026-11-22 --out FILE
 ```
 
@@ -50,7 +54,7 @@ python -m src.train.evaluate_all --set heldout --recurrent runs/recurrent-40ep-2
 ## Next steps, in the order I would do them
 
 1. **Done: a memory path for the CfC** (`time_mmcfc`, with the `time_lstm` control). See above and FINDINGS.
-2. **Test the claim a CfC is supposed to win on:** train at one event rate and test at others, or drop packets at test time. On matched data the gate has not shown an advantage, so this is the experiment that decides whether the CfC is worth keeping. Run every time-only arm, the GRU and LSTM included.
+2. **Done: packet-drop test** (`src/train/rate_shift.py`, `--drop-augment` in `src/train/packets.py`). The CfC's advantage disappears against a drop-trained GRU. A remaining version to try is a real rate change, such as your own SilkyEvCam recordings or windows from far-away drones, instead of random drops.
 3. **Check training stability:** a lower learning rate and a decay schedule, for every arm. The CfC's loss spiked up to 1.39 after epoch 5 while the GRU's peaked at 0.75; with mixed memory the peak fell to 0.80.
 4. **Check the cell against `ncps`** at batch size 1. It follows the published CfC equation and is tested for batching and gradients, but has not been compared with the reference code.
 5. **Fix the placement shortcut before using position features.** A linear model on position and spread alone reaches 0.861 matched AUC, so those arms cannot show rotor timing is at work.

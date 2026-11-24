@@ -1,5 +1,8 @@
 """Train one event-packet arm. Run: python -m src.train.packets --arm time_cfc --out DIR
 
+With --drop-augment R, every training window loses packets at a rate drawn
+uniformly from 0 to R, freshly each epoch (src/data/packet_drop.py).
+
 Fixed before any result was seen: 40 epochs (12 was shown to undertrain recurrent
 models), batch 128, AdamW at 0.001, gradient norm clipped at 1, last epoch kept,
 seeds 0-4, no tuning on validation. Log counts are standardised with training statistics.
@@ -17,6 +20,7 @@ from torch import nn
 from src.count_matched import both_aucs, matched_pairs
 from src.data.cnn_windows import load_splits
 from src.data.event_packets import FEATURES, MAX_PACKETS, load_packets
+from src.data.packet_drop import drop
 from src.data.window_cache import load_set
 from src.models.packet_models import PACKET_ARMS
 from src.phase1_multiseq import metrics, tune_threshold
@@ -65,9 +69,11 @@ def main():
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--epochs", type=int, default=40)
     parser.add_argument("--threads", type=int, default=2)
+    parser.add_argument("--drop-augment", type=float, default=0.0,
+                        help="train with each window's packets dropped at a rate drawn from 0 to this value")
     args = parser.parse_args()
     torch.set_num_threads(args.threads)
-    out = args.out / args.arm
+    out = args.out / (args.arm + ("_aug" if args.drop_augment else ""))
     out.mkdir(parents=True, exist_ok=False)
     feature_set, constant_gap, build = PACKET_ARMS[args.arm]
 
@@ -88,6 +94,7 @@ def main():
     runs, all_scores = [], {}
     for seed in SEEDS:
         torch.manual_seed(seed)
+        augment = np.random.default_rng(1000 + seed)
         model = build(len(FEATURES[feature_set]))
         optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
         losses, start = [], time.time()
@@ -96,7 +103,15 @@ def main():
             total = 0.0
             for index in torch.randperm(len(targets)).split(BATCH_SIZE):
                 optimizer.zero_grad(set_to_none=True)
-                loss = criterion(model(*batch(train_store, index)), targets[index])
+                if args.drop_augment:
+                    picked = [drop(train_packets[i], np.expm1(train_count[i]).round(),
+                                   augment.uniform(0, args.drop_augment), augment) for i in index.tolist()]
+                    store = tensors([p for p, _ in picked], np.log1p([n for _, n in picked]).astype(np.float32),
+                                    feature_set, constant_gap, stats)
+                    inputs = batch(store, torch.arange(len(index)))
+                else:
+                    inputs = batch(train_store, index)
+                loss = criterion(model(*inputs), targets[index])
                 loss.backward()
                 nn.utils.clip_grad_norm_(model.parameters(), CLIP)
                 optimizer.step()
@@ -123,7 +138,7 @@ def main():
                       "std": float(np.std([r[name] for r in runs], ddof=1))}
                for name in ("auc", "matched_auc", "precision", "recall", "fa_per_min", *(f"auc {s}" for s in val_seq))}
     (out / "results.json").write_text(json.dumps({
-        "arm": args.arm, "feature_set": feature_set, "constant_gap": constant_gap,
+        "arm": args.arm, "drop_augment": args.drop_augment, "feature_set": feature_set, "constant_gap": constant_gap,
         "epochs": args.epochs, "parameters": sum(p.numel() for p in model.parameters()),
         "learning_rate": LEARNING_RATE, "batch_size": BATCH_SIZE, "clip": CLIP,
         "training": train_seq, "validation": val_seq, "matched_pairs": len(pairs[0]),
