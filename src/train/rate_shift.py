@@ -30,11 +30,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--runs", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--split", choices=("phase1", "phase3"), default="phase1")
     args = parser.parse_args()
     if args.out.exists():
         raise FileExistsError(args.out)
     torch.set_num_threads(8)
-    train_seq, val_seq = load_splits()
+    train_seq, val_seq = load_splits(args.split)
     _, train_count, _, _ = load_packets(train_seq)
     stats = (train_count.mean(), train_count.std())
     packets, log_count, y, rows = load_packets(val_seq)

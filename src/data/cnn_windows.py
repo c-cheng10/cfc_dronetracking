@@ -8,12 +8,25 @@ import numpy as np
 from src import phase1_fft as phase1
 
 
-def load_splits() -> tuple[list[str], list[str]]:
-    """Return whole recordings for CNN training and validation."""
-    with (phase1.OUT_DIR / "phase1_sequences.json").open() as source:
+SPLITS = ("phase1", "phase3")
+
+
+def load_splits(split: str = "phase1") -> tuple[list[str], list[str]]:
+    """Return whole recordings for training and validation.
+
+    phase1: 5 + 5 recordings (experiments/phase1_sequences.json), used up to November 24, 2026.
+    phase3: 22 + 15 recordings (experiments/phase3_sequences.json), chosen by src/data/phase3_split.py.
+    """
+    if split not in SPLITS:
+        raise ValueError(f"split must be one of {SPLITS}")
+    with (phase1.OUT_DIR / f"{split}_sequences.json").open() as source:
         splits = json.load(source)
-    train, validation = splits["tune"], splits["heldout"]
-    reserved = set(splits["challenging"]) | set(splits["development"])
+    if split == "phase1":
+        train, validation = splits["tune"], splits["heldout"]
+        reserved = set(splits["challenging"]) | set(splits["development"])
+    else:
+        train, validation = splits["train"], splits["validation"]
+        reserved = set(splits["test"]) | set(splits["development"])
     if set(train) & set(validation) or reserved & (set(train) | set(validation)):
         raise ValueError("Training, validation, and reserved recordings must be disjoint")
     return train, validation

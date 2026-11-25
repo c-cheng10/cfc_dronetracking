@@ -72,13 +72,14 @@ def main():
     parser.add_argument("--lr", type=float, default=LEARNING_RATE)
     parser.add_argument("--drop-augment", type=float, default=0.0,
                         help="train with each window's packets dropped at a rate drawn from 0 to this value")
+    parser.add_argument("--split", choices=("phase1", "phase3"), default="phase1")
     args = parser.parse_args()
     torch.set_num_threads(args.threads)
     out = args.out / (args.arm + ("_aug" if args.drop_augment else ""))
     out.mkdir(parents=True, exist_ok=False)
     feature_set, constant_gap, build = PACKET_ARMS[args.arm]
 
-    train_seq, val_seq = load_splits()
+    train_seq, val_seq = load_splits(args.split)
     train_packets, train_count, train_y, _ = load_packets(train_seq)
     val_packets, val_count, val_y, val_rows = load_packets(val_seq)
     stats = (train_count.mean(), train_count.std())
@@ -139,7 +140,7 @@ def main():
                       "std": float(np.std([r[name] for r in runs], ddof=1))}
                for name in ("auc", "matched_auc", "precision", "recall", "fa_per_min", *(f"auc {s}" for s in val_seq))}
     (out / "results.json").write_text(json.dumps({
-        "arm": args.arm, "drop_augment": args.drop_augment, "feature_set": feature_set, "constant_gap": constant_gap,
+        "arm": args.arm, "split": args.split, "drop_augment": args.drop_augment, "feature_set": feature_set, "constant_gap": constant_gap,
         "epochs": args.epochs, "parameters": sum(p.numel() for p in model.parameters()),
         "learning_rate": args.lr, "batch_size": BATCH_SIZE, "clip": CLIP,
         "training": train_seq, "validation": val_seq, "matched_pairs": len(pairs[0]),

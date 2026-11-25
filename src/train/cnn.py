@@ -82,6 +82,7 @@ def main():
     parser.add_argument("--epochs", type=int, default=12)
     parser.add_argument("--lr", type=float, default=LEARNING_RATE)
     parser.add_argument("--device", choices=("auto", "cpu", "mps"), default="auto")
+    parser.add_argument("--split", choices=("phase1", "phase3"), default="phase1")
     args = parser.parse_args()
     if args.epochs < 1:
         parser.error("--epochs must be positive")
@@ -92,7 +93,7 @@ def main():
         torch.set_num_threads(4)
     args.out.mkdir(parents=True, exist_ok=False)
 
-    train_sequences, validation_sequences = load_splits()
+    train_sequences, validation_sequences = load_splits(args.split)
     print(f"Loading FRED windows for {device} training", flush=True)
     train_counts, train_labels, train_rows = load_split(train_sequences, device)
     val_counts, val_labels, val_rows = load_split(validation_sequences, device)
