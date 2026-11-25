@@ -39,6 +39,37 @@ Packet-drop test at 0.01, AUC / matched AUC:
 
 ---
 
+## November 24, 2026: thinning and jittering events: the CfC is no more robust than an LSTM; the GRU is the fragile one
+
+**Claim tested** (fixed before any result, in `src/train/event_shift.py`): trained the ordinary way, the CfC and mixed-memory CfC lose less AUC and matched AUC than the GRU and LSTM when events are thinned or jittered, and the drop-trained mixed-memory CfC loses less than the drop-trained GRU, since neither was trained on these shifts.
+
+**Why a new test:** the packet-drop test below removes whole packets, which stretches the gaps. A farther drone or a lower-contrast scene removes *events*, and the packetizer then re-groups what is left: a dense window still gets up to 500 packets, just smaller ones. On train/36, keeping 25% of events moved the median packet gap only from 0.95 to 1.02 ms. So here events are changed first, then each window is re-packetized and its event count recomputed.
+
+**Run:** `python -m src.train.event_shift --runs runs/packets-2026-11-22 --out runs/packets-2026-11-22/event_shift.json`. Same 9 trained arms, 5 seeds, validation windows and 663 matched pairs as below; nothing retrained. *Thin K* keeps each event with probability K. *Jitter S* adds Gaussian noise of S ms to each timestamp and re-sorts. Every arm sees the same shifted events. Self-check: the unshifted rebuild reproduces the 0% numbers of `rate_shift.json` for every arm. The training count statistics are read from the Phase 1 CSVs, so only the validation recordings are needed.
+
+AUC / matched AUC, mean of 5 seeds:
+
+| Arm | none | thin 0.5 | thin 0.25 | thin 0.1 | jitter 2 ms |
+|---|---:|---:|---:|---:|---:|
+| CfC | 0.960 / 0.851 | 0.957 / 0.803 | 0.945 / 0.739 | 0.918 / 0.668 | 0.955 / 0.835 |
+| Mixed-memory CfC | 0.967 / 0.889 | 0.964 / 0.844 | 0.943 / 0.779 | 0.900 / 0.698 | 0.964 / 0.874 |
+| LSTM | 0.968 / 0.879 | 0.964 / 0.825 | 0.948 / 0.754 | 0.911 / 0.675 | 0.965 / 0.865 |
+| GRU | 0.979 / 0.911 | 0.970 / 0.862 | 0.936 / 0.791 | 0.860 / 0.721 | 0.976 / 0.895 |
+| GRU, drop-augmented | 0.967 / 0.897 | 0.959 / 0.847 | 0.942 / 0.787 | 0.891 / 0.755 | 0.965 / 0.880 |
+| Mixed-memory CfC, drop-augmented | 0.965 / 0.884 | 0.960 / 0.843 | 0.944 / 0.796 | 0.897 / 0.756 | 0.964 / 0.871 |
+
+Constant-gap arms and the 0.1 and 0.5 ms jitter levels are in the JSON. Jitter up to 0.5 ms changes no arm by more than 0.008.
+
+**What it means:**
+
+- **The claim fails.** On matched AUC every arm trained the ordinary way loses about the same under thinning (0.18 to 0.20 at 10% kept), and the GRU stays ahead of both CfCs at every level. Under 2 ms jitter the CfC and GRU lose the same 0.016. The drop-trained pair are level (0.756 against 0.755 matched at 10% kept).
+- **On plain AUC the GRU is the outlier, not the CfC the winner.** At 10% kept the CfC loses 0.042 and the GRU 0.120, so the CfC ends ahead (0.918 against 0.860, 5 of 5 seeds). But the LSTM loses only 0.057 (0.911), level with the CfC. The gain is on windows that event count separates, the same pattern as the packet-drop test: the GRU's use of the event count breaks when counts fall, and its rotor-timing signal does not degrade faster than the others'.
+- **Plain AUC is what sets false alarms in deployment,** so "a CfC or an LSTM degrades more gracefully than a GRU when the event rate falls" is a defensible, useful statement. "A CfC generalizes better" is not.
+- **Fewer events costs every model a lot of rotor signal.** At 10% of the events matched AUC falls to 0.67 to 0.76 for all arms. This is the first range-like failure curve we have, for PRC-2.
+- Every validation recording has now been used for 12 arms and two shift tests. It is a reused set, not a clean held-out one.
+
+**Files:** `src/train/event_shift.py`, `src/data/event_packets.py` (`build_sequence(shifts=...)`), `runs/packets-2026-11-22/event_shift.json` (not committed: `runs/` is git-ignored).
+
 ## November 24, 2026: at 0.01 the GRU improves again and both plain CfCs fail
 
 **Run:** the six models whose best rate was 0.003 were retrained at 0.01, same protocol and selection rule as the entry below. Mixed-memory CfC was not run, since it already diverged at 0.003.

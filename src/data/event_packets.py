@@ -42,7 +42,9 @@ def packets_from_events(t_ms, polarity, x, y):
     return np.stack((gap, mean(polarity), mx, my, sx, sy), axis=1).astype(np.float32)
 
 
-def build_sequence(sequence):
+def build_sequence(sequence, shifts=None):
+    """Packets and rows for one recording. With shifts {name: fn(t_ms, p, x, y) -> same},
+    each window's events go through every fn first and {name: packets} is returned instead."""
     rows, events, streams, starts, stream_index, n_bins = window_streams(sequence)
     collected = [[] for _ in streams]
     for begin in range(0, events.shape[0], phase1.CHUNK):
@@ -68,7 +70,7 @@ def build_sequence(sequence):
                                  ((y[i] - s["y1"][k]) / h).astype(np.float32)))
     merged = [tuple(np.concatenate(col) for col in zip(*parts, strict=True)) if parts else None
               for parts in collected]
-    packets = []
+    out = {name: [] for name in (shifts or {None: None})}
     for row, start, j in zip(rows, starts, stream_index, strict=True):
         begin = int(start) * phase1.BIN_US
         if merged[j] is None:
@@ -79,8 +81,10 @@ def build_sequence(sequence):
             window = [col[lo:hi] for col in merged[j]]
         if len(window[0]) != int(row["event_count"]):
             raise ValueError(f"{sequence} at {row['t_start_us']} µs: {len(window[0])} events, expected {row['event_count']}")
-        packets.append(packets_from_events((window[0] - begin) / 1000.0, *window[1:]))
-    return packets, rows
+        events_ms = ((window[0] - begin) / 1000.0, *window[1:])
+        for name, fn in (shifts or {None: None}).items():
+            out[name].append(packets_from_events(*(fn(*events_ms) if fn else events_ms)))
+    return (out if shifts else out[None]), rows
 
 
 def load_packets(sequences):
