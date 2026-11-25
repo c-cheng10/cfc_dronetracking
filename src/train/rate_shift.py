@@ -42,8 +42,8 @@ def main():
     dropped = {rate: drop_all(packets, log_count, rate, seed=0) for rate in RATES}
     report = {"rates": RATES, "matched_pairs": len(pairs[0]), "arms": {}}
     for arm in ARMS:
-        if not (args.runs / arm).is_dir():
-            print(f"{arm}: missing, skipped", flush=True)
+        if not (args.runs / arm / "results.json").is_file():
+            print(f"{arm}: missing or unfinished, skipped", flush=True)
             continue
         feature_set, constant_gap, build = PACKET_ARMS[arm.removesuffix("_aug")]
         models = []

@@ -6,6 +6,60 @@ Each entry says what was run, the numbers, and where the files are. AUC is the p
 
 ---
 
+## November 24, 2026: at 0.01 the GRU improves again and both plain CfCs fail
+
+**Run:** the six models whose best rate was 0.003 were retrained at 0.01, same protocol and selection rule as the entry below. Mixed-memory CfC was not run, since it already diverged at 0.003.
+
+| Model (validation) | Matched AUC at 0.003 | Matched AUC at 0.01 | Best rate | Best AUC | Best matched AUC |
+|---|---:|---:|---:|---:|---:|
+| GRU | 0.951 | **0.971** | 0.01 | 0.990 ± 0.003 | 0.971 ± 0.004 |
+| GRU, drop-trained | 0.942 | **0.956** | 0.01 | 0.983 ± 0.004 | 0.956 ± 0.006 |
+| LSTM | 0.911 | **0.952** | 0.01 | 0.984 ± 0.006 | 0.952 ± 0.027 |
+| CfC + memory, drop-trained | 0.908 | **0.943** | 0.01 | 0.975 ± 0.004 | 0.943 ± 0.007 |
+| CfC + memory | diverged | not run | 0.001 | 0.967 ± 0.008 | 0.889 ± 0.015 |
+| CNN | 0.882 | **0.887** | 0.01 | 0.962 ± 0.005 | 0.887 ± 0.013 |
+| CfC | **0.872** | diverged | 0.003 | 0.970 ± 0.009 | 0.872 ± 0.032 |
+
+Paired by seed at each model's best rate, matched AUC: GRU over CfC + memory +0.082 (5 of 5 seeds), over CfC +0.099 (5 of 5), over LSTM +0.019 (5 of 5), over CNN +0.084 (5 of 5). Drop-trained GRU over drop-trained CfC + memory +0.014 (5 of 5). CfC + memory against the CNN +0.002 (3 of 5).
+
+**What it means:**
+
+- **Both CfCs trained on complete windows hit a stability limit the other models don't.** Each diverged one rate above its best, so their best is bounded, while the GRU, LSTM and CNN were still improving at 0.01.
+- **Drop training kept the mixed-memory CfC stable at 0.01,** and it reached 0.943 matched AUC there. The unaugmented version's divergence at 0.003 was one seed (seed 2), so a warm-up schedule or tighter gradient clipping might let it train faster. That has not been tried; it would have to go to every model.
+- **The GRU is still at the top of the range** and might improve further above 0.01. That can only widen its lead, so the comparison with the CfC doesn't depend on it.
+- **The conclusion is firmer after tuning:** on these validation windows a GRU beats every CfC variant in every seed, and the CfC + memory is level with the CNN.
+
+---
+
+## November 24, 2026: learning-rate sweep widens the GRU's lead
+
+**Run:** every model retrained at learning rates 0.0003 and 0.003, beside the existing 0.001, with 5 seeds, 40 epochs and everything else unchanged. Rates and the selection rule were fixed before any result: each model keeps the rate with the best mean validation matched AUC. Because validation now picks the rate, the numbers below are slightly optimistic, and the challenging split is the only clean test left. Summary: `runs/lr-sweep-2026-11-24/summary.json`.
+
+| Model (validation) | 0.0003 | 0.001 | 0.003 | Best AUC | Best matched AUC |
+|---|---:|---:|---:|---:|---:|
+| GRU | 0.878 | 0.911 | **0.951** | 0.987 ± 0.002 | 0.951 ± 0.004 |
+| GRU, drop-trained | 0.858 | 0.897 | **0.942** | 0.974 ± 0.010 | 0.942 ± 0.006 |
+| LSTM | 0.801 | 0.879 | **0.911** | 0.982 ± 0.004 | 0.911 ± 0.023 |
+| CfC + memory, drop-trained | 0.821 | 0.884 | **0.908** | 0.969 ± 0.019 | 0.908 ± 0.011 |
+| CfC + memory | 0.839 | **0.889** | diverged | 0.967 ± 0.008 | 0.889 ± 0.015 |
+| CNN | 0.761 | 0.853 | **0.882** | 0.968 ± 0.003 | 0.882 ± 0.021 |
+| CfC | 0.807 | 0.851 | **0.872** | 0.970 ± 0.009 | 0.872 ± 0.032 |
+
+The first three columns are matched AUC. "Diverged" means training loss became non-finite on seed 2, so that rate failed for that model and was not rerun.
+
+Paired by seed at each model's best rate, matched AUC: GRU over CfC + memory +0.062 (5 of 5 seeds), over plain CfC +0.078 (5 of 5), over the CNN +0.069 (5 of 5); CfC + memory against the CNN +0.007 (2 of 5); drop-trained GRU over drop-trained CfC + memory +0.035 (5 of 5).
+
+Packet-drop test at the best rates, AUC at 0 / 50 / 90% dropped: GRU 0.987 / 0.788 / 0.767; CfC 0.970 / 0.920 / 0.866; CfC + memory 0.967 / 0.855 / 0.835; drop-trained GRU 0.974 / 0.972 / 0.939; drop-trained CfC + memory 0.969 / 0.968 / 0.939. Matched AUC at 50%: GRU 0.876, CfC 0.797, drop-trained GRU 0.922, drop-trained CfC + memory 0.890. Per seed: `runs/lr-sweep-2026-11-24/lr0.003/rate_shift.json`.
+
+**What it means:**
+
+- **Tuning helped the GRU most.** Its matched AUC rose from 0.911 to 0.951 and its lead over CfC + memory grew from 0.022 to 0.062. The old shared rate was holding the GRU back more than the CfC.
+- **CfC + memory cannot use the faster rate.** It diverged at 0.003 and is the only model whose best rate was 0.001.
+- **The sweep is not finished.** Six of seven models did best at 0.003, the highest rate tried, so 0.01 may be better still. Until it is tried, the ranking at the top could still change.
+- **The packet-drop pattern holds.** Trained on complete windows, both CfCs lose less AUC than the GRU (90%: 0.866 and 0.835 against 0.767), but the GRU keeps more matched AUC at 50%. Drop-trained, the two are level on AUC (0.939 each) and the GRU leads on matched AUC.
+
+---
+
 ## November 23, 2026: dropping packets: the CfC degrades less than a plain GRU, not less than an augmented one
 
 **Claim tested** (fixed before any result): trained at normal event rates, the CfC loses less accuracy than the GRU when validation packets are dropped, even against a GRU trained with packets dropped.

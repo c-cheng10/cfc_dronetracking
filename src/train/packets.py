@@ -69,6 +69,7 @@ def main():
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--epochs", type=int, default=40)
     parser.add_argument("--threads", type=int, default=2)
+    parser.add_argument("--lr", type=float, default=LEARNING_RATE)
     parser.add_argument("--drop-augment", type=float, default=0.0,
                         help="train with each window's packets dropped at a rate drawn from 0 to this value")
     args = parser.parse_args()
@@ -96,7 +97,7 @@ def main():
         torch.manual_seed(seed)
         augment = np.random.default_rng(1000 + seed)
         model = build(len(FEATURES[feature_set]))
-        optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
+        optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
         losses, start = [], time.time()
         for epoch in range(1, args.epochs + 1):
             model.train()
@@ -140,7 +141,7 @@ def main():
     (out / "results.json").write_text(json.dumps({
         "arm": args.arm, "drop_augment": args.drop_augment, "feature_set": feature_set, "constant_gap": constant_gap,
         "epochs": args.epochs, "parameters": sum(p.numel() for p in model.parameters()),
-        "learning_rate": LEARNING_RATE, "batch_size": BATCH_SIZE, "clip": CLIP,
+        "learning_rate": args.lr, "batch_size": BATCH_SIZE, "clip": CLIP,
         "training": train_seq, "validation": val_seq, "matched_pairs": len(pairs[0]),
         "runs": runs, "validation_summary": summary}, indent=2) + "\n")
 

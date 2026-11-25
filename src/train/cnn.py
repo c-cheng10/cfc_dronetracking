@@ -54,10 +54,10 @@ def evaluate(train_scores, train_positive, validation_scores, validation_positiv
     return {"threshold": threshold, **result}
 
 
-def train_model(counts, labels, seed, epochs):
+def train_model(counts, labels, seed, epochs, learning_rate=LEARNING_RATE):
     torch.manual_seed(seed)
     model = EventCountCNN().to(counts.device)
-    optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
     positives = labels.sum()
     criterion = nn.BCEWithLogitsLoss(pos_weight=(len(labels) - positives) / positives)
     for epoch in range(1, epochs + 1):
@@ -80,6 +80,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, required=True, help="new directory for run artifacts")
     parser.add_argument("--epochs", type=int, default=12)
+    parser.add_argument("--lr", type=float, default=LEARNING_RATE)
     parser.add_argument("--device", choices=("auto", "cpu", "mps"), default="auto")
     args = parser.parse_args()
     if args.epochs < 1:
@@ -108,7 +109,7 @@ def main():
     results = []
     validation_scores = {}
     for seed in SEEDS:
-        model = train_model(train_counts, train_labels, seed, args.epochs)
+        model = train_model(train_counts, train_labels, seed, args.epochs, args.lr)
         scores = predict(model, val_counts)
         result = evaluate(predict(model, train_counts), train_positive, scores, val_positive)
         results.append({"seed": seed, **result})
@@ -130,7 +131,7 @@ def main():
         "torch_version": torch.__version__,
         "epochs": args.epochs,
         "batch_size": BATCH_SIZE,
-        "learning_rate": LEARNING_RATE,
+        "learning_rate": args.lr,
         "parameters": sum(parameter.numel() for parameter in model.parameters()),
         "input": {"bin_us": BIN_US, "bins": WIN, "transform": "log1p"},
         "training": {"sequences": train_sequences, "windows": len(train_rows)},
