@@ -6,6 +6,29 @@ Each entry says what was run, the numbers, and where the files are. AUC is the p
 
 ---
 
+## November 25, 2026: naturally sparse windows don't break the GRU the way dropped packets do
+
+**Run:** `src/sparsity_slice.py`, Phase 3 validation, using the scores the Phase 3 models saved (no model was rerun). Drone windows were sliced by event count and by box width (small boxes are distant drones), with slice edges at quantiles of the 5,370 drone windows. Each slice is compared with all 15,744 background windows (AUC) and with background windows of nearly the same event count from the same recordings (matched AUC). Per seed: `runs/phase3-2026-11-24/sparsity_slice.json`.
+
+AUC / matched AUC, mean of 5 seeds:
+
+| Drone windows | Events per window | Count alone | GRU | GRU, drop-trained | LSTM | CNN |
+|---|---:|---:|---:|---:|---:|---:|
+| Sparsest 10% | up to 1,681 | 0.555 | 0.938 / 0.964 | 0.913 / 0.949 | 0.929 / 0.948 | 0.859 / 0.876 |
+| Sparsest 25% | up to 3,366 | 0.739 | 0.959 / 0.967 | 0.944 / 0.958 | 0.954 / 0.954 | 0.904 / 0.887 |
+| Middle 50% | 3,366 to 25,561 | 0.951 | 0.982 / 0.987 | 0.977 / 0.983 | 0.985 / 0.986 | 0.967 / 0.908 |
+| Densest 25% | over 25,561 | 0.990 | 0.992 / 0.983 | 0.994 / 0.982 | 0.994 / 0.980 | 0.988 / 0.856 |
+| Smallest 10% of boxes | 15 to 30 px wide | 0.748 | 0.959 / 0.970 | 0.945 / 0.955 | 0.957 / 0.958 | 0.902 / 0.876 |
+
+**What it means:**
+
+- **Sparse drones are harder, but not near guessing.** The GRU's AUC falls from 0.992 on the densest quarter to 0.938 on the sparsest tenth, where event count alone scores 0.555. Its matched AUC there (0.964) is as high as on the full set, so it isn't relying on count.
+- **Artificially dropped packets are a harsher test than natural sparsity.** With half the packets dropped the GRU fell to 0.549; on the sparsest real windows it scores 0.938. Training included sparse windows like these, but never windows thinned after packets were formed. The camera Max deploys may still be sparser than anything in FRED.
+- **Drop training costs a little on naturally sparse windows** (0.913 against 0.938 on the sparsest tenth), so it isn't free.
+- The CNN trails most on sparse and small windows, where it loses 0.08 AUC to the GRU.
+
+---
+
 ## November 25, 2026: Phase 3 split, Max's lane: GRU best again, and a plain GRU collapses when packets drop
 
 **Run:** GRU, drop-trained GRU, LSTM and CNN on the Phase 3 split (`--split phase3`: 22 training recordings, 40,314 windows; 15 validation recordings, 21,114 windows; 1,904 matched pairs). Each model at learning rates 0.0003, 0.001, 0.003 and 0.01, 5 seeds, 40 epochs, everything else as in `docs/HANDOFF_chris.md`; each keeps its best rate by validation matched AUC. No CfC was trained here; that is Chris's lane. The test split is not scored. Summary: `runs/phase3-2026-11-24/summary.json`.
