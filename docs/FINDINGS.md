@@ -6,6 +6,39 @@ Each entry says what was run, the numbers, and where the files are. AUC is the p
 
 ---
 
+## November 25, 2026: Phase 3 split, Max's lane: GRU best again, and a plain GRU collapses when packets drop
+
+**Run:** GRU, drop-trained GRU, LSTM and CNN on the Phase 3 split (`--split phase3`: 22 training recordings, 40,314 windows; 15 validation recordings, 21,114 windows; 1,904 matched pairs). Each model at learning rates 0.0003, 0.001, 0.003 and 0.01, 5 seeds, 40 epochs, everything else as in `docs/HANDOFF_chris.md`; each keeps its best rate by validation matched AUC. No CfC was trained here; that is Chris's lane. The test split is not scored. Summary: `runs/phase3-2026-11-24/summary.json`.
+
+| Model (validation) | 0.0003 | 0.001 | 0.003 | 0.01 | Best AUC | Best matched AUC |
+|---|---:|---:|---:|---:|---:|---:|
+| GRU | 0.751 | 0.951 | 0.969 | **0.972** | 0.979 ± 0.003 | 0.972 ± 0.005 |
+| GRU, drop-trained | 0.848 | 0.917 | 0.956 | **0.961** | 0.973 ± 0.007 | 0.961 ± 0.006 |
+| LSTM | 0.763 | 0.906 | 0.958 | **0.961** | 0.979 ± 0.004 | 0.961 ± 0.007 |
+| CNN | 0.830 | 0.867 | **0.881** | 0.858 | 0.957 ± 0.004 | 0.881 ± 0.013 |
+
+The rate columns are matched AUC. Paired by seed at the best rates, matched AUC: GRU over CNN +0.091 (5 of 5 seeds), over LSTM +0.011 (5 of 5), over drop-trained GRU +0.011 (4 of 5).
+
+At its best rate the GRU flags 92.3% of drone windows with 12.9 false alarms per background-box minute. Its weakest validation recordings are train/175 (Tello, AUC 0.844), train/18 (DarwinFPV, 0.898) and train/13 (Betafpv, 0.918). The three Mini 2 recordings score 0.989 to 0.999.
+
+Packet-drop test at 0.01, AUC / matched AUC:
+
+| Packets dropped | 0% | 25% | 50% | 75% | 90% |
+|---|---:|---:|---:|---:|---:|
+| GRU | 0.979 / 0.972 | 0.711 / 0.854 | 0.549 / 0.774 | 0.532 / 0.728 | 0.556 / 0.626 |
+| LSTM | 0.979 / 0.961 | 0.782 / 0.875 | 0.693 / 0.834 | 0.704 / 0.776 | 0.638 / 0.614 |
+| GRU, drop-trained | 0.973 / 0.961 | 0.972 / 0.952 | 0.966 / 0.923 | 0.948 / 0.846 | 0.923 / 0.706 |
+
+**What it means:**
+
+- **The ranking from the small split holds** on four times more training data: GRU first, LSTM close, CNN well behind on matched AUC.
+- **A GRU trained on complete windows is unusable once packets go missing.** Its AUC falls to 0.549 with half the packets gone, close to guessing, and much further than on the old split (0.788 there). Why it falls this far has not been checked; the event count it sees at the readout also drops, which is one candidate.
+- **Drop training fixes it** at a cost of 0.006 AUC and 0.011 matched AUC on complete windows. Any model we deploy on our own camera should be drop-trained, since our sensor will see fewer events than FRED's.
+- **This is the case where a CfC could matter.** Chris's lane should run the same packet-drop test on the CfC trained on complete windows.
+- The Mini 2 scores are high, but neighbouring Mini 2 recordings sit in both training and validation, so they may be flattered.
+
+---
+
 ## November 24, 2026: at 0.01 the GRU improves again and both plain CfCs fail
 
 **Run:** the six models whose best rate was 0.003 were retrained at 0.01, same protocol and selection rule as the entry below. Mixed-memory CfC was not run, since it already diverged at 0.003.
