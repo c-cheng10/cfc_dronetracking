@@ -6,6 +6,85 @@ Each entry says what was run, the numbers, and where the files are. AUC is the p
 
 ---
 
+## November 25, 2026 (Chris): the GRU on the finder's own boxes, alarm voting, and the GRU reproduces across machines
+
+Three checks, all on Phase 3 validation, using Max's GRUs at rate 0.01 (`runs/phase3-2026-11-24/lr0.01/`) unless stated. Each seed uses its own alarm threshold (2% of training background windows pass), and numbers are means of 5 seeds.
+
+### 1. The GRU reproduces on Chris's machine; the CfC didn't
+
+`python -m src.train.packets --arm time_gru --split phase1 --lr 0.001 --threads 1 --parallel 5 --out runs/check-gru`:
+
+| | Matched AUC | AUC |
+|---|---:|---:|
+| Chris | 0.909 ± 0.010 | 0.9791 |
+| Max | 0.911 ± 0.006 | 0.9793 |
+
+The same check for `time_mmcfc` came out at 0.848 ± 0.037 against Max's 0.889 ± 0.015, with one seed that never converged (see `docs/HANDOFF_from_chris.md`). The shared setup reproduces, so the CfC gap comes from its unstable training, not from the data or the code.
+
+### 2. Alarm voting: "k of a box's last n windows" (`src/track_vote.py`)
+
+Windows are grouped into streams (one FRED box followed over time), and an alarm needs k hits among the stream's last n windows (0.25 s apart). This uses FRED's boxes, so there's no finder or tracker yet. Self-check: rescoring Max's weights gives his validation AUC within 0.002 for every seed, and the "1 of 1" row reproduces his 92.3% recall and 12.9 false alarms per box-minute.
+
+Claim fixed before the run: for the drop-trained GRU, "3 of 4" cuts false-alarm windows per background-box minute at least 5-fold, with recall falling by less than 5 points. **It failed:** false-alarm windows fell only 1.6-fold (8.96 to 5.58) while recall fell 3.7 points.
+
+| Drop-trained GRU | Recall | False-alarm windows / box-min | Alarm episodes / box-min | Median first alarm |
+|---|---:|---:|---:|---:|
+| 1 of 1 | 0.882 | 8.96 | 3.23 | 0.00 s |
+| 2 of 3 | 0.883 | 7.26 | 1.23 | 0.25 s |
+| 3 of 4 | 0.845 | 5.58 | 0.75 | 0.50 s |
+| 4 of 6 | 0.854 | 5.51 | 0.74 | 0.75 s |
+
+The plain GRU follows the same pattern: 12.86 false-alarm windows and 6.27 episodes per box-minute at "1 of 1", against 6.39 and 1.08 at "3 of 4". Every drone stream raises an alarm at least once under every rule.
+
+**What it means:**
+
+- **Voting cuts separate alarm episodes 4 to 6 fold, but not alarm time.** False alarms come in long runs on the same box.
+- **The false alarms are concentrated.** For drop-trained seed 0, 50% come from 4 of 48 background streams and 80% from 8. Two recordings give 68% of them: train/18 (DarwinFPV), where 26% of background windows alarm, and train/13 (Betafpv), where 18% do. Every other recording is at 10% or below, and most are under 2%.
+- **Mains flicker isn't the cause.** Those boxes are sparse (median 150 to 230 events per window) and show no steady 50/60 Hz peak. What's in them hasn't been looked at yet. Their event frames are the next thing to check.
+
+Output: `runs/phase3-2026-11-24/lr0.01/track_vote.json`.
+
+### 3. The GRU on boxes the finder proposes (`src/finder_gru.py`)
+
+`src/phase1_find.py` with its frozen Phase 1 parameters, except up to 3 boxes per window instead of 1. Each box's events are packetized as in training and scored by the GRU, with the locked FFT score on the same boxes as the comparison. A drone counts when it has at least 12 annotation frames in the window, and a box matches it at IoU above 0.1 with its swept box. There are 6,445 present drone-windows in total.
+
+Claim fixed before the run: the drop-trained GRU detects at least 90% of the drones the finder's boxes find, and gives fewer false alarms per minute than the FFT. **The first half failed narrowly** (0.648 of 0.729 is 89%). The second half held.
+
+| Scorer | Drones found by a box | Detected | False alarms / min of full frame | AUC, matched vs unmatched boxes |
+|---|---:|---:|---:|---:|
+| GRU | 0.729 | 0.662 | 19.97 | 0.952 |
+| GRU, drop-trained | 0.729 | 0.648 | 20.55 | 0.939 |
+| FFT (threshold 3.25) | 0.729 | 0.575 | 66.49 | — |
+
+Seed 0 of the plain GRU, by drone type:
+
+| Drone type | Present | Found by a box | Detected |
+|---|---:|---:|---:|
+| DJI Mini 3 | 923 | 0.984 | 0.947 |
+| Betafpv air75 | 1,030 | 0.767 | 0.635 |
+| DarwinFPV cineape20 | 1,482 | 0.738 | 0.584 |
+| DJI Tello EDU | 865 | 0.661 | 0.610 |
+| DJI Mini 2 | 1,145 | 0.528 | 0.480 |
+
+**What it means:**
+
+- **The GRU holds up on loose boxes.** It accepts about 90% of the drones the finder boxes, and separates matched from unmatched boxes at 0.95 AUC, against 0.979 on FRED's boxes. It has never been trained on finder boxes.
+- **Against the FFT on the same boxes,** the GRU detects more drones (0.66 against 0.58) with a third of the false alarms.
+- **The finder is the bottleneck.** It boxes only 73% of present drones, and only 53% of DJI Mini 2 drone-windows, the closest FRED type to the Mini 4K we deploy against. On train/175 (Tello) it proposed 12 boxes in 260 drone-windows.
+- **The full pipeline is far from the per-box numbers.** Finder plus GRU detects 66% of drone-windows with about 20 false alarms per minute of full frame. Voting (section 2) hasn't been combined with it yet.
+- **Caveat:** the finder's parameters were tuned on old-split recordings and scored on the old split's validation recordings before (`experiments/phase1_find_results.txt`). Five of the 15 Phase 3 validation recordings are those old validation recordings.
+
+Output: `runs/phase3-2026-11-24/lr0.01/finder_gru.json`.
+
+### Not done
+
+- Voting on finder boxes, which needs a tracker to link boxes across windows.
+- Looking at the event frames of the train/18 and train/13 false-alarm boxes.
+- `EventDetector` as the finder (its score isn't recorded).
+- The plain-CfC or CfC + memory arms in either test.
+
+---
+
 ## November 25, 2026: naturally sparse windows don't break the GRU the way dropped packets do
 
 **Run:** `src/sparsity_slice.py`, Phase 3 validation, using the scores the Phase 3 models saved (no model was rerun). Drone windows were sliced by event count and by box width (small boxes are distant drones), with slice edges at quantiles of the 5,370 drone windows. Each slice is compared with all 15,744 background windows (AUC) and with background windows of nearly the same event count from the same recordings (matched AUC). Per seed: `runs/phase3-2026-11-24/sparsity_slice.json`.
