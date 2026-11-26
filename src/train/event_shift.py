@@ -1,6 +1,6 @@
 """Score trained packet arms on validation windows whose EVENTS were thinned or jittered.
 
-python -m src.train.event_shift --runs runs/packets-2026-11-22 --out FILE
+python -m src.train.event_shift --runs runs/packets-2026-11-22 --out FILE [--split phase3]
 
 Unlike rate_shift.py (which drops whole packets), events are changed first and the
 window is then re-packetized, as a farther drone or a noisier sensor would be.
@@ -63,11 +63,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--runs", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--split", choices=("phase1", "phase3"), default="phase1")
     args = parser.parse_args()
     if args.out.exists():
         raise FileExistsError(args.out)
     torch.set_num_threads(8)
-    train_seq, val_seq = load_splits()
+    train_seq, val_seq = load_splits(args.split)
     stats = train_count_stats(train_seq)
     rng = np.random.default_rng(0)          # one stream, so every arm sees the same shifted events
     shifts = {"none": lambda *e: e, **{f"thin {k}": thin(k, rng) for k in THIN},
@@ -92,9 +93,13 @@ def main():
     y = np.array(y, dtype=bool)
     counts = {name: np.log1p(np.array(n, dtype=np.float32)) for name, n in n_events.items()}
     pairs = matched_pairs(*load_set(val_seq))
-    baseline = json.loads((args.runs / "rate_shift.json").read_text())["arms"]
+    baseline_path = args.runs / "rate_shift.json"
+    baseline = json.loads(baseline_path.read_text())["arms"] if baseline_path.is_file() else {}
     report = {"shifts": list(shifts), "matched_pairs": len(pairs[0]), "claim": __doc__.split("Claim")[1].strip(), "arms": {}}
     for arm in ARMS:
+        if not (args.runs / arm / "results.json").is_file():
+            print(f"{arm}: missing or unfinished, skipped", flush=True)
+            continue
         feature_set, constant_gap, build = PACKET_ARMS[arm.removesuffix("_aug")]
         models = []
         for seed in SEEDS:
@@ -109,7 +114,8 @@ def main():
             print(f"{arm:17} {name:14} AUC {np.mean([r['auc'] for r in results]):.3f}"
                   f" matched {np.mean([r['matched_auc'] for r in results]):.3f}", flush=True)
         # self-check: the unshifted rebuild must reproduce Max's 0% numbers exactly
-        assert np.allclose(report["arms"][arm]["none"]["auc"], baseline[arm]["0.0"]["auc"], atol=1e-4), arm
+        if arm in baseline:
+            assert np.allclose(report["arms"][arm]["none"]["auc"], baseline[arm]["0.0"]["auc"], atol=1e-4), arm
     args.out.write_text(json.dumps(report, indent=2) + "\n")
 
 

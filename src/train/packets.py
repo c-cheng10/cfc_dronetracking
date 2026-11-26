@@ -71,6 +71,13 @@ def predict(model, store):
     return scores.numpy()
 
 
+def write_bundle(out, run, arm, feature_set, learning_rate):
+    """seed_N.json beside seed_N.pt: everything needed to score new windows with those weights."""
+    (out / f"seed_{run['seed']}.json").write_text(json.dumps({
+        "arm": arm, "feature_set": feature_set, "learning_rate": learning_rate, "seed": run["seed"],
+        "count_mean": run["count_mean"], "count_std": run["count_std"], "threshold": run["threshold"]}, indent=2) + "\n")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--arm", choices=PACKET_ARMS, required=True)
@@ -101,6 +108,7 @@ def main():
         runs.append(run)
         all_scores[f"seed_{run['seed']}"] = scores
         torch.save(state, out / f"seed_{run['seed']}.pt")
+        write_bundle(out, run, args.arm, feature_set, args.lr)
     np.savez(out / "validation_scores.npz", **all_scores)
     summary = {name: {"mean": float(np.mean([r[name] for r in runs])),
                       "std": float(np.std([r[name] for r in runs], ddof=1))}
@@ -197,7 +205,8 @@ def train_seed(args, seed):
         m = sequence == s
         result[f"auc {s}"] = float(both_aucs(scores[m], val_y[m], (np.flatnonzero(val_y[m]), np.flatnonzero(~val_y[m])))["auc"])
     print(f"{args.arm} seed {seed}: AUC {result['auc']:.4f}, matched {result['matched_auc']:.4f}", flush=True)
-    run = {"seed": seed, "threshold": threshold, "losses": losses, **result}
+    run = {"seed": seed, "threshold": threshold, "count_mean": float(stats[0]), "count_std": float(stats[1]),
+           "losses": losses, **result}
     return run, scores, model.state_dict(), sum(p.numel() for p in model.parameters()), len(pairs[0])
 
 

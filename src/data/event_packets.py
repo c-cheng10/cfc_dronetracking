@@ -23,6 +23,7 @@ from src.data.window_cache import CACHE
 MAX_PACKETS = 500
 WINDOW_MS = phase1.WIN * phase1.BIN_US / 1000
 FEATURES = {"time": [0, 1], "space": [0, 1, 2, 3, 4, 5]}
+CACHE_VERSION = 1    # bump whenever packets_from_events or build_sequence changes, so old caches rebuild
 
 
 def packets_from_events(t_ms, polarity, x, y):
@@ -94,17 +95,18 @@ def load_packets(sequences):
     packets, rows = [], []
     for sequence in sequences:
         path = CACHE / f"packets_{sequence.replace('/', '_')}.npz"
+        stat = phase1.csv_path(sequence).stat()
+        key = np.array([CACHE_VERSION, stat.st_size, stat.st_mtime_ns])
         if path.is_file():
             with np.load(path) as data:
-                offsets = data["offsets"]
-                flat = data["packets"]
-                packets.extend(np.split(flat, offsets[1:-1]))
-                rows.extend(json.loads(str(data["rows"])))
-            continue
+                if "key" in data and np.array_equal(data["key"], key):
+                    packets.extend(np.split(data["packets"], data["offsets"][1:-1]))
+                    rows.extend(json.loads(str(data["rows"])))
+                    continue
         sequence_packets, sequence_rows = build_sequence(sequence)
         offsets = np.concatenate(([0], np.cumsum([len(p) for p in sequence_packets])))
         partial = path.with_name(f"{path.stem}.{os.getpid()}.tmp.npz")    # rename, so parallel builders never read half a file
-        np.savez(partial, packets=np.concatenate(sequence_packets), offsets=offsets, rows=json.dumps(sequence_rows))
+        np.savez(partial, key=key, packets=np.concatenate(sequence_packets), offsets=offsets, rows=json.dumps(sequence_rows))
         partial.replace(path)
         packets.extend(sequence_packets)
         rows.extend(sequence_rows)
