@@ -1,6 +1,7 @@
 """Cache the verified count windows so several training processes can share them."""
 
 import json
+import os
 
 import numpy as np
 
@@ -25,7 +26,9 @@ def load_set(sequences):
                     rows.extend(json.loads(str(data["rows"])))
                     continue
         windows, sequence_rows = load_windows(sequence)
-        np.savez_compressed(path, key=key, counts=windows, rows=json.dumps(sequence_rows))
+        partial = path.with_name(f"{path.stem}.{os.getpid()}.tmp.npz")    # rename, so parallel builders never read half a file
+        np.savez_compressed(partial, key=key, counts=windows, rows=json.dumps(sequence_rows))
+        partial.replace(path)
         counts.append(windows)
         rows.extend(sequence_rows)
     labels = np.array([int(row["label"]) for row in rows], dtype=bool)

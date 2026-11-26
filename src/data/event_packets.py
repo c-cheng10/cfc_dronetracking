@@ -12,6 +12,7 @@ Columns 2 to 5 may reveal how the boxes were placed, so "time" uses only 0 and 1
 """
 
 import json
+import os
 
 import numpy as np
 
@@ -102,7 +103,9 @@ def load_packets(sequences):
             continue
         sequence_packets, sequence_rows = build_sequence(sequence)
         offsets = np.concatenate(([0], np.cumsum([len(p) for p in sequence_packets])))
-        np.savez(path, packets=np.concatenate(sequence_packets), offsets=offsets, rows=json.dumps(sequence_rows))
+        partial = path.with_name(f"{path.stem}.{os.getpid()}.tmp.npz")    # rename, so parallel builders never read half a file
+        np.savez(partial, packets=np.concatenate(sequence_packets), offsets=offsets, rows=json.dumps(sequence_rows))
+        partial.replace(path)
         packets.extend(sequence_packets)
         rows.extend(sequence_rows)
     log_count = np.log1p(np.array([float(row["event_count"]) for row in rows], dtype=np.float32))

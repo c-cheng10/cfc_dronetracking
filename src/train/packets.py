@@ -5,12 +5,17 @@ uniformly from 0 to R, freshly each epoch (src/data/packet_drop.py).
 
 Fixed before any result was seen: 40 epochs (12 was shown to undertrain recurrent
 models), batch 128, AdamW at 0.001, gradient norm clipped at 1, last epoch kept,
-seeds 0-4, no tuning on validation.
---parallel 5 --threads 1 trains the seeds at once; results match a serial run up to float rounding. Log counts are standardised with training statistics.
+seeds 0-4, no tuning on validation. Log counts are standardised with training statistics.
+
+--parallel 5 --threads 1 trains the seeds at once (identical results at the same thread count).
+Each seed saves a checkpoint every epoch; rerun the same command with --resume to carry on
+after a crash or reboot, with the same result as an uninterrupted run (with --script, equal only to
+rounding, about 1e-9, because TorchScript re-optimises its graph in each new process).
 """
 
 import argparse
 import json
+import os
 import time
 from concurrent.futures import ProcessPoolExecutor
 from functools import cache
@@ -79,12 +84,13 @@ def main():
     parser.add_argument("--parallel", type=int, default=1, help="seeds trained at once, one process each")
     parser.add_argument("--script", action="store_true",
                         help="TorchScript the model: same maths, about 20%% faster for the CfC arms")
+    parser.add_argument("--resume", action="store_true", help="continue an interrupted run in the same --out")
     args = parser.parse_args()
     out = args.out / (args.arm + ("_aug" if args.drop_augment else ""))
-    out.mkdir(parents=True, exist_ok=False)
+    out.mkdir(parents=True, exist_ok=args.resume)
     feature_set, constant_gap, _ = PACKET_ARMS[args.arm]
     train_seq, val_seq = load_splits(args.split)
-    jobs = [(vars(args), seed) for seed in SEEDS]
+    jobs = [({**vars(args), "out_dir": out}, seed) for seed in SEEDS]
     if args.parallel > 1:
         with ProcessPoolExecutor(args.parallel) as pool:
             done = list(pool.map(train_seed, *zip(*jobs)))
@@ -140,8 +146,21 @@ def train_seed(args, seed):
     if args.script:
         model = torch.jit.script(model)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
-    losses, start = [], time.time()
-    for epoch in range(1, args.epochs + 1):
+    losses, first = [], 1
+    checkpoint = args.out_dir / f"checkpoint_seed_{seed}.pt"
+    settings = {k: vars(args)[k] for k in ("arm", "split", "lr", "drop_augment", "threads", "script")}
+    if checkpoint.is_file():
+        saved = torch.load(checkpoint, weights_only=False)
+        if saved["settings"] != settings:
+            raise ValueError(f"{checkpoint} was made with {saved['settings']}, not {settings}")
+        model.load_state_dict(saved["model"])
+        optimizer.load_state_dict(saved["optimizer"])
+        torch.set_rng_state(saved["torch_rng"])
+        augment.bit_generator.state = saved["augment_rng"]
+        losses, first = saved["losses"], saved["epoch"] + 1
+        print(f"{args.arm} seed {seed}: resuming after epoch {saved['epoch']}", flush=True)
+    start = time.time()
+    for epoch in range(first, args.epochs + 1):
         model.train()
         total = 0.0
         for index in torch.randperm(len(targets)).split(BATCH_SIZE):
@@ -162,9 +181,14 @@ def train_seed(args, seed):
         losses.append(total / len(targets))
         if not np.isfinite(losses[-1]):
             raise FloatingPointError(f"{args.arm} seed {seed}: non-finite loss")
+        partial = checkpoint.with_suffix(".tmp")      # write then rename, so a crash never leaves half a file
+        torch.save({"settings": settings, "epoch": epoch, "losses": losses, "model": model.state_dict(),
+                    "optimizer": optimizer.state_dict(), "torch_rng": torch.get_rng_state(),
+                    "augment_rng": augment.bit_generator.state}, partial)
+        partial.replace(checkpoint)
         if epoch % 5 == 0:
             print(f"{args.arm} seed {seed} epoch {epoch}/{args.epochs}: loss {losses[-1]:.4f} "
-                  f"({(time.time() - start) / epoch:.1f} s/epoch)", flush=True)
+                  f"({(time.time() - start) / (epoch - first + 1):.1f} s/epoch)", flush=True)
     threshold = tune_threshold(predict(model, train_store)[~train_y])
     scores = predict(model, val_store)
     result = metrics(scores[val_y], scores[~val_y], threshold)
