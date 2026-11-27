@@ -1,0 +1,280 @@
+{
+ "model": "runs/phase3-2026-11-24/lr0.01/time_gru",
+ "drone_segments": 82,
+ "seeds": {
+  "0": {
+   "single window": {
+    "recall": 0.9169459962756052,
+    "fa_per_min": 12.77439024390244,
+    "segments_confirmed": 0.9878048780487805,
+    "median_s_to_confirm": 0.0
+   },
+   "2 of 2": {
+    "recall": 0.861266294227188,
+    "fa_per_min": 5.9298780487804885,
+    "segments_confirmed": 0.9634146341463414,
+    "median_s_to_confirm": 0.25
+   },
+   "2 of 3": {
+    "recall": 0.9104283054003725,
+    "fa_per_min": 8.597560975609756,
+    "segments_confirmed": 0.9634146341463414,
+    "median_s_to_confirm": 0.5
+   },
+   "3 of 4": {
+    "recall": 0.8770949720670391,
+    "fa_per_min": 5.731707317073171,
+    "segments_confirmed": 0.9512195121951219,
+    "median_s_to_confirm": 0.75
+   },
+   "4 of 4": {
+    "recall": 0.7657355679702048,
+    "fa_per_min": 2.3018292682926833,
+    "segments_confirmed": 0.9390243902439024,
+    "median_s_to_confirm": 0.75
+   },
+   "2 of 2, every other window": {
+    "recall": 0.8355679702048417,
+    "fa_per_min": 4.801829268292684,
+    "segments_confirmed": 0.9634146341463414,
+    "median_s_to_confirm": 0.5
+   },
+   "2 of 3, every other window": {
+    "recall": 0.8959031657355679,
+    "fa_per_min": 6.935975609756098,
+    "segments_confirmed": 0.9390243902439024,
+    "median_s_to_confirm": 1.0
+   }
+  },
+  "1": {
+   "single window": {
+    "recall": 0.9266294227188082,
+    "fa_per_min": 15.487804878048783,
+    "segments_confirmed": 0.9878048780487805,
+    "median_s_to_confirm": 0.0
+   },
+   "2 of 2": {
+    "recall": 0.8748603351955307,
+    "fa_per_min": 7.454268292682928,
+    "segments_confirmed": 0.975609756097561,
+    "median_s_to_confirm": 0.25
+   },
+   "2 of 3": {
+    "recall": 0.9124767225325885,
+    "fa_per_min": 9.832317073170733,
+    "segments_confirmed": 0.9634146341463414,
+    "median_s_to_confirm": 0.5
+   },
+   "3 of 4": {
+    "recall": 0.8780260707635009,
+    "fa_per_min": 6.615853658536586,
+    "segments_confirmed": 0.9512195121951219,
+    "median_s_to_confirm": 0.75
+   },
+   "4 of 4": {
+    "recall": 0.7912476722532589,
+    "fa_per_min": 3.9176829268292686,
+    "segments_confirmed": 0.9512195121951219,
+    "median_s_to_confirm": 0.75
+   },
+   "2 of 2, every other window": {
+    "recall": 0.8513966480446927,
+    "fa_per_min": 5.975609756097562,
+    "segments_confirmed": 0.9634146341463414,
+    "median_s_to_confirm": 0.5
+   },
+   "2 of 3, every other window": {
+    "recall": 0.8942271880819367,
+    "fa_per_min": 7.560975609756098,
+    "segments_confirmed": 0.9390243902439024,
+    "median_s_to_confirm": 1.0
+   }
+  },
+  "2": {
+   "single window": {
+    "recall": 0.9242085661080075,
+    "fa_per_min": 11.189024390243903,
+    "segments_confirmed": 1.0,
+    "median_s_to_confirm": 0.0
+   },
+   "2 of 2": {
+    "recall": 0.8720670391061452,
+    "fa_per_min": 6.52439024390244,
+    "segments_confirmed": 0.975609756097561,
+    "median_s_to_confirm": 0.25
+   },
+   "2 of 3": {
+    "recall": 0.9124767225325885,
+    "fa_per_min": 8.15548780487805,
+    "segments_confirmed": 0.9634146341463414,
+    "median_s_to_confirm": 0.5
+   },
+   "3 of 4": {
+    "recall": 0.8806331471135941,
+    "fa_per_min": 5.823170731707317,
+    "segments_confirmed": 0.9512195121951219,
+    "median_s_to_confirm": 0.75
+   },
+   "4 of 4": {
+    "recall": 0.7819366852886406,
+    "fa_per_min": 3.734756097560976,
+    "segments_confirmed": 0.9512195121951219,
+    "median_s_to_confirm": 0.75
+   },
+   "2 of 2, every other window": {
+    "recall": 0.846927374301676,
+    "fa_per_min": 5.411585365853659,
+    "segments_confirmed": 0.9634146341463414,
+    "median_s_to_confirm": 0.5
+   },
+   "2 of 3, every other window": {
+    "recall": 0.8951582867783985,
+    "fa_per_min": 6.310975609756098,
+    "segments_confirmed": 0.9390243902439024,
+    "median_s_to_confirm": 1.0
+   }
+  },
+  "3": {
+   "single window": {
+    "recall": 0.9130353817504655,
+    "fa_per_min": 14.603658536585368,
+    "segments_confirmed": 1.0,
+    "median_s_to_confirm": 0.0
+   },
+   "2 of 2": {
+    "recall": 0.8601489757914339,
+    "fa_per_min": 7.652439024390245,
+    "segments_confirmed": 0.975609756097561,
+    "median_s_to_confirm": 0.25
+   },
+   "2 of 3": {
+    "recall": 0.8985102420856611,
+    "fa_per_min": 8.917682926829269,
+    "segments_confirmed": 0.9634146341463414,
+    "median_s_to_confirm": 0.5
+   },
+   "3 of 4": {
+    "recall": 0.8662942271880819,
+    "fa_per_min": 6.371951219512195,
+    "segments_confirmed": 0.9512195121951219,
+    "median_s_to_confirm": 0.75
+   },
+   "4 of 4": {
+    "recall": 0.7757914338919926,
+    "fa_per_min": 4.954268292682928,
+    "segments_confirmed": 0.9512195121951219,
+    "median_s_to_confirm": 0.75
+   },
+   "2 of 2, every other window": {
+    "recall": 0.8366852886405959,
+    "fa_per_min": 6.402439024390245,
+    "segments_confirmed": 0.9634146341463414,
+    "median_s_to_confirm": 0.5
+   },
+   "2 of 3, every other window": {
+    "recall": 0.880074487895717,
+    "fa_per_min": 6.890243902439025,
+    "segments_confirmed": 0.9390243902439024,
+    "median_s_to_confirm": 1.0
+   }
+  },
+  "4": {
+   "single window": {
+    "recall": 0.9327746741154562,
+    "fa_per_min": 10.259146341463415,
+    "segments_confirmed": 1.0,
+    "median_s_to_confirm": 0.0
+   },
+   "2 of 2": {
+    "recall": 0.8875232774674116,
+    "fa_per_min": 5.411585365853659,
+    "segments_confirmed": 0.975609756097561,
+    "median_s_to_confirm": 0.25
+   },
+   "2 of 3": {
+    "recall": 0.9152700186219739,
+    "fa_per_min": 7.439024390243903,
+    "segments_confirmed": 0.9634146341463414,
+    "median_s_to_confirm": 0.5
+   },
+   "3 of 4": {
+    "recall": 0.886219739292365,
+    "fa_per_min": 5.274390243902439,
+    "segments_confirmed": 0.9512195121951219,
+    "median_s_to_confirm": 0.75
+   },
+   "4 of 4": {
+    "recall": 0.8109869646182495,
+    "fa_per_min": 2.423780487804878,
+    "segments_confirmed": 0.9512195121951219,
+    "median_s_to_confirm": 0.75
+   },
+   "2 of 2, every other window": {
+    "recall": 0.8638733705772812,
+    "fa_per_min": 4.359756097560976,
+    "segments_confirmed": 0.9634146341463414,
+    "median_s_to_confirm": 0.5
+   },
+   "2 of 3, every other window": {
+    "recall": 0.8977653631284916,
+    "fa_per_min": 5.89939024390244,
+    "segments_confirmed": 0.9390243902439024,
+    "median_s_to_confirm": 1.0
+   }
+  }
+ },
+ "average": {
+  "auc": 0.9845866972112458,
+  "seed_aucs": [
+   0.977643199005314,
+   0.9791366827337966,
+   0.9809237133048705,
+   0.974026947453483,
+   0.9827131449561702
+  ],
+  "rules": {
+   "single window": {
+    "recall": 0.9543761638733705,
+    "fa_per_min": 13.963414634146343,
+    "segments_confirmed": 1.0,
+    "median_s_to_confirm": 0.0
+   },
+   "2 of 2": {
+    "recall": 0.9152700186219739,
+    "fa_per_min": 7.972560975609757,
+    "segments_confirmed": 0.975609756097561,
+    "median_s_to_confirm": 0.25
+   },
+   "2 of 3": {
+    "recall": 0.9364990689013035,
+    "fa_per_min": 10.060975609756099,
+    "segments_confirmed": 0.9634146341463414,
+    "median_s_to_confirm": 0.5
+   },
+   "3 of 4": {
+    "recall": 0.9100558659217877,
+    "fa_per_min": 7.164634146341464,
+    "segments_confirmed": 0.9512195121951219,
+    "median_s_to_confirm": 0.75
+   },
+   "4 of 4": {
+    "recall": 0.8459962756052142,
+    "fa_per_min": 4.496951219512195,
+    "segments_confirmed": 0.9512195121951219,
+    "median_s_to_confirm": 0.75
+   },
+   "2 of 2, every other window": {
+    "recall": 0.8929236499068901,
+    "fa_per_min": 6.539634146341464,
+    "segments_confirmed": 0.9634146341463414,
+    "median_s_to_confirm": 0.5
+   },
+   "2 of 3, every other window": {
+    "recall": 0.9154562383612663,
+    "fa_per_min": 7.743902439024391,
+    "segments_confirmed": 0.9390243902439024,
+    "median_s_to_confirm": 1.0
+   }
+  }
+ }
+}

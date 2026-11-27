@@ -6,7 +6,87 @@ Each entry says what was run, the numbers, and where the files are. AUC is the p
 
 ---
 
+## November 26, 2026: Phase 3 CfC sweep (Chris's lane, finished on Max's machine): the GRU still leads
+
+**Run:** `time_mmcfc`, plain and drop-trained (0.9), on the Phase 3 split at rates 0.0003, 0.001 and 0.003, 5 seeds, protocol unchanged (Chris ran `--threads 1 --script`). Chris trained seeds 0 to 3 and seed 4 up to epochs 15 to 28 on Windows (torch 2.15.0); **seed 4 of every run was finished on Max's Mac** (torch 2.12.1) from Chris's committed checkpoints, so it isn't bit-identical to what his laptop would have produced. At 0.01 both versions diverged on seed 0 (non-finite loss) and weren't rerun. Results, the packet-drop test and the event test are on the `chris` branch under `runs/phase3-cfc-2026-11-25/`; the GRU lane's event test is `runs/phase3-2026-11-24/lr0.01/event_shift.json`.
+
+Validation matched AUC by rate (AUC at the best rate in the last column):
+
+| Model | 0.0003 | 0.001 | 0.003 | 0.01 | Best AUC / matched AUC |
+|---|---:|---:|---:|---:|---:|
+| GRU (Max's lane) | 0.751 | 0.951 | 0.969 | **0.972** | 0.979 / 0.972 |
+| CfC + memory | 0.658 ± 0.191 | 0.932 | **0.953** | diverged | 0.979 / 0.953 |
+| GRU, drop-trained | 0.848 | 0.917 | 0.956 | **0.961** | 0.973 / 0.961 |
+| CfC + memory, drop-trained | 0.837 | 0.914 | **0.935** | diverged | 0.962 / 0.935 |
+
+At 0.0003, seed 4 of the plain CfC ended at 0.385 matched AUC, below guessing, after its loss spiked to 2.38.
+
+Robustness, each model at its best rate, AUC / matched AUC, mean of 5 seeds:
+
+| Shift | GRU | CfC + memory | GRU, drop-trained | CfC + memory, drop-trained |
+|---|---:|---:|---:|---:|
+| None | 0.979 / 0.972 | 0.979 / 0.953 | 0.973 / 0.961 | 0.962 / 0.935 |
+| 50% of packets dropped | 0.549 / 0.774 | 0.682 / 0.829 | 0.966 / 0.923 | 0.959 / 0.899 |
+| 90% of packets dropped | 0.556 / 0.626 | 0.772 / 0.621 | 0.923 / 0.706 | 0.924 / 0.717 |
+| Events thinned to 25% | 0.923 / 0.852 | 0.937 / 0.836 | 0.934 / 0.868 | 0.926 / 0.833 |
+| Events thinned to 10% | 0.849 / 0.732 | 0.883 / 0.709 | 0.872 / 0.758 | 0.870 / 0.716 |
+| Timestamps jittered 2 ms | 0.959 / 0.914 | 0.957 / 0.889 | 0.953 / 0.908 | 0.924 / 0.864 |
+
+**What it means:**
+
+- **On Phase 3 the GRU beats every CfC variant on matched AUC,** by 0.019 at each model's best rate (0.972 against 0.953), and the CfC can't use the rate that helps the GRU most.
+- **Trained the ordinary way, the CfC holds plain AUC better under shifts** (packets dropped: +0.133 at 50%, 4 of 5 seeds, and +0.216 at 90%, 5 of 5; events thinned to 10%: +0.034, 4 of 5), but on matched AUC it is level or behind under every event shift (thinned to 10%: −0.023, 1 of 5 seeds; jitter 2 ms: −0.025, 0 of 5). Its edge is on windows that event count already separates.
+- **Drop-trained, the two are level when packets drop** (AUC 0.959 against 0.966 at 50%, 0.924 against 0.923 at 90%), and the GRU leads on matched AUC under every event shift (by 0.026 to 0.043; under events thinned to 25% or 10% and 2 ms jitter, in all 5 seeds).
+- Chris's November 24 claim (the CfC degrades less under event thinning and jitter) fails here as it did on the old split.
+
+---
+
+## November 26, 2026: alarm voting, the GRU on finder boxes, a better finder grid, and the count check
+
+All on the Phase 3 split, Max's lane, with the Phase 3 GRU at rate 0.01 unless stated. Rules were fixed before each result. Nothing touched the test split.
+
+**Alarm voting** (`src/track_vote.py`, saved validation scores, no retraining). Windows grouped by recording, FRED track ID and box; a rule "k of n" confirms when k of the last n windows alarmed. Windows are 0.5 s every 0.25 s, so neighbours share half their events; "every other window" uses windows 0.5 s apart. Mean of 5 seeds:
+
+| Rule | Drone-window recall | False alarms per background-box minute | Median s to first confirmation |
+|---|---:|---:|---:|
+| Single window | 0.923 | 12.9 | 0.00 |
+| 2 of 2 | 0.871 | 6.6 | 0.25 |
+| 3 of 4 | 0.878 | 6.0 | 0.75 |
+| 4 of 4 | 0.785 | 3.5 | 0.75 |
+| 2 of 2, every other window | 0.847 | 5.4 | 0.50 |
+
+Voting halves false alarms but doesn't remove them, because they cluster: the same background box keeps firing for seconds. Averaging the 5 seeds' scores raises AUC from 0.979 to 0.985.
+
+**The GRU on the finder's boxes** (`src/finder_gru.py`). The Phase 1 finder, unchanged (one box per 0.5 s window), on the 15 validation recordings: 5,289 proposals, 3,703 on a drone (IoU above 0.1 with the swept drone box). Events in each proposal become packets exactly as for FRED's boxes. Per minute of camera time, not per background box:
+
+| Scorer | Proposal AUC | Drone windows detected | False detections per camera-minute | After 3-of-4 vote |
+|---|---:|---:|---:|---:|
+| Finder alone (ceiling) | | 0.662 | 57.5 | |
+| FFT, frozen threshold | 0.760 | 0.528 | 24.5 | 0.437 / 12.2 |
+| GRU | 0.931 | 0.606 | 12.9 | 0.535 / 6.4 |
+| GRU, drop-trained | 0.905 | 0.592 | 14.8 | 0.516 / 8.2 |
+
+The GRU's AUC falls from 0.979 on FRED's boxes to 0.931 on the finder's, but it still beats the FFT on both detection and false alarms. The finder is the limit: it puts a box on the drone in 66% of drone windows, and on the two Mini 2 recordings only 32% (train/207) and 41% (train/203). In most of the missed windows it proposes nothing, because a cell needs 16 times the window's mean count and noise or busy backgrounds raise the mean.
+
+**A finder grid on the training recordings** (`src/finder2.py`, `src/finder_tune.py`; validation not touched). Threshold rules: Phase 1's (16 or 8 × the mean cell count), mean plus k standard deviations, and each cell against its own median over the previous 2 s; 1, 3 or 5 boxes per window. `finder2` reproduces the Phase 1 finder exactly at Phase 1's setting. Recall is the share of drone windows with a box on the drone:
+
+| Setting | Recall | False boxes per minute |
+|---|---:|---:|
+| Phase 1 (16 × mean, 1 box) | 0.509 | 61 |
+| Mean + 5 std, 3 boxes | 0.761 | 151 |
+| Mean + 3 std, 3 boxes | 0.829 | 224 |
+| History, k = 8, 3 boxes | 0.866 | 445 |
+| History, k = 8, 5 boxes | 0.884 | 786 |
+
+Train/206 (Mini 2) rises from 0.10 under Phase 1's rule to above 0.55 with mean + 3 std (it isn't among that setting's three worst recordings) and to 0.73 with history, 5 boxes. More boxes mean more for the GRU to reject, so the choice has to be made end to end: **not done yet** (stage B, the GRU on the shortlisted settings, still on training recordings, then validation once). The history rule suppresses a drone that hovers in one cell for more than 2 s.
+
+**Does the event-count input cause the packet-drop collapse?** (`time_gru_nocount`, Phase 1 split, rate 0.001, `runs/count-check-2026-11-26/`). No. Without the count at the readout the GRU matches the original on complete windows (AUC 0.978 against 0.979, matched 0.913 against 0.911) and falls as far when packets drop: AUC 0.783 against 0.822 at 50% dropped, lower in 4 of 5 seeds. The collapse comes from the recurrent part meeting gaps it never saw in training, which drop training fixes. The count input adds almost nothing.
+
+---
+
 ## November 25, 2026 (Chris): the GRU on the finder's own boxes, alarm voting, and the GRU reproduces across machines
+
+> **Superseded in part (November 26):** `src/track_vote.py` and `src/finder_gru.py` were replaced by Max's versions (see the November 26 entry above). The numbers in this entry came from Chris's earlier versions, at commit `c1ab416`.
 
 Three checks, all on Phase 3 validation, using Max's GRUs at rate 0.01 (`runs/phase3-2026-11-24/lr0.01/`) unless stated. Each seed uses its own alarm threshold (2% of training background windows pass), and numbers are means of 5 seeds.
 
