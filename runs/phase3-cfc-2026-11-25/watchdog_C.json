@@ -1,0 +1,24 @@
+{
+ "max_jobs": 1,
+ "jobs": [
+  {
+   "name": "event_shift GRU lane",
+   "cwd": "/Users/maxwen/Code/cfc_dronetracking-chris",
+   "cmd": [
+    "/opt/anaconda3/bin/python",
+    "-u",
+    "-m",
+    "src.train.event_shift",
+    "--split",
+    "phase3",
+    "--runs",
+    "/Users/maxwen/Code/cfc_dronetracking/runs/phase3-2026-11-24/lr0.01",
+    "--out",
+    "/Users/maxwen/Code/cfc_dronetracking/runs/phase3-2026-11-24/lr0.01/event_shift.json"
+   ],
+   "done": "/Users/maxwen/Code/cfc_dronetracking/runs/phase3-2026-11-24/lr0.01/event_shift.json",
+   "watch": "runs/phase3-cfc-2026-11-25/logs/event_shift_gru",
+   "log": "runs/phase3-cfc-2026-11-25/logs/event_shift_gru/log.txt"
+  }
+ ]
+}

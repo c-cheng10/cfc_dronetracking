@@ -1,0 +1,43 @@
+{
+ "max_jobs": 2,
+ "jobs": [
+  {
+   "name": "rate_shift lr0.003",
+   "cwd": "/Users/maxwen/Code/cfc_dronetracking-chris",
+   "cmd": [
+    "/opt/anaconda3/bin/python",
+    "-u",
+    "-m",
+    "src.train.rate_shift",
+    "--split",
+    "phase3",
+    "--runs",
+    "runs/phase3-cfc-2026-11-25/lr0.003",
+    "--out",
+    "runs/phase3-cfc-2026-11-25/lr0.003/rate_shift.json"
+   ],
+   "done": "runs/phase3-cfc-2026-11-25/lr0.003/rate_shift.json",
+   "watch": "runs/phase3-cfc-2026-11-25/logs/rate_shift_lr0.003",
+   "log": "runs/phase3-cfc-2026-11-25/logs/rate_shift_lr0.003/log.txt"
+  },
+  {
+   "name": "event_shift lr0.003",
+   "cwd": "/Users/maxwen/Code/cfc_dronetracking-chris",
+   "cmd": [
+    "/opt/anaconda3/bin/python",
+    "-u",
+    "-m",
+    "src.train.event_shift",
+    "--split",
+    "phase3",
+    "--runs",
+    "runs/phase3-cfc-2026-11-25/lr0.003",
+    "--out",
+    "runs/phase3-cfc-2026-11-25/lr0.003/event_shift.json"
+   ],
+   "done": "runs/phase3-cfc-2026-11-25/lr0.003/event_shift.json",
+   "watch": "runs/phase3-cfc-2026-11-25/logs/event_shift_lr0.003",
+   "log": "runs/phase3-cfc-2026-11-25/logs/event_shift_lr0.003/log.txt"
+  }
+ ]
+}

@@ -1,0 +1,9 @@
+{
+  "arm": "time_mmcfc",
+  "feature_set": "time",
+  "learning_rate": 0.003,
+  "seed": 2,
+  "count_mean": 7.447931289672852,
+  "count_std": 2.3163297176361084,
+  "threshold": 1.090988039970398
+}
