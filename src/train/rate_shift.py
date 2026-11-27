@@ -23,7 +23,7 @@ from src.train.packets import predict, tensors
 
 RATES = (0.0, 0.25, 0.5, 0.75, 0.9)
 ARMS = ("time_cfc", "time_cfc_const", "time_mmcfc", "time_mmcfc_const", "time_gru", "time_gru_const",
-        "time_lstm", "time_gru_aug", "time_mmcfc_aug")
+        "time_lstm", "time_gru_aug", "time_mmcfc_aug", "time_gru_nocount")
 
 
 def main():

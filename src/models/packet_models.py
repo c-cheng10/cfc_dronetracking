@@ -12,15 +12,17 @@ from src.models.recurrent import CfCCell
 
 
 class PacketReadout(nn.Module):
-    def __init__(self, hidden):
+    def __init__(self, hidden, use_count=True):
         super().__init__()
-        self.linear = nn.Linear(2 * hidden + 1, 1)
+        self.use_count = use_count
+        self.linear = nn.Linear(2 * hidden + int(use_count), 1)
 
     def forward(self, states, mask, log_count):
         keep = mask.unsqueeze(-1)
         mean = (states * keep).sum(1) / keep.sum(1)
         peak = states.masked_fill(~keep, -torch.inf).amax(1)
-        return self.linear(torch.cat((mean, peak, log_count.unsqueeze(1)), dim=1)).squeeze(1)
+        parts = (mean, peak, log_count.unsqueeze(1)) if self.use_count else (mean, peak)
+        return self.linear(torch.cat(parts, dim=1)).squeeze(1)
 
 
 class PacketCfC(nn.Module):
@@ -42,10 +44,10 @@ class PacketCfC(nn.Module):
 
 
 class PacketGRU(nn.Module):
-    def __init__(self, inputs, hidden):
+    def __init__(self, inputs, hidden, use_count=True):
         super().__init__()
         self.gru = nn.GRU(inputs, hidden, batch_first=True)
-        self.readout = PacketReadout(hidden)
+        self.readout = PacketReadout(hidden, use_count)
 
     def forward(self, gap, features, mask, log_count):
         states, _ = self.gru(features)
@@ -98,6 +100,8 @@ PACKET_ARMS = {
     "time_cfc_const": ("time", True, lambda n: PacketCfC(n, 29, 32)),
     "time_gru": ("time", False, lambda n: PacketGRU(n, 38)),
     "time_gru_const": ("time", True, lambda n: PacketGRU(n, 38)),
+    # Diagnostic: the readout does not see the window's event count.
+    "time_gru_nocount": ("time", False, lambda n: PacketGRU(n, 38, use_count=False)),
     "time_mmcfc": ("time", False, lambda n: PacketMixedCfC(n, 20, 27)),
     "time_mmcfc_const": ("time", True, lambda n: PacketMixedCfC(n, 20, 27)),
     "time_lstm": ("time", False, lambda n: PacketLSTM(n, 33)),
